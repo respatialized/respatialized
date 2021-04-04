@@ -183,6 +183,10 @@
        (list
         (at-import
          "https://fonts.googleapis.com/css2?family=Inter:wght@600;900&display=swap")
+        (at-import
+         "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap")
+        (at-import
+         "https://fonts.googleapis.com/css2?family=Recursive&display=swap")
         [:a {:color "#C14825"}]
         [:body {:background-color "#EEE"
                 :font-size "24px"
@@ -204,7 +208,7 @@
           :line-height "2.05rem"}]
         [:pre :code
          {:white-space "pre-wrap"
-          :font-family "Recursive Mono Linear Static"
+          :font-family "Recursive"
           :font-height "0.6rem"
           :color "#222"
           :margin-bottom "0.4em"}]
