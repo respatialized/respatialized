@@ -1,20 +1,20 @@
 <% (def metadata {:title "Respatialized"}) %>
 
-<%=(header {:level :h1} "Re<br>spatial<br>ized") %>
+<%=(header {:level :h1} (list "Re" [:br] "spatial" [:br] "ized")) %>
 <%=(header {:level :h4} "actual / potential spaces" ) %>
 
 <%=(header {:level :h2} "recent work")%>
 <%=(ul
-       [:p [:a {:href "/not-a-tree.html"} "This Website Is Not A Tree"]]
-       [:p "a metatextual introduction to this site as it is and as it could be."]
-       [:p [:a {:href "/against-metadata.html"} "Against Metadata"]]
-       [:p "rants against the apparent fact that metadata is treated as an afterthought in program design and configuration management."]
-       [:p [:a {:href "/information-cocoon.html"} "Reifying the Filter Bubble, part 1"]]
-       [:p "new digital infrastructure makes a metaphor less of one."]
-       [:p [:a {:href "/reifying-filter-bubble-2.html"} "Reifying the Filter Bubble, part 2"]]
-       [:p "notes against the 'decentralization' of an impoverished internet."]
-       [:p [:a {:href "/working-definition.html"} "A Working Definition"]]
-       [:p "a working definition of my own ideology."])
+      (list [:p [:a {:href "/not-a-tree.html"} "This Website Is Not A Tree"]]
+       [:p "a metatextual introduction to this site as it is and as it could be."])
+       (list [:p [:a {:href "/against-metadata.html"} "Against Metadata"]]
+       [:p "rants against the apparent fact that metadata is treated as an afterthought in program design and configuration management."])
+       (list [:p [:a {:href "/information-cocoon.html"} "Reifying the Filter Bubble, part 1"]]
+       [:p "new digital infrastructure makes a metaphor less of one."])
+       (list [:p [:a {:href "/reifying-filter-bubble-2.html"} "Reifying the Filter Bubble, part 2"]]
+       [:p "notes against the 'decentralization' of an impoverished internet."])
+       (list [:p [:a {:href "/working-definition.html"} "A Working Definition"]]
+       [:p "a working definition of my own ideology."]))
 %>
 
 

@@ -2,7 +2,7 @@
   "Compositional css generated with garden"
   (:require [garden.core :as garden]
             [garden.stylesheet :refer [at-media at-import]]
-            [garden.selectors :refer [attr-starts-with attr before after]]
+            [garden.selectors :as select :refer [attr-starts-with attr before after]]
             [garden.units :as u]
             [garden.color]))
 
@@ -179,11 +179,64 @@
     {:color (get wal-colors "color5")}]
    [:.token.symbol (get wal-colors "color6")]))
 
+(def page-style
+       (list
+        (at-import
+         "https://fonts.googleapis.com/css2?family=Inter:wght@600;900&display=swap")
+        [:a {:color "#C14825"}]
+        [:body {:background-color "#EEE"
+                :font-size "24px"
+                :font-family "IBM Plex Sans"
+                :line-height 1.35
+                :color "#222"
+                :letter-spacing "-0.01rem"}]
+        [:header {:font-weight 600
+                  :font-family "Inter"}]
+        [:h1 :h2 :h3 {:font-size "3rem"
+                      :line-height "3rem"
+                      :margin-bottom "0.6em"
+                      :margin-top "0.2em"}]
+        [:h4 :h5 :h6 {:font-size "1.5rem"}]
+        [:blockquote
+         {:font-weight 600
+          :font-size "1.45rem"
+          :font-family "Inter"
+          :line-height "2.05rem"}]
+        [:pre :code
+         {:white-space "pre-wrap"
+          :font-family "Recursive Mono Linear Static"
+          :font-height "0.6rem"
+          :color "#222"
+          :margin-bottom "0.4em"}]
+        [:dt {:font-family "Inter"
+              :margin-bottom "0.2rem"}]
+        [:dd {:margin-bottom "0.4rem"}]
+        [:summary {:margin-bottom "0.4em"}]
+        [:article {:max-width "45rem"
+                   :padding-left "20px"
+                   :color "#222"  }]
+        [:p {:margin-bottom "0.4em"
+             :margin-top "0.2em"}]
+        [:table {:font-size "0.95rem"
+                 :letter-spacing "0.01rem"
+                 :line-height "1.45em"
+                 :max-width "90em"}]
+        [:td :th {#_#_:border "0.5px solid"
+                  :padding "0.25rem"
+                  :text-align "left"}]
+        [(select/attr "colspan") {:text-align "center"
+                                  :border-bottom "0.5px solid"
+                                  :border-top "0.5px solid"
+                                  }]
+        [:table {:border-collapse "collapse"
+                 :max-width "1400px"}]))
+
 (defn -main
   "main fn"
   []
   (->> [remedy
         prism-rules
+        page-style
         ;; [:h1 :h2 :h3 :h4 :h5 :h6 {:color (get wal-colors "color6")}]
         ]
        garden/css
