@@ -5,6 +5,7 @@
    [hiccup.page :as hp]
    [respatialized.render :as render :refer :all]
    [respatialized.parse :as parse]
+   [respatialized.css :as css]
    [respatialized.holotype :as holotype]
    [juxt.dirwatch :refer [watch-dir close-watcher]]
    [clojure.string :as str]))
@@ -162,6 +163,7 @@
          (recur [fw])))))
   ([& files]
    (load-deps)
+   (css/-main)
    (if (and (= 1 (count files))
             (.isDirectory (io/file (first files))))
      (do
