@@ -206,12 +206,12 @@
           :font-size "1.45rem"
           :font-family "Inter"
           :line-height "2.05rem"}]
+        [:code {:font-size "0.95em"}]
         [:pre :code
          {:white-space "pre-wrap"
           :font-family "Recursive"
-          :font-height "0.6rem"
-          :color "#222"
-          :margin-bottom "0.4em"}]
+          :color "#66220e"}]
+        [:pre {:margin-bottom "0.4em"}]
         [:dt {:font-family "Inter"
               :margin-bottom "0.2rem"}]
         [:dd {:margin-bottom "0.4rem"}]
