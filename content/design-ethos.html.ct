@@ -1,0 +1,15 @@
+<% (def metadata {:title "Design Ethos"}) %>
+
+<%= (header (:title metadata)) %>
+
+<%= (header "SITUATED PERSPECTIVE") %>
+
+A landscape, cityscape, or structure must be visible from the perspective of a human being within a scene. Aerial perspectives are situated in an aerial vehicle. 
+
+Some implications of this become clear immediately:
+
+- if there is a helicopter observing an area, the question comes to mind: why? who is the observer observing? to what end?
+
+- is a structure built for repair? can someone get to the vantage point in the scene? what tools or affordances exist for those purposes?
+
+- a "non-realistic" viewpoint can be achieved through a screen or other diagnostic device
