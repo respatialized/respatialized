@@ -41,7 +41,7 @@ generate a density map using Clifford attractors and draw contour lines around t
 general strategy: sort the resulting values into layers based on density and draw contours around each of them.
 
 <% (def empty-img (buf-img/new-image 1100 650 :int-rgb)) %>
-<% (def img-tensor (tensor/ensure-tensor empty-img)) %>
+<% (def img-tensor (buf-img/as-ubyte-tensor empty-img)) %>
 
 <%
 ;; let's get some pixels on the page, shall we?
@@ -75,27 +75,31 @@ general strategy: sort the resulting values into layers based on density and dra
      (dtype/make-container (map last dejong-res))])) %>
 
 
-<% (defn iter-img
-     ([starting-img starting-pts attractor rasterizer iterations]
-      (loop [n iterations
-             current {:img starting-img
-                      :iter starting-pts}]
-        (if (= n 0) current
-            (let [next (attractor (:iter current))]
-              (recur
-               (- n 1)
-               {:img (rasterizer next (:img current))
-                :iter next})))
-        ))
-  ([starting-img starting-pts attractor rasterizer]
-   (fn [iterations] (iter-img starting-img starting-pts attractor rasterizer iterations)))) %>
+<%
+
+(defn iter-img
+  ([starting-tens starting-pts attractor rasterizer! iterations]
+   (loop [n iterations
+          current starting-pts]
+     (if (= n 0) current
+         (let [next (attractor current)]
+           (do (rasterizer! next starting-tens))
+           (recur
+            (- n 1)
+            next)))))
+  ([starting-tens starting-pts attractor rasterizer!]
+   (fn [iterations] (iter-img starting-tens starting-pts attractor rasterizer! iterations))))
+
+
+%>
 
 
 <%
 (defn coords+tensor!
   ([xs ys t magnitude]
-   (doseq [x xs y ys]
-     (tensor/mset! t x y magnitude))
+   (let [shape (dtype/shape t)]
+     (doseq [x xs y ys]
+       (tensor/mset! t x y (into [] (repeat (last shape) magnitude)))))
    t))
 
 %>
@@ -104,9 +108,9 @@ general strategy: sort the resulting values into layers based on density and dra
 <%
 
 (defn rasterize-xys
-  ([[xs ys] image magnitude]
+  ([[xs ys] tens magnitude]
    (let [two-pi (* Math/PI 2)
-         [width height] (dtype/shape image)
+         [width height] (dtype/shape tens)
          x-center (/ width 2)
          y-center (/ height 2)
          xs-normed (-> xs
@@ -120,21 +124,21 @@ general strategy: sort the resulting values into layers based on density and dra
                        (dtype-fn/round)
                        (dtype-fn/+ y-center))]
 
-     (coords+tensor! xs-normed ys-normed image magnitude)))
+     (coords+tensor! xs-normed ys-normed tens magnitude)))
 
-  ([magnitude] (fn [xs-ys image] (rasterize-xys xs-ys image magnitude))))
+  ([magnitude] (fn [xs-ys tens] (rasterize-xys xs-ys tens magnitude))))
 
 %>
 
 <% (def dejong-iter-img (iter-img
                          img-tensor
                          starting-pts-de-jong
-                         (tensor-de-jong 0.034 1.902 1.6 0.0)
-                         (rasterize-xys 5)
-                         4
+                         (tensor-de-jong 0.034 1.902 1.6 0.4)
+                         (rasterize-xys 80)
+                         6
                          ))  %>
 
-<%=(save-insert! empty-img "./public/media/holotype4-empty-img.png")%>
+<%= (save-insert! empty-img "./public/media/holotype4-1.png") %>
 
 <%= (header {:level :h5} "Other ideas") %>
 
