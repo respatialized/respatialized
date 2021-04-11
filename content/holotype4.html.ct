@@ -1,0 +1,149 @@
+<%(ns respatialized.holotype4
+  (:require [clojure2d.core :as clj2d]
+            [respatialized.structure.fractals :as fractals]
+            [respatialized.holotype :as holotype]
+            [garden.core :as garden]
+            [garden.stylesheet :as style]
+            [clojure.java.io :as io]
+            [tech.v3.dataset :as ds]
+            [tech.v3.tensor :as tensor]
+            [tech.v3.datatype :as dtype]
+            [tech.v3.datatype.functional :as dtype-fn]
+            [tech.v3.libs.buffered-image :as buf-img]))
+
+%>
+
+<%(def page-style
+  (garden/css
+   (style/at-import "https://fonts.googleapis.com/css2?family=Anonymous+Pro&family=Share+Tech+Mono&display=swap")
+   [:body {:font-family "'Share Tech Mono'"
+       :background-color "#0F1C48"
+       :color "#DDD"}]
+       [:a {:color "#2211EE"}]
+       [:header {:font-family "'Share Tech Mono'"
+       :border-bottom "2px solid"
+       :border-bottom-color "#DDD"
+       :letter-spacing "-0.12rem"
+       :color "#DDD"
+       :text-transform "uppercase"}]
+       [:article {:color "#DDD"}]))%>
+
+<% (def metadata {:title "HOLOTYPE//4"
+                  :page-style page-style}) %>
+
+<%= (header (:title metadata)) %>
+<%= (header {:level :h4} "Computational texture generation with attractors + clustering") %>
+
+<%=(header {:level :h2} "synthetic topographies / 1")%>
+
+generate a density map using Clifford attractors and draw contour lines around the points using the density as a height estimator.
+
+general strategy: sort the resulting values into layers based on density and draw contours around each of them.
+
+<% (def empty-img (buf-img/new-image 1100 650 :int-rgb)) %>
+<% (def img-tensor (tensor/ensure-tensor empty-img)) %>
+
+<%
+;; let's get some pixels on the page, shall we?
+(defn save-insert! [img fpath]
+  (do
+    (buf-img/save! img fpath)
+    (let [img-url (-> fpath
+                      io/file
+                      .getName
+                      (#(str "/media/" %)))]
+      [:figure
+       [:img {:src img-url}]]))) %>
+
+<% (defn tensor-de-jong [a b c d]
+  ;; this probably isn't the best implementation
+  ;; but it's a starting point
+  (fn tensor-de-jong-iter [[xs ys]]
+    [(dtype-fn/- (dtype-fn/sin (dtype-fn/* a ys))
+                 (dtype-fn/cos (dtype-fn/* b xs)))
+     (dtype-fn/- (dtype-fn/sin (dtype-fn/* c xs))
+                 (dtype-fn/cos (dtype-fn/* d ys)))])) %>
+
+<% (def starting-pts-linear
+  [(fastmath.core/slice-range 0.1 0.25 5)
+   (fastmath.core/slice-range 0.3 0.33 5)]) %>
+
+
+<% (def starting-pts-de-jong
+  (let [dejong-res (take 5 (iterate fractals/dejong1 [0.5 0.5]))]
+    [(dtype/make-container (map first dejong-res))
+     (dtype/make-container (map last dejong-res))])) %>
+
+
+<% (defn iter-img
+     ([starting-img starting-pts attractor rasterizer iterations]
+      (loop [n iterations
+             current {:img starting-img
+                      :iter starting-pts}]
+        (if (= n 0) current
+            (let [next (attractor (:iter current))]
+              (recur
+               (- n 1)
+               {:img (rasterizer next (:img current))
+                :iter next})))
+        ))
+  ([starting-img starting-pts attractor rasterizer]
+   (fn [iterations] (iter-img starting-img starting-pts attractor rasterizer iterations)))) %>
+
+
+<%
+(defn coords+tensor!
+  ([xs ys t magnitude]
+   (doseq [x xs y ys]
+     (tensor/mset! t x y magnitude))
+   t))
+
+%>
+
+
+<%
+
+(defn rasterize-xys
+  ([[xs ys] image magnitude]
+   (let [two-pi (* Math/PI 2)
+         [width height] (dtype/shape image)
+         x-center (/ width 2)
+         y-center (/ height 2)
+         xs-normed (-> xs
+                       (dtype-fn// two-pi)
+                       (dtype-fn/* width)
+                       (dtype-fn/round)
+                       (dtype-fn/+ x-center))
+         ys-normed (-> ys
+                       (dtype-fn// two-pi)
+                       (dtype-fn/* height)
+                       (dtype-fn/round)
+                       (dtype-fn/+ y-center))]
+
+     (coords+tensor! xs-normed ys-normed image magnitude)))
+
+  ([magnitude] (fn [xs-ys image] (rasterize-xys xs-ys image magnitude))))
+
+%>
+
+<% (def dejong-iter-img (iter-img
+                         img-tensor
+                         starting-pts-de-jong
+                         (tensor-de-jong 0.034 1.902 1.6 0.0)
+                         (rasterize-xys 5)
+                         4
+                         ))  %>
+
+<%=(save-insert! empty-img "./public/media/holotype4-empty-img.png")%>
+
+<%= (header {:level :h5} "Other ideas") %>
+
+Tensor attractors - what if the dynamical system was a vector instead of a point?
+
+Parameter evolution - what if the constant parameters iterated through a space along with the point?
+
+Displacement evolution - what if the "center point" was doing a random walk or otherwise evolving with the system?
+
+Displacement maps - what if the results of an attractor's iterations were transformed by doing tensor operations with a displacement map?
+
+Attractors in color space - what would a 3d attractor moving through the HSB color space look like?
