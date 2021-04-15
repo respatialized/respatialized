@@ -1,15 +1,17 @@
 <%(ns respatialized.holotype4
-  (:require [clojure2d.core :as clj2d]
-            [respatialized.structure.fractals :as fractals]
-            [respatialized.holotype :as holotype]
-            [garden.core :as garden]
-            [garden.stylesheet :as style]
-            [clojure.java.io :as io]
-            [tech.v3.dataset :as ds]
-            [tech.v3.tensor :as tensor]
-            [tech.v3.datatype :as dtype]
-            [tech.v3.datatype.functional :as dtype-fn]
-            [tech.v3.libs.buffered-image :as buf-img]))
+    (:require [clojure2d.core :as clj2d]
+              [respatialized.structure.fractals :as fractals]
+              [respatialized.holotype :as holotype]
+              [garden.core :as garden]
+              [garden.stylesheet :as style]
+              [clojure.java.io :as io]
+              [tech.v3.dataset :as ds]
+              [tech.v3.tensor :as tensor]
+              [tech.v3.datatype :as dtype]
+              [tech.v3.datatype.functional :as dtype-fn]
+              [tech.v3.libs.buffered-image :as buf-img]
+              [criterium.core :as criterium])
+    (:import [tech.v3.tensor DirectTensor]))
 
 %>
 
@@ -96,10 +98,11 @@ general strategy: sort the resulting values into layers based on density and dra
 
 <%
 (defn coords+tensor!
-  ([xs ys t magnitude]
-   (let [shape (dtype/shape t)]
-     (doseq [x xs y ys]
-       (tensor/mset! t x y (into [] (repeat (last shape) magnitude)))))
+  ([xs ys ^DirectTensor t magnitude]
+   (doseq [x xs y ys]
+     (.ndWriteLong t x y 0 magnitude)
+     (.ndWriteLong t x y 1 magnitude)
+     (.ndWriteLong t x y 2 magnitude))
    t))
 
 %>
@@ -108,7 +111,7 @@ general strategy: sort the resulting values into layers based on density and dra
 <%
 
 (defn rasterize-xys
-  ([[xs ys] tens magnitude]
+  ([[^DirectTensor xs ^DirectTensor ys] ^DirectTensor tens ^Long magnitude]
    (let [two-pi (* Math/PI 2)
          [width height] (dtype/shape tens)
          x-center (/ width 2)
@@ -122,11 +125,12 @@ general strategy: sort the resulting values into layers based on density and dra
                        (dtype-fn// two-pi)
                        (dtype-fn/* height)
                        (dtype-fn/round)
-                       (dtype-fn/+ y-center))]
+                       (dtype-fn/+ y-center))
+         vals [magnitude magnitude magnitude]]
 
      (coords+tensor! xs-normed ys-normed tens magnitude)))
 
-  ([magnitude] (fn [xs-ys tens] (rasterize-xys xs-ys tens magnitude))))
+  ([^Long magnitude] (fn [[^DirectTensor xs ^DirectTensor ys] ^DirectTensor tens] (rasterize-xys [xs ys] tens magnitude))))
 
 %>
 
@@ -134,8 +138,8 @@ general strategy: sort the resulting values into layers based on density and dra
                          img-tensor
                          starting-pts-de-jong
                          (tensor-de-jong 0.034 1.902 1.6 0.4)
-                         (rasterize-xys 80)
-                         6
+                         (rasterize-xys 60)
+                         21
                          ))  %>
 
 <%= (save-insert! empty-img "./public/media/holotype4-1.png") %>

@@ -31,6 +31,9 @@
   spec-provider/spec-provider {:mvn/version "0.4.14"}
   provisdom/spectomic {:mvn/version "0.7.11"}
 
+  ;; performance
+  criterium/criterium {:mvn/version "0.4.6"}
+
   ;; site building functions
   }
  :jvm-opts ["--illegal-access=deny" "-Xms4G" "-Xmx8G"]
