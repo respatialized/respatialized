@@ -107,7 +107,7 @@ general strategy: sort the resulting values into layers based on density and dra
       (loop [n iterations
              current pts
              canvas cnvs]
-        (println "iteration" (- iterations n) "| attractor" "canvas update")
+        (println "iteration" (- iterations n)  "input size" (count (first current)))
         (if (= n 0) canvas
             (let [next (time (attractor current))
                   next-cnvs (time (rasterizer next canvas))]
@@ -131,15 +131,16 @@ general strategy: sort the resulting values into layers based on density and dra
 %>
 
 <% (defn paint-canvas [^DirectTensor xs ^DirectTensor ys canvas]
-  (let [xarray (dtype/->double-array xs)
-        yarray (dtype/->double-array ys)]
-    (clj2d/with-canvas-> canvas
-      (clj2d/set-stroke 0)
-      (clj2d/set-color (clojure2d.color/to-RGB "#CD4C30"))
-      (#(do
-          (doseq [x xarray y yarray]
-            (clj2d/ellipse % (Math/floor x) (Math/floor y) 2 2))
-          %))))) %>
+  (println "timing type conv:")
+  (let [xarray (time (dtype/->double-array xs))
+        yarray (time (dtype/->double-array ys))]
+       (clj2d/with-canvas-> canvas
+         (clj2d/set-stroke 0)
+         (clj2d/set-color (clojure2d.color/to-RGB "#CD4C30"))
+         (#(do
+             (doseq [x xarray y yarray]
+               (clj2d/ellipse % (Math/floor x) (Math/floor y) 2 2))
+             %))))) %>
 
 
 
@@ -175,16 +176,17 @@ general strategy: sort the resulting values into layers based on density and dra
 %>
 
 <% (defn canvas-xys
-     ([[xs ys] cnvs]
-      (let [two-pi (* Math/PI 2)
-            width (:w cnvs)
-            height (:h cnvs)
-            x-center (/ width 2)
-            y-center (/ height 2)
-            xs-normed (normalize xs two-pi width x-center)
-            ys-normed (normalize ys two-pi height y-center)]
+  ([[xs ys] cnvs]
+   (println "time for xnorm,ynorm,canvas update")
+   (let [two-pi (* Math/PI 2)
+         width (:w cnvs)
+         height (:h cnvs)
+         x-center (/ width 2)
+         y-center (/ height 2)
+         xs-normed (time (normalize xs two-pi width x-center))
+         ys-normed (time (normalize ys two-pi height y-center))]
 
-        (paint-canvas xs-normed ys-normed cnvs)))
+     (paint-canvas xs-normed ys-normed cnvs)))
   ([] (fn [[xs ys] cnvs] (canvas-xys [xs ys] cnvs)))) %>
 
 <% (def dejong-iter-img (iter-cnvs
