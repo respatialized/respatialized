@@ -2,6 +2,7 @@
     (:require [clojure2d.core :as clj2d]
               [respatialized.structure.fractals :as fractals]
               [respatialized.holotype :as holotype]
+              [malli.core :as m]
               [garden.core :as garden]
               [garden.stylesheet :as style]
               [clojure.java.io :as io]
@@ -14,6 +15,7 @@
     (:import [tech.v3.tensor DirectTensor]))
 
 %>
+
 
 <%(def page-style
   (garden/css
@@ -45,6 +47,11 @@ general strategy: sort the resulting values into layers based on density and dra
 <% (def empty-img (buf-img/new-image 1100 650 :int-rgb)) %>
 <% (def img-tensor (buf-img/as-ubyte-tensor empty-img)) %>
 
+<% (def canvas (clj2d/with-canvas->
+                 (clj2d/canvas 900 1400)
+                 (clj2d/set-background (clojure2d.color/to-RGB "#C0B9AA"))
+                 )) %>
+
 <%
 ;; let's get some pixels on the page, shall we?
 (defn save-insert! [img fpath]
@@ -57,10 +64,10 @@ general strategy: sort the resulting values into layers based on density and dra
       [:figure
        [:img {:src img-url}]]))) %>
 
-<% (defn tensor-de-jong [a b c d]
+<% (defn tensor-de-jong [^Double a ^Double b ^Double c ^Double d]
   ;; this probably isn't the best implementation
   ;; but it's a starting point
-  (fn tensor-de-jong-iter [[xs ys]]
+  (fn tensor-de-jong-iter [[^DirectTensor xs ^DirectTensor ys]]
     [(dtype-fn/- (dtype-fn/sin (dtype-fn/* a ys))
                  (dtype-fn/cos (dtype-fn/* b xs)))
      (dtype-fn/- (dtype-fn/sin (dtype-fn/* c xs))
@@ -77,28 +84,44 @@ general strategy: sort the resulting values into layers based on density and dra
      (dtype/make-container (map last dejong-res))])) %>
 
 
+
 <%
 
 (defn iter-img
-  ([starting-tens starting-pts attractor rasterizer! iterations]
+  ([starting-img starting-pts attractor rasterizer! iterations]
    (loop [n iterations
           current starting-pts]
      (if (= n 0) current
          (let [next (attractor current)]
-           (do (rasterizer! next starting-tens))
+           (do (rasterizer! next starting-img))
            (recur
             (- n 1)
             next)))))
-  ([starting-tens starting-pts attractor rasterizer!]
-   (fn [iterations] (iter-img starting-tens starting-pts attractor rasterizer! iterations))))
-
+  ([starting-img starting-pts attractor rasterizer!]
+   (fn [iterations] (iter-img starting-img starting-pts attractor rasterizer! iterations))))
 
 %>
 
+<% (defn iter-cnvs
+     ([cnvs pts attractor rasterizer iterations]
+      (loop [n iterations
+             current pts
+             canvas cnvs]
+        (println "iteration" (- iterations n) "| attractor" "canvas update")
+        (if (= n 0) canvas
+            (let [next (time (attractor current))
+                  next-cnvs (time (rasterizer next canvas))]
+              (recur
+               (- n 1)
+               next
+               next-cnvs)))))
+  ([cnvs pts attractor rasterizer]
+   (fn [iterations]
+     (iter-cnvs cnvs pts attractor rasterizer)))) %>
 
 <%
 (defn coords+tensor!
-  ([xs ys ^DirectTensor t magnitude]
+  ([^DirectTensor xs ^DirectTensor ys ^DirectTensor t magnitude]
    (doseq [x xs y ys]
      (.ndWriteLong t x y 0 magnitude)
      (.ndWriteLong t x y 1 magnitude)
@@ -107,6 +130,21 @@ general strategy: sort the resulting values into layers based on density and dra
 
 %>
 
+<% (defn paint-canvas [^DirectTensor xs ^DirectTensor ys canvas]
+  (let [xarray (dtype/->double-array xs)
+        yarray (dtype/->double-array ys)]
+    (clj2d/with-canvas-> canvas
+      (clj2d/set-stroke 0)
+      (clj2d/set-color (clojure2d.color/to-RGB "#CD4C30"))
+      (#(do
+          (doseq [x xarray y yarray]
+            (clj2d/ellipse % (Math/floor x) (Math/floor y) 2 2))
+          %))))) %>
+
+
+
+<%(defn normalize [^DirectTensor t ^Double old-extent  ^Long new-extent ^Long offset]
+  (dtype-fn/+ (dtype-fn/* (dtype-fn// t old-extent) new-extent) offset)) %>
 
 <%
 
@@ -116,16 +154,18 @@ general strategy: sort the resulting values into layers based on density and dra
          [width height] (dtype/shape tens)
          x-center (/ width 2)
          y-center (/ height 2)
-         xs-normed (-> xs
-                       (dtype-fn// two-pi)
-                       (dtype-fn/* width)
-                       (dtype-fn/round)
-                       (dtype-fn/+ x-center))
-         ys-normed (-> ys
-                       (dtype-fn// two-pi)
-                       (dtype-fn/* height)
-                       (dtype-fn/round)
-                       (dtype-fn/+ y-center))
+         xs-normed (normalize xs two-pi width x-center)
+         #_(-> xs
+               (dtype-fn// two-pi)
+               (dtype-fn/* width)
+               (dtype-fn/round)
+               (dtype-fn/+ x-center))
+         ys-normed (normalize ys two-pi height y-center)
+         #_(-> ys
+             (dtype-fn// two-pi)
+             (dtype-fn/* height)
+             (dtype-fn/round)
+             (dtype-fn/+ y-center))
          vals [magnitude magnitude magnitude]]
 
      (coords+tensor! xs-normed ys-normed tens magnitude)))
@@ -134,15 +174,28 @@ general strategy: sort the resulting values into layers based on density and dra
 
 %>
 
-<% (def dejong-iter-img (iter-img
-                         img-tensor
+<% (defn canvas-xys
+     ([[xs ys] cnvs]
+      (let [two-pi (* Math/PI 2)
+            width (:w cnvs)
+            height (:h cnvs)
+            x-center (/ width 2)
+            y-center (/ height 2)
+            xs-normed (normalize xs two-pi width x-center)
+            ys-normed (normalize ys two-pi height y-center)]
+
+        (paint-canvas xs-normed ys-normed cnvs)))
+  ([] (fn [[xs ys] cnvs] (canvas-xys [xs ys] cnvs)))) %>
+
+<% (def dejong-iter-img (iter-cnvs
+                         canvas
                          starting-pts-de-jong
                          (tensor-de-jong 0.034 1.902 1.6 0.4)
-                         (rasterize-xys 60)
-                         21
+                         (canvas-xys)
+                         20
                          ))  %>
 
-<%= (save-insert! empty-img "./public/media/holotype4-1.png") %>
+<%= (holotype/canvas->hiccup! dejong-iter-img  "./public/media/holotype4-1.png" "holotype4-1") %>
 
 <%= (header {:level :h5} "Other ideas") %>
 
