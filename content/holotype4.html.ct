@@ -21,8 +21,9 @@
   (garden/css
    (style/at-import "https://fonts.googleapis.com/css2?family=Anonymous+Pro&family=Share+Tech+Mono&display=swap")
    [:body {:font-family "'Share Tech Mono'"
-       :background-color "#0F1C48"
-       :color "#DDD"}]
+           :background-color "#0F1C48"
+           :color "#DDD"
+           :max-width "1400px"}]
        [:a {:color "#2211EE"}]
        [:header {:font-family "'Share Tech Mono'"
        :border-bottom "2px solid"
@@ -49,7 +50,7 @@ general strategy: sort the resulting values into layers based on density and dra
 
 <% (def canvas (clj2d/with-canvas->
                  (clj2d/canvas 900 1400)
-                 (clj2d/set-background (clojure2d.color/to-RGB "#C0B9AA"))
+                 (clj2d/set-background 0 0 0 0)
                  )) %>
 
 <%
@@ -74,12 +75,12 @@ general strategy: sort the resulting values into layers based on density and dra
                               (dtype-fn/cos (dtype-fn/* d ys))))])) %>
 
 <% (def starting-pts-linear
-  [(fastmath.core/slice-range 0.1 0.25 5)
-   (fastmath.core/slice-range 0.3 0.33 5)]) %>
+  [(dtype/make-container (fastmath.core/slice-range -3 3 6))
+   (dtype/make-container (fastmath.core/slice-range 3 -3 6))]) %>
 
 
 <% (def starting-pts-de-jong
-  (let [dejong-res (take 5 (iterate fractals/dejong1 [0.5 0.5]))]
+  (let [dejong-res (take 20 (iterate (fractals/de-jong 1.318 2.014 0.001 2.07)  [-0.1 1.0]))]
     [(dtype/make-container (map first dejong-res))
      (dtype/make-container (map last dejong-res))])) %>
 
@@ -136,10 +137,10 @@ general strategy: sort the resulting values into layers based on density and dra
         yarray (time (dtype/->double-array ys))]
        (clj2d/with-canvas-> canvas
          (clj2d/set-stroke 0)
-         (clj2d/set-color (clojure2d.color/to-RGB "#CD4C30"))
+         (clj2d/set-color  205 205 205 10)
          (#(do
              (doseq [x xarray y yarray]
-               (clj2d/ellipse % (Math/floor x) (Math/floor y) 2 2))
+               (clj2d/rect % (Math/floor x) (Math/floor y) 1 1))
              %))))) %>
 
 
@@ -155,7 +156,7 @@ general strategy: sort the resulting values into layers based on density and dra
          [width height] (dtype/shape tens)
          x-center (/ width 2)
          y-center (/ height 2)
-         xs-normed (normalize xs two-pi width x-center)
+         xs-normed (normalize xs Math/PI width x-center)
          #_(-> xs
                (dtype-fn// two-pi)
                (dtype-fn/* width)
@@ -183,8 +184,8 @@ general strategy: sort the resulting values into layers based on density and dra
          height (:h cnvs)
          x-center (/ width 2)
          y-center (/ height 2)
-         xs-normed (time (normalize xs two-pi width x-center))
-         ys-normed (time (normalize ys two-pi height y-center))]
+         xs-normed (time (normalize xs Math/PI width x-center))
+         ys-normed (time (normalize ys Math/PI (* height 1.5) y-center))]
 
      (paint-canvas xs-normed ys-normed cnvs)))
   ([] (fn [[xs ys] cnvs] (canvas-xys [xs ys] cnvs)))) %>
@@ -192,9 +193,9 @@ general strategy: sort the resulting values into layers based on density and dra
 <% (def dejong-iter-img (iter-cnvs
                          canvas
                          starting-pts-de-jong
-                         (tensor-de-jong 0.834 1.902 1.6 2.4)
+                         (tensor-de-jong 1.318 2.014 0.001 2.07)
                          (canvas-xys)
-                         20000
+                         40000
                          ))  %>
 
 <%= (holotype/canvas->hiccup! dejong-iter-img  "./public/media/holotype4-1.png" "holotype4-1") %>
