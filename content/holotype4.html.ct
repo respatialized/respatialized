@@ -123,10 +123,18 @@ general strategy: sort the resulting values into layers based on density and dra
 <%
 (defn coords+tensor!
   ([^DirectTensor xs ^DirectTensor ys ^DirectTensor t magnitude]
-   (doseq [x xs y ys]
-     (.ndWriteLong t x y 0 magnitude)
-     (.ndWriteLong t x y 1 magnitude)
-     (.ndWriteLong t x y 2 magnitude))
+   (let [xarray (dtype/->double-array xs)
+         yarray (dtype/->double-array ys)
+         [width height] (dtype/shape t)]
+     (doseq [x xarray y yarray]
+       (if (and (> width x 0) (> height y 0))
+         (do
+           #_(println "updating coord" x "," y)
+           (.ndWriteLong t x y 0 (min 255 (+ magnitude (.ndReadLong t x y 0))))
+           (.ndWriteLong t x y 1 (min 255 (+ magnitude (.ndReadLong t x y 1))))
+           (.ndWriteLong t x y 2 (min 255 (+ magnitude (.ndReadLong t x y 2)))))
+         (do nil)
+         #_(println "invalid coord" x "," y))))
    t))
 
 %>
@@ -146,31 +154,20 @@ general strategy: sort the resulting values into layers based on density and dra
 
 
 <%(defn normalize [^DirectTensor t ^Double old-extent  ^Long new-extent ^Long offset]
-  (dtype-fn/+ (dtype-fn/* (dtype-fn// t old-extent) new-extent) offset)) %>
+  (dtype-fn/round (dtype-fn/+ (dtype-fn/* (dtype-fn// t old-extent) new-extent) offset))) %>
 
 <%
 
 (defn rasterize-xys
   ([[^DirectTensor xs ^DirectTensor ys] ^DirectTensor tens ^Long magnitude]
    (let [two-pi (* Math/PI 2)
-         [width height] (dtype/shape tens)
+         [height width] (dtype/shape tens)
          x-center (/ width 2)
          y-center (/ height 2)
-         xs-normed (normalize xs Math/PI width x-center)
-         #_(-> xs
-               (dtype-fn// two-pi)
-               (dtype-fn/* width)
-               (dtype-fn/round)
-               (dtype-fn/+ x-center))
-         ys-normed (normalize ys two-pi height y-center)
-         #_(-> ys
-             (dtype-fn// two-pi)
-             (dtype-fn/* height)
-             (dtype-fn/round)
-             (dtype-fn/+ y-center))
-         vals [magnitude magnitude magnitude]]
+         xs-normed (normalize xs 4 (* width 1.2) x-center)
+         ys-normed (normalize ys 4 (* height 2.3) (* y-center 1.3))]
 
-     (coords+tensor! xs-normed ys-normed tens magnitude)))
+     (coords+tensor! ys-normed xs-normed tens magnitude)))
 
   ([^Long magnitude] (fn [[^DirectTensor xs ^DirectTensor ys] ^DirectTensor tens] (rasterize-xys [xs ys] tens magnitude))))
 
@@ -190,15 +187,18 @@ general strategy: sort the resulting values into layers based on density and dra
      (paint-canvas xs-normed ys-normed cnvs)))
   ([] (fn [[xs ys] cnvs] (canvas-xys [xs ys] cnvs)))) %>
 
-<% (def dejong-iter-img (iter-cnvs
-                         canvas
+<% (def dejong-iter-img (iter-img
+                         img-tensor
                          starting-pts-de-jong
                          (tensor-de-jong 1.318 2.014 0.001 2.07)
-                         (canvas-xys)
+                         (rasterize-xys 4)
                          40000
                          ))  %>
 
-<%= (holotype/canvas->hiccup! dejong-iter-img  "./public/media/holotype4-1.png" "holotype4-1") %>
+<%= (header {:level :h4} "An example starting point") %>
+
+<%= (save-insert! empty-img "./public/media/holotype4-1.png") %>
+
 
 <%= (header {:level :h5} "Other ideas") %>
 
