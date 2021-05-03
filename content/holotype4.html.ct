@@ -80,7 +80,7 @@ general strategy: sort the resulting values into layers based on density and dra
 
 
 <% (def starting-pts-de-jong
-  (let [dejong-res (take 20 (iterate (fractals/de-jong 1.318 2.014 0.001 2.07)  [-0.1 1.0]))]
+  (let [dejong-res (take 15 (iterate (fractals/de-jong 1.618 2.013 0.001 2.07)  [-0.1 1.0]))]
     [(dtype/make-container (map first dejong-res))
      (dtype/make-container (map last dejong-res))])) %>
 
@@ -199,6 +199,68 @@ general strategy: sort the resulting values into layers based on density and dra
 
 <%= (save-insert! empty-img "./public/media/holotype4-1.png") %>
 
+<%= (header {:level :h4} "Reducing over the time dimension") %>
+
+<% (def ten-k (take 10000 (iterate (tensor-de-jong 1.318 2.013 0.0001 2.07) starting-pts-de-jong))) %>
+
+<% (defn iter-bounds [iter-seq]
+  (let [[start-x start-y] (first iter-seq)
+        elemwise-bounds (reduce (fn [{:keys [max-x max-y
+                         min-x min-y]}
+                 [next-x next-y]]
+              {:max-x (dtype-fn/max max-x next-x)
+               :max-y (dtype-fn/max max-y next-y)
+               :min-x (dtype-fn/min min-x next-x)
+               :min-y (dtype-fn/min min-y next-y)})
+            {:max-x start-x :max-y start-y
+             :min-x start-x :min-y start-y}
+            iter-seq)]
+    {:x [(apply min (:min-x elemwise-bounds))
+         (apply max (:max-x elemwise-bounds))]
+     :y [(apply min (:min-y elemwise-bounds))
+         (apply max (:max-y elemwise-bounds))]})) %>
+
+Instead of writing to the image tensor on each iteration of the attractor, a more efficient approach would take an arbitrary number of iterations and reduce over all of them to produce a raster image. This resulting density map is also a necessary input for clustering / topography.
+
+<% (defn inc-tensor!
+  ([[^DirectTensor xs ^DirectTensor ys] ^DirectTensor t [xnorm ynorm]]
+      (let [xarray (dtype/->double-array (xnorm xs))
+            yarray (dtype/->double-array (ynorm ys))
+            [width height] (dtype/shape t)]
+        (doseq [x xarray y yarray]
+          (if true #_(and (> width x 0) (> height y 0))
+              (do
+                (.ndWriteLong t x y (inc (.ndReadLong t x y))))
+            (do nil)
+            #_(println "invalid coord" x "," y))))
+      t)
+  ([normalizer]
+   (fn [[^DirectTensor xs ^DirectTensor ys] ^DirectTensor t]
+     (inc-tensor! [xs ys] t normalizer))))  %>
+
+<% (def unbounded-tensor (tensor/new-tensor [1100 650] {:datatype :int64})) %>
+
+<% (def total-res
+  (iter-img unbounded-tensor
+            starting-pts-de-jong
+            (tensor-de-jong 1.318 2.014 0.001 2.07)
+            (inc-tensor! [(fn [xs] (normalize xs 4 1100 (/ 1100 2)))
+                          (fn [ys] (normalize ys 4 650 (/ 650 2)))])
+            50000)) %>
+
+<% (def tens2
+  (let [log-transformed (dtype-fn/max 0.0 (dtype-fn/log10 unbounded-tensor))
+        max-log (apply max (map #(apply max %) log-transformed))
+        pixel-scale (/ 255 max-log)]
+    (tensor/compute-tensor
+     [1100 650]
+     (fn [x y]
+       (let [v (-> log-transformed
+                   (.ndReadDouble x y)
+                   (* pixel-scale)
+                   (Math/round))]
+         [v v v])))))  %>
+
 
 <%= (header {:level :h5} "Other ideas") %>
 
@@ -211,3 +273,5 @@ Displacement evolution - what if the "center point" was doing a random walk or o
 Displacement maps - what if the results of an attractor's iterations were transformed by doing tensor operations with a displacement map?
 
 Attractors in color space - what would a 3d attractor moving through the HSB color space look like?
+
+Log transform the density map into a more aesthetically coherent range of shading values - this was a technique I picked up for visualizing data spanning multiple orders of magnitude from datashader.
