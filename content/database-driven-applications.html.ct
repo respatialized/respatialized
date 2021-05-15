@@ -1,0 +1,56 @@
+<% (ns respatialized.notes
+   (:require [garden.core :as garden]
+             [garden.stylesheet :as stylesheet]))%>
+<% (def page-css
+   (garden/css [:figure [:figcaption {:font-style "italic"}]]
+   [:figure [:img {:margin "auto"}]]
+   [:h1 {:break-after "all"}]
+   [:h3 {:font-size "1.8rem"}]
+   [:article {:column-count 2
+   :max-width "1300px"
+   }
+   [:section {:break-after "column"
+              :max-width "35rem"
+           :break-inside "avoid"}]]
+   ))%>
+<% (def metadata {:title "Database-driven applications"
+   :date "2021-05-15"
+   :page-style page-css}) %>
+<%= (header {:level :h1} (:title metadata)) %>
+
+<%= [:section ] %>
+
+<%= (header {:level :h3} "How applications usually get made") %>
+
+<%=[:figure
+  {:class "svg-diagram"}
+  (image "media/api-diagram.svg")
+     [:figcaption "A 'traditional' MVC-esque architecture with an API"]]%>
+
+At each component boundary, there lies the potential for an impedance mismatch: due to some technology or system constraint, some critical piece of the information model doesn't make it across the boundary.
+
+<%= [:ol
+     [:li (ul "The data model may be difficult to express in the constraints of the storage medium (e.g. SQL)"
+              "The data model is expressed too concretely in the DB (e.g. JSON columns, document stores)")]
+     [:li (ul "The data model may not match the constraints of the communication layer (e.g. REST/HTTP)"
+              "The API only exposes a limited subset of the information model")]
+    [:li (ul "The front end, as a privileged part of the application, gets to talk to the information model directly and bypass the API's limitations")]
+    [:li (ul "The API exposed to external programs only sees a limited subset of the 'true' API")]] %>
+
+<%= [:section] %>
+
+<%= (header {:level :h3} "A simple alternative") %>
+
+<%= [:figure {:class "svg-diagram"} (image "media/schema-diagram.svg")
+    [:figcaption "Schema as united information model and API"]]%>
+
+Just let a program run queries against the database. Let me make a TODO on my TODO list by transacting an assertion.
+
+In order for this to be a viable solution, several assumptions must hold:
+
+<%= (ul "You need a very expressive query language. (sorry, SQL)"
+       "You need to give the user unmediated access to their data. (sorry, webapps)"
+       "'Scalability' is not a concern. (sorry, webapps)"
+       "You need to parse and validate the query to eliminate pathological/hostile inputs. (sorry, SQL)") %>
+
+In short, this solution really only works in the context of <%=(link "https://www.inkandswitch.com/local-first.html" "local-first software")%>.
