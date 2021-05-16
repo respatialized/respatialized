@@ -1,0 +1,21 @@
+<% (def metadata {:title "Framing degrowth"}) %>
+
+<%= (header {:level :h1} (:title metadata)) %>
+
+Consider a single group of men in two different societies.
+
+<%=[:hr]%>
+
+In the first, each man has a full toolbox and workbench in his 'man cave' basement with new and capable power tools: drills, a circular saw, belt sander, the works. These get used at most a couple of times a month, mostly for small woodworking projects like a spice rack or wine bottle holder. The basement is starting to fill up with the kids' stuff anyway, so even medium-sized projects like a bench or picnic table are hard to make space for.
+
+Besides, who has the time? In order to stay ahead on their mortgages, these guys have been putting in long hours at work, which has or hasn't been noticed, depending on the particular boss and whether that particular boss is paying attention. But the work seems to be paying off nevertheless - good school district, property value increasing at 2 or 3 times that of inflation. And a full toolbox, just waiting to be used! Come to think of it, maybe some DIY shutters with an inlay made by that new CNC device would be nice... but what would the local homeowner's association think of those? Hm, maybe not up to code. Better not push it. Maybe another project will put those tools to better use... oh crap, I just got another email...
+
+<%=[:hr]%>
+
+Consider the second. These men in the second scenario don't own any tools at all. Instead, they grab slots as they can at the local community workshop. You can't always get a slot lined up, but when you do, they've really got everything you could imagine needing. Drill press, jigsaw, vertical milling machine, plus more hand tools than you'd know what to do with. I heard they were planning to put in a 3x2m CNC machine next year? And the space! One of your friends built the hull of a small sailboat in the sessions he had banked up. Another built an entire new section of roofing for his house. It took a lot of work, but the spire he put on his place really makes it look distinctive; no one else would have thought to build one like that. And it is somewhat easy to make the time when you're only scheduled to work 22 hours a week (but, the impulse to procrastinate doesn't always pay attention to your schedule of mandated working hours).
+
+Getting those sessions, though! It's a hassle for sure, arranging delivery of the materials you need and pitching in to haul them off the van when they arrive. You need to make sure to use or swap them within a couple of months too, as it's not like the warehouse attached to the workshop has infinite space for everyone's backburner furniture project. Some of the senior workshop members have threatened once or twice to repurpose some of your unused wood for repairs to the workshop, but they've never made good on it. Still, better to avoid the annoyed glances when running into other members of the workshop who get their shit done in a timely fashion, right? They might occasionally give you a hard time, but they're always up to pitch in for those jobs that take more than one pair of hands (and for the beer afterwards). After all, the sooner your surplus wood is out of there, the sooner they can get cracking on that next sculpture. Plus, they always seem to find a use for the scrap wood left over from your furniture builds, so they're happy to get first dibs on it. Besides, the other families in the co-housing building you live in will be thrilled when they see those new shutters on the windows.
+
+<%=[:hr]%>
+
+We know which one of these societies has a numerically higher GDP. Which one is richer?
