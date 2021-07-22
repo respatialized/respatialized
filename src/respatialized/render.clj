@@ -16,7 +16,7 @@
   (:gen-class))
 
 (defn doc-header
-  "Returns a default header from a post's metadata def."
+  "Returns a default header from a map with a post's metadata."
   [{:keys [title page-style scripts]}]
   (let [page-header
         (apply conj
@@ -113,7 +113,6 @@
          get-header (fn [k] [:th k])
          get-row (fn [rv] (apply conj [:tr {:class row-class}]
                                 (map (fn [v] [:td v]) rv)))]
-
      [:table
       [:thead (apply conj [:tr {:class header-class}] (map get-header ks))]
       (into [:tbody] (map get-row vs))]))
@@ -268,9 +267,10 @@
 
 (defn include-def
   "Excerpts the source code of the given symbol in the given file."
-  ([{:keys [render-fn def-syms]
+  ([{:keys [render-fn def-syms container]
      :or {render-fn #(util/escape-html (with-out-str (pprint %)))
-          def-syms #{'def 'defn}}} sym f]
+          def-syms #{'def 'defn}
+          container [:pre [:code {:class "language-clojure"}]]}} sym f]
    (with-open [r (clojure.java.io/reader f)]
      (loop [source (java.io.PushbackReader. r)]
        (if (not (.ready source)) :not-found
@@ -279,6 +279,6 @@
              (if (and (list? e)
                       (def-syms (first e))
                       (= sym (symbol (second e))))
-               [:pre [:code {:class "language-clojure"} (render-fn e)]]
+               (conj container (render-fn e))
                (recur source)))))))
   ([sym f] (include-def {} sym f)))
