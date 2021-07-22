@@ -3,7 +3,8 @@
              [garden.stylesheet :as stylesheet]))%>
 <% (def page-css
    (garden/css [:figure [:figcaption {:font-style "italic"}]]
-   [:figure [:img {:margin "auto"}]]
+   [:figure [:img {:margin "auto"
+                   :width "27rem" }]]
    [:h1 {:break-after "all"}]
    [:h3 {:font-size "1.8rem"}]
    [:article {:column-count 2
