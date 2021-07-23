@@ -4,18 +4,12 @@
             [hiccup.element :as elem]
             [hiccup.util :as util]
             [clojure.string :as string]
-            [clojure.pprint :refer [pprint]]
-            [clojure.java.io :as io]
-            [clojure.tools.reader :as r]
+            [site.fabricate.prototype.page :as page]
             [flatland.ordered.set :refer [ordered-set]]
             [flatland.ordered.map :refer [ordered-map]]
-            [respatialized.styles :as styles]
-            [respatialized.document :as doc :refer [sectionize-contents]]
-            [respatialized.parse :refer [parse parse-eval]
-             :as parse])
-  (:gen-class))
+            [respatialized.styles :as styles]))
 
-(defn doc-header
+(defn site-page-header
   "Returns a default header from a map with a post's metadata."
   [{:keys [title page-style scripts]}]
   (let [page-header
@@ -32,6 +26,13 @@
                scripts)]
     (if page-style (conj page-header [:style page-style]) page-header)))
 
+(defn nil-or-empty? [v]
+  (if (seqable? v) (empty? v)
+      (nil? v)))
+
+(defn conj-non-nil [s & args]
+  (reduce conj s (filter #(not (nil-or-empty? %)) args)))
+
 (defn header
   "Create a structured header given the option map and child elements."
   [{:keys [date level class]
@@ -40,70 +41,15 @@
   (let [c (if (not (map? opts)) (conj contents opts) contents)
         h (apply conj [level] c)
         d (if date [:time {:datetime date} date])]
-    (respatialized.parse/conj-non-nil
+    (conj-non-nil
      [:header]
      (if class {:class class} nil) h d)))
-
-(defn em [& contents]  (apply conj [:em] contents))
-(defn strong [& contents]  (apply conj [:strong] contents))
-
-(defn link
-  ([url
-    {:keys [frag]
-     :or {frag nil}
-     :as opts} & contents]
-   (let [c (if (not (map? opts)) (conj contents opts) contents)]
-     (apply conj [:a {:href url}] c))))
 
 (defn image
   ([path annotation class]
     [:img {:src path :alt annotation :class class}])
   ([path annotation] (image path annotation styles/img-default))
   ([path] (image path "")))
-
-(defn code ([& contents] [:pre (apply conj [:code] contents)]))
-(defn in-code ([& contents] (apply conj [:code] contents)))
-(defn aside [& contents] (apply conj [:aside] contents))
-
-;; (defn )
-
-(defn blockquote
-  [{:keys [caption url author source]
-    :or {caption nil
-         author ""
-         url ""}
-    :as opts} & contents]
-  (let [c (if (not (map? opts)) (conj contents opts) contents)
-        s (if source [:figcaption author ", " [:cite source]]
-              [:figcaption author])]
-    [:figure
-     (apply conj [:blockquote {:cite url}] c) s]))
-
-;; (defn blockquote
-;;   ([content author
-;;     {:keys [:outer-class
-;;             :content-class
-;;             :author-class]}]
-
-;;    [:blockquote {:class outer-class}
-;;     [:div {:class content-class} content]
-;;     [:span {:class author-class} author]])
-;;   ([content author]
-;;    (blockquote content author
-;;                {:outer-class styles/blockquote-outer
-;;                 :content-class styles/blockquote-content
-;;                 :author-class styles/blockquote-author})))
-
-(defn quote [{:keys [cite]
-              :or {cite ""}
-              :as opts} & contents]
-  (let [c (if (not (map? opts)) (conj contents opts) contents)]
-    (apply conj [:q {:cite cite}] c)))
-
-(defn ul [& contents]
-  (apply conj [:ul] (map (fn [i] [:li i]) contents)))
-(defn ol [& contents]
-   (apply conj [:ol] (map (fn [i] [:li i]) contents)))
 
 (defn sorted-map-vec->table
   "Converts a vector of maps to a hiccup table."
@@ -198,87 +144,4 @@
      [:table header
       (map->tbody m all-keys)])))
 
-(defn script [attr-map & contents]
-  (apply conj [:script attr-map] contents))
-
 (def default-grid 8)
-
-(defn template->hiccup
-  "Converts a template file to a hiccup data structure for the page."
-  [t]
-  (let [parsed (parse/parse t)
-        form-ns (parse/yank-ns parsed)
-        tmpl-ns (if form-ns form-ns
-                    (symbol (str "tmp-ns." (Math/abs (hash parsed)))))
-        evaluated  (parse/eval-with-errors
-                    parsed tmpl-ns doc/validate-element)
-        page-meta (parse/eval-in-ns 'metadata tmpl-ns)
-        body-content
-        (into [:article {:lang "en"}]
-              sectionize-contents
-              evaluated)]
-    [:html
-     (doc-header page-meta)
-     [:body
-      body-content
-      [:footer
-       {:class "mb7"}
-       [:div [:a {:href "/"} "Home"]]]]]))
-
-;; (defn page
-;;   "Converts a comb/hiccup file to HTML."
-;;   [t]
-;;   (hp/html5 (template->hiccup t)))
-
-
-
-(def lit-open "//CODE{")
-(def lit-close "}//")
-(def comb-open "<%=(code \"")
-(def comb-close "\")%>")
-
-(defn fence-code [in-text]
-  (-> in-text
-      (string/replace lit-open comb-open)
-      (string/replace lit-close comb-close)))
-
-(defn include-file [file-path]
-  (-> file-path
-      slurp
-      code))
-
-(defn include-template-file [file-path]
-  (-> file-path
-      slurp
-      fence-code
-      parse))
-
-
-(defn include-source
-  ([{:keys [details]
-     :or {details nil}
-     :as opts} file-path]
-   (let [source-code (slurp file-path)]
-     (if details (conj [:details [:summary details]]
-                       (code source-code))
-         (code source-code))))
-  ([file-path] (include-source {} file-path)))
-
-
-(defn include-def
-  "Excerpts the source code of the given symbol in the given file."
-  ([{:keys [render-fn def-syms container]
-     :or {render-fn #(util/escape-html (with-out-str (pprint %)))
-          def-syms #{'def 'defn}
-          container [:pre [:code {:class "language-clojure"}]]}} sym f]
-   (with-open [r (clojure.java.io/reader f)]
-     (loop [source (java.io.PushbackReader. r)]
-       (if (not (.ready source)) :not-found
-           (let [e (try (r/read source)
-                        (catch Exception e nil))]
-             (if (and (list? e)
-                      (def-syms (first e))
-                      (= sym (symbol (second e))))
-               (conj container (render-fn e))
-               (recur source)))))))
-  ([sym f] (include-def {} sym f)))
