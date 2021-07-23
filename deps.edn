@@ -8,6 +8,8 @@
   org.clojure/tools.reader {:mvn/version "1.3.4"}
 
   ;; site generation
+  site.fabricate/fabricate {:git/url "git@github.com:fabricate-site/fabricate.git"
+                            :sha "2b063d7d15477f58e999c108532e7e0d0e3a54f2"}
   hiccup/hiccup {:mvn/version "2.0.0-alpha2" :exclusions [org.clojure/clojure]}
   garden/garden {:mvn/version "1.3.9"}
   juxt/dirwatch {:mvn/version "0.2.5"}
