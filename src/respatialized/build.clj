@@ -7,11 +7,20 @@
    [site.fabricate.prototype.fsm :as fsm]
    [site.fabricate.prototype.write :as write]
    [site.fabricate.prototype.page :refer :all]
+   [juxt.dirwatch :refer [close-watcher]]
    [respatialized.css :as css]
    [respatialized.render :as render :refer :all]
    [respatialized.holotype :as holotype]
    [clojure.string :as str]))
 
+(defn get-template-files [dir suffix]
+  (->> dir
+       io/file
+       file-seq
+       (filter #(and (.isFile %)
+                     (not (.isDirectory %))
+                     (.endsWith (.toString %) suffix)))
+       (map #(.toString %))))
 
 (comment
   ;; store the post data and the html and only update it if
@@ -38,40 +47,49 @@
 
 (def site-settings
   {:template-suffix ".fab"
-                 :input-dir "./content"
+   :input-dir "./content"
    :output-dir "./public"})
 
 
 
 (defn -main
   ([]
+   (with-redefs [site.fabricate.prototype.write/default-site-settings
+                site-settings
+                site.fabricate.prototype.page/doc-header
+                site-page-header]
+     (write/publish {:dirs ["./content/"]})
+    )
    )
   ([& files]
    ))
 
 (comment
-  (future (-main))
 
   )
 
 (comment
-  (->> "./content/ai-and-labor.html.fab"
-       (fsm/advance write/operations)
-       (fsm/advance write/operations)
-       (fsm/advance write/operations)
-       (fsm/advance write/operations)
-       (fsm/advance write/operations)
-       )
 
+  (alter-var-root #'site.fabricate.prototype.write/default-site-settings
+                  (constantly site-settings))
 
-  (fsm/complete write/operations "./content/ai-and-labor.html.fab")
+  (alter-var-root #'site.fabricate.prototype.page/doc-header
+                  (constantly site-page-header))
 
-  (with-redefs [site.fabricate.prototype.write/default-site-settings
-                site-settings
-                site.fabricate.prototype.page/doc-header
-                site-page-header]
-
-  (fsm/complete write/operations "./content/ai-and-labor.html.fab")
+  (def drafts
+    (write/draft)
     )
+
+  (close-watcher drafts)
+
+  (def completed-posts
+    (with-redefs [site.fabricate.prototype.write/default-site-settings
+                  site-settings
+                  site.fabricate.prototype.page/doc-header
+                  site-page-header]
+      (->> (get-template-files "./content" ".fab")
+           (map (fn [p]
+                  [p (fsm/complete write/operations p)]))
+           (into {}))))
 
   )
