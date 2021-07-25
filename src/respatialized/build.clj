@@ -8,6 +8,7 @@
    [site.fabricate.prototype.write :as write]
    [site.fabricate.prototype.page :refer :all]
    [respatialized.css :as css]
+   [respatialized.render :as render :refer :all]
    [respatialized.holotype :as holotype]
    [clojure.string :as str]))
 
@@ -35,6 +36,13 @@
   ;; 5. use the state map to drive a web UI that leverages htmx to display rich information about the state of the site being built
   )
 
+(def site-settings
+  {:template-suffix ".fab"
+                 :input-dir "./content"
+   :output-dir "./public"})
+
+
+
 (defn -main
   ([]
    )
@@ -43,5 +51,27 @@
 
 (comment
   (future (-main))
+
+  )
+
+(comment
+  (->> "./content/ai-and-labor.html.fab"
+       (fsm/advance write/operations)
+       (fsm/advance write/operations)
+       (fsm/advance write/operations)
+       (fsm/advance write/operations)
+       (fsm/advance write/operations)
+       )
+
+
+  (fsm/complete write/operations "./content/ai-and-labor.html.fab")
+
+  (with-redefs [site.fabricate.prototype.write/default-site-settings
+                site-settings
+                site.fabricate.prototype.page/doc-header
+                site-page-header]
+
+  (fsm/complete write/operations "./content/ai-and-labor.html.fab")
+    )
 
   )
