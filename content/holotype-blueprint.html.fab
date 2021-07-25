@@ -1,11 +1,13 @@
-<%(ns holotype
+✳(ns respatialized.holotype.blueprint
   (:require [flatland.ordered.map :refer [ordered-map]]
             [respatialized.render :refer :all :exclude [features]]
+            [site.fabricate.prototype.page :refer :all ]
+            [site.fabricate.prototype.read :refer [include-def]]
       [garden.core :as garden :refer [style css]]
       [garden.stylesheet :refer [at-import]]
-      [garden.selectors :as select]))%>
+      [garden.selectors :as select]))🔚
 
-<%(def page-style
+✳(def page-style
        (css
        (at-import
 "https://fonts.googleapis.com/css2?family=Inter:wght@600;900&display=swap")
@@ -53,29 +55,29 @@
                                  :border-top "0.5px solid"
                                  }]
                         [:table {:border-collapse "collapse"
-                                 :max-width "1400px"}]))%>
+                                 :max-width "1400px"}]))🔚
 
 
-<%(def metadata {:title "HOLOTYPE: blueprint" :page-style page-style})%>
+✳(def metadata {:title "HOLOTYPE: blueprint" :page-style page-style})🔚
 
 
-<%=(header {:level :h1 :date "2021-02-11"} (:title metadata))%>
+✳=(header {:level :h1 :date "2021-02-11"} (:title metadata))🔚
 
 Holotype will eventually become a library, distributable as an artifact separate from the context of its original creation. This page serves as a blueprint for that library.
 
-<%=(blockquote
+✳=(blockquote
  {:source "Suffering-oriented programming"
   :url "http://nathanmarz.com/blog/suffering-oriented-programming.html"
   :author "Nathan Marz"}
-    "First make it possible. Then make it beautiful. Then make it fast.")%>
+    "First make it possible. Then make it beautiful. Then make it fast.")🔚
 
-Following Marz's advice, there will be three major phases of the work needed to make <%= (in-code "holotype")%> a reality.
+Following Marz's advice, there will be three major phases of the work needed to make ✳= (in-code "holotype")🔚 a reality.
 
-<%=(header {:level :h3} "Possible")%>
+✳=(header {:level :h3} "Possible")🔚
 
-Because <%= (in-code "holotype")%> exists mostly as idiosyncratic site generation code, I still need to make it <%= (em "possible") %> to use outside of the context of this website. As Marz suggests, I am still feeling out the problem space in the context of a working prototype based on concrete examples.
+Because ✳= (in-code "holotype")🔚 exists mostly as idiosyncratic site generation code, I still need to make it ✳= (em "possible") 🔚 to use outside of the context of this website. As Marz suggests, I am still feeling out the problem space in the context of a working prototype based on concrete examples.
 
-<%(def features
+✳(def features
        (ordered-map "Preliminary API"
                     {:milestone "Possible"
                      :status "Planned"
@@ -134,49 +136,49 @@ Because <%= (in-code "holotype")%> exists mostly as idiosyncratic site generatio
                     "On-disk cache"
                     {:milestone "Fast"
                      :description "Persist parsed contents on disk for fast rebuilds"}
-                    ))%>
+                    ))🔚
 
 As an example of following Marz's lead in building the prototype atop concrete uses, I generated the table below from an ordered map of features defined inline:
 
-<%= [:details
+✳= [:details
 
     [:summary "Table source map"]
-    (code {:class "language-clojure"} (with-out-str (clojure.pprint/pprint features)))] %>
-<%= [:details [:summary (in-code "respatialized.render/map->table")] (include-def (quote map->table) "./src/respatialized/render.clj")] %>
+    (code {:class "language-clojure"} (with-out-str (clojure.pprint/pprint features)))] 🔚
+✳= [:details [:summary (in-code "respatialized.render/map->table")] (include-def (quote map->table) "./src/respatialized/render.clj")] 🔚
 
 I didn't have that function before I wrote this post. Rather than writing a general-purpose 'table' function from scratch, I allowed the shape of the data that made the most sense at the time of writing to guide the implementation. A lot of this phase will consist of work like that: specific solutions that serve as data points for a new series of abstractions that unify the design.
 
-<%=(header {:level :h3} "Beautiful")%>
+✳=(header {:level :h3} "Beautiful")🔚
 
-In this phase, API stability will allow for new features to be built on a stable foundation while maintaining extensibility. I consider it an important goal that the <%=(in-code "holotype")%> code be usable as a <%=(em "library")%>, not as an opinionated and auto-configuring <%=(em "framework")%>, which is what I hope a disciplined approach to API design will allow.
+In this phase, API stability will allow for new features to be built on a stable foundation while maintaining extensibility. I consider it an important goal that the ✳=(in-code "holotype")🔚 code be usable as a ✳=(em "library")🔚, not as an opinionated and auto-configuring ✳=(em "framework")🔚, which is what I hope a disciplined approach to API design will allow.
 
-<%=(header {:level :h3} "Fast")%>
+✳=(header {:level :h3} "Fast")🔚
 
 This phase will focus on improving the responsiveness of interactions with the library. Due to the importance of real-time feedback for users of the library, latency is to be prioritized over throughput.
 
-<%=(header {:level :h3} "Table of features")%>
+✳=(header {:level :h3} "Table of features")🔚
 
-<%= (map->table features :milestone) %>
+✳= (map->table features :milestone) 🔚
 
-<%=(header {:level :h3} "Features In Detail")%>
+✳=(header {:level :h3} "Features In Detail")🔚
 
-<%=(header {:level :h4} "Error handling")%>
+✳=(header {:level :h4} "Error handling")🔚
 
 Holotype features a parse and evaluate method that allows errors to be surfaced directly, in context. Here's an example:
 
-<%=(invalid-fn :input)%>
+✳=(invalid-fn :input)🔚
 
 The error message encountered during the parse/eval step gets surfaced where the original source expression was in the page, allowing a user to quickly identify the cause and fix it. Particularly useful when paired with live page refreshing. Right now the focus is on allowing a user to see and respond to errors, but future work may add a machine-friendlier way of catching and responding to them.
 
-<%=(header {:level :h4} "Autodocumentation")%>
+✳=(header {:level :h4} "Autodocumentation")🔚
 
-The separation of parsing and execution enables an interesting possibility: the self-documenting namespace. The expressions marked for evaluation without being included in the result – <%= (in-code (str \< \% \space \% \>)) %> – map more or less directly on to a namespace's core definitions, and expressions marked for inclusion – <%= (in-code (str \< \% \= \space \% \>)) %> – map on to expressions that can be safely ignored in the context of definining a namespace. This means that holotype could be used for literate programming as easily as for programmatic content generation.
+The separation of parsing and execution enables an interesting possibility: the self-documenting namespace. The expressions marked for evaluation without being included in the result – ✳= (in-code (str \< \% \space \% \>)) 🔚 – map more or less directly on to a namespace's core definitions, and expressions marked for inclusion – ✳= (in-code (str \< \% \= \space \% \>)) 🔚 – map on to expressions that can be safely ignored in the context of definining a namespace. This means that holotype could be used for literate programming as easily as for programmatic content generation.
 
-Parsing the essential expressions out of a file and passing them directly to Clojure's reader + classpath resolver effectively <%=(link "https://en.wikipedia.org/wiki/Literate_programming#Concept" "tangles" )%> them without the need for intermediate files. Weaving could be accomplished using the database.
+Parsing the essential expressions out of a file and passing them directly to Clojure's reader + classpath resolver effectively ✳=(link "https://en.wikipedia.org/wiki/Literate_programming#Concept" "tangles" )🔚 them without the need for intermediate files. Weaving could be accomplished using the database.
 
-<%=(header {:level :h2} "Design ethos")%>
+✳=(header {:level :h2} "Design ethos")🔚
 
-<%=[:dl [:dt "Design for density"]
+✳=[:dl [:dt "Design for density"]
     [:dd "Try to maximize the information present on a page, both for human and machine consumers of it."]
     [:dt "Simple things should be simple"]
         [:dd "A page should be fully renderable with plaintext only. Basic markup functions should not be intrusive to use."]
@@ -184,14 +186,14 @@ Parsing the essential expressions out of a file and passing them directly to Clo
         [:dd "If a header is created by a function, the user should know that the header is created by a function. Complex behaviors should not be achieved 'automagically.'"]
     [:dt "Complex things should be possible"]
     [:dd "The full power of a programming language should be in the hands of users without needing to rebuild/recompile the whole of the underlying source code."]
-        ]%>
+        ]🔚
 
 
-<%=(header {:level :h2} "Technical debt/backlog")%>
+✳=(header {:level :h2} "Technical debt/backlog")🔚
 
-<%=(ul [:span "Add capability to include page-specific scripts analogous to " [:code ":page-style"]  " for css"]
+✳=(ul [:span "Add capability to include page-specific scripts analogous to " [:code ":page-style"]  " for css"]
        [:span "Refine API with " [:a {:href "https://clojure.org/news/2021/03/18/apis-serving-people-and-programs"} "clojure 1.11 option maps"]]
        [:span "Add defaults for " [:a {:href "https://css-tricks.com/a-complete-guide-to-data-attributes/"} "data attributes"]]
        "Derive styling from data attributes"
        "Implement descent-based search for smallest invalid hiccup forms"
-       "Fix character escaping")%>
+       "Fix character escaping")🔚

@@ -1,8 +1,12 @@
-<% (def metadata {:title "Design Ethos"}) %>
+✳ (ns respatialized.writing.ethos
+(:require [respatialized.render :refer :all]
+[site.fabricate.prototype.page :refer :all])) 🔚
 
-<%= (header (:title metadata)) %>
+✳ (def metadata {:title "Design Ethos"}) 🔚
 
-<%= (header "SITUATED PERSPECTIVE") %>
+✳= (header (:title metadata)) 🔚
+
+✳= (header "SITUATED PERSPECTIVE") 🔚
 
 A landscape, cityscape, or structure must be visible from the perspective of a human being within a scene. Aerial perspectives are situated in an aerial vehicle. 
 
