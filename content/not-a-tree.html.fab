@@ -535,3 +535,15 @@ By the time I had refined this work enough to re-render my existing pages, ✳=(
 Without even indending to design it at the outset, I now had a model for HTML expressive enough to reuse within my paragraph detection algorithm that could process forms differently depending on the surrounding context - paragraphs cannot be contained within paragraphs in HTML. Before long, I had a test suite that ✳= (link "https://github.com/respatialized/respatialized.github.io/blob/52b4c9f78f28f8e77b8f5828eb66555fdc9d0bd0/test/respatialized/document_test.clj#L527" "continuously conformed")🔚 all of my existing pages to the top-level model of HTML. I had assigned a semantic structure to the forms of the document that I wanted to process, one that captures the hierarchy of HTML forms far better than anything I could have designed if I had tried to design something from scratch.
 
 None of the validation logic that now exists would work without the efforts of Vincent Cantin, as well as Tommi Reiman, Pauli Jaakkola and the rest of the contributors to ✳=(in-code "malli")🔚. I no longer have to shy away from the complexity of HTML - I now have a spec expressive enough to give me the leverage I need over it.
+
+
+✳=(header {:level :h3 :date "2021-04-05"} "Fabricate")🔚
+
+✳= (blockquote {:author "Matthew Butterick" :url "https://docs.racket-lang.org/pollen/"}
+               [:em "...if you can find a better digital-publishing tool, use that. But I’m never going back to the way I used to work."])🔚
+
+I have simplified the code that generates this website to the point where I can successfully extract it into its own static site generation library, called ✳=(link "https://github.com/fabricate-site/fabricate" "fabricate")🔚. This ✳=(link "https://github.com/respatialized/respatialized.github.io" "source repo")🔚 now consumes that code instead of defining its generation process itself. The ✳=(in-code (link "https://www.dictionary.com/browse/holotype" "holotype"))🔚 has become a prototype.
+
+Using the ✳=(link "https://fabricate-site.github.io/fabricate/finite-schema-machines.html" "organizing concept")🔚 of finite-state machines, I have developed an extensible method of defining the steps necessary to create a collection of HTML pages.
+
+You can read more about the intent and point of view informing Fabricate ✳=(link "https://fabricate-site.github.io/fabricate/" "here")🔚. I hope it brings the power and flexibility of Pollen's publishing system to the Clojure ecosystem. I also hope it means that I can write about things apart from the website generation process on ✳=(em "this")🔚 site.
