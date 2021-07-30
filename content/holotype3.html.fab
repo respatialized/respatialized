@@ -2,6 +2,7 @@
 ✳ (ns respatialized.holotype.3
 (:require [respatialized.render :refer :all]
 [site.fabricate.prototype.page :refer :all]
+[site.fabricate.prototype.read :as read]
 [respatialized.holotype :as holotype]
 [garden.core :refer [style css]]
 [garden.stylesheet :refer [at-import]])) 🔚
@@ -32,11 +33,11 @@
                                  :line-height "1.75rem"}]
                    [:pre {:white-space "pre-wrap"}]
                    [:article {:max-width "700px"
-  :color "#C5C4C4"}]))%>
+  :color "#C5C4C4"}]))🔚
 
 ✳(def metadata
        {:title "HOLOTYPE/3"
-       :page-style page-style})%>
+       :page-style page-style})🔚
 
 ✳=(header {:level :h1} "HOLOTYPE/3: PAGE-SPECIFIC CSS")🔚
 
@@ -58,10 +59,11 @@ That's what ✳= (in-code "holotype")🔚 gives you the power to do. A thousand 
     {:author "Matthew Butterick"
      :source "The Bomb In The Garden"
      :url "https://unitscale.com/mb/bomb-in-the-garden/"}
-    "But the idea of try­ing to do this by hand—I just would’ve quit in de­spair. I would’ve been in tears, scratch­ing my eyes out. So rather than try to do it by hand, I wrote some Python code that gen­er­at­ed all the HTML and CSS.")%>
+    "But the idea of try­ing to do this by hand—I just would’ve quit in de­spair. I would’ve been in tears, scratch­ing my eyes out. So rather than try to do it by hand, I wrote some Python code that gen­er­at­ed all the HTML and CSS.")🔚
 
 Butterick eventually discovered that Racket gave him the leverage he needed. I personally find that Clojure gives me even more. Here's the source code that generated this page:
 
-✳= (include-source {:details "source below:"} "./content/holotype3.html.ct") 🔚
+✳=[:details [:summary "source below:"]
+ [:pre [:code (slurp "./content/holotype3.html.fab")]]] 🔚
 
 I have a lot more to learn about effective HTML and CSS. But I consider this a great medium in which to do so, because it productively blurs the line between "source code" and textual content.
