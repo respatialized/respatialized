@@ -77,7 +77,7 @@
   (t/testing "source code fns"
     #_(t/is (= [:pre [:code
                     {:class "language-clojure"}
-                    "(def delimiters [\"<%\" \"%>\"])"]]
+                    "(def delimiters [\"✳\" \"🔚\"])"]]
              (include-def {:render-fn str} 'delimiters "./src/respatialized/parse.clj")))
     #_(t/is (= [:pre [:code
                     {:class "language-clojure"}
