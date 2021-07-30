@@ -51,7 +51,6 @@
    :output-dir "./public"})
 
 
-
 (defn -main
   ([]
    (with-redefs [site.fabricate.prototype.write/default-site-settings
@@ -89,7 +88,19 @@
                   site-page-header]
       (->> (get-template-files "./content" ".fab")
            (map (fn [p]
+                  (println "rendering" p)
                   [p (fsm/complete write/operations p)]))
            (into {}))))
+
+  (def current-post
+    (with-redefs [site.fabricate.prototype.write/default-site-settings
+                  site-settings
+                  site.fabricate.prototype.page/doc-header
+                  site-page-header]
+
+
+      (fsm/complete write/operations "./content/database-driven-applications.html.fab")
+
+      ))
 
   )

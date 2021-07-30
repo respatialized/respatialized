@@ -7,21 +7,19 @@
    (garden/css [:figure [:figcaption {:font-style "italic"}]]
    [:figure [:img {:margin "auto"
                    :width "27rem" }]]
-   [:h1 {:break-after "all"}]
+   [:h1 {:column-span "all"}]
    [:h3 {:font-size "1.8rem"}]
-   [:article {:column-count 2
+   [:article {:column-count 1
    :max-width "1300px"
    }
-   [:section {:break-after "column"
-              :max-width "35rem"
+[:section {:break-after "column"
+           :max-width "35rem"
            :break-inside "avoid"}]]
    ))🔚
 ✳ (def metadata {:title "Database-driven applications"
    :date "2021-05-15"
    :page-style page-css}) 🔚
 ✳= (header {:level :h1} (:title metadata)) 🔚
-
-✳= [:section ] 🔚
 
 ✳= (header {:level :h3} "How applications usually get made") 🔚
 
