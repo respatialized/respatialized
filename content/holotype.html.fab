@@ -1,0 +1,14 @@
+✳ (ns respatialized.holotype.1
+(:require [respatialized.render :refer :all]
+[site.fabricate.prototype.page :refer :all]
+[respatialized.holotype :as holotype])) 🔚
+
+✳ (def metadata {:title "HOLOTYPE_/1"}) 🔚
+
+✳=(header "HOLOTYPE_/1")🔚
+
+A holotype is an exemplar of a new type.
+
+✳=(holotype/canvas->hiccup! (holotype/h2) "media/holotype-2.jpg" "holotype2")🔚
+
+This new type blurs the separation between the content and the code used to create it.

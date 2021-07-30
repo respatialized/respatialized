@@ -37,7 +37,7 @@
   (hp/html5
    [:article
     {:lang "en"}
-    (render/doc-header "HOLOTYPE1")
+    (render/site-page-header "HOLOTYPE1")
     [:body {:class "ml3 basier-mono bg-mid-gray"}
      [:div {:class "f1 b white"} "HOLOTYPE//1"]
      [:div [:p "an example of using clojure alone to render a Perun post:"]]

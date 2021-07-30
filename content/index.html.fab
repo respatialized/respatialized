@@ -1,10 +1,13 @@
-<% (def metadata {:title "Respatialized"}) %>
+✳ (def metadata {:title "Respatialized"}) 🔚
+✳ (ns respatialized.writing.index
+(:require [respatialized.render :refer :all]
+ [site.fabricate.prototype.page :refer :all])) 🔚
 
-<%=(header {:level :h1} (list "Re" [:br] "spatial" [:br] "ized")) %>
-<%=(header {:level :h4} "actual / potential spaces" ) %>
+✳=(header {:level :h1} (list "Re" [:br] "spatial" [:br] "ized")) 🔚
+✳=(header {:level :h4} "actual / potential spaces" ) 🔚
 
-<%=(header {:level :h2} "recent work")%>
-<%=(ul
+✳=(header {:level :h2} "recent work")🔚
+✳=(ul
       (list [:p [:a {:href "/not-a-tree.html"} "This Website Is Not A Tree"]]
        [:p "a metatextual introduction to this site as it is and as it could be."])
        (list [:p [:a {:href "/against-metadata.html"} "Against Metadata"]]
@@ -14,8 +17,7 @@
        (list [:p [:a {:href "/reifying-filter-bubble-2.html"} "Reifying the Filter Bubble, part 2"]]
        [:p "notes against the 'decentralization' of an impoverished internet."])
        (list [:p [:a {:href "/working-definition.html"} "A Working Definition"]]
-       [:p "a working definition of my own ideology."]))
-%>
+       [:p "a working definition of my own ideology."]))🔚
 
 
-<%= [:div {:class "f3"} (strong "Site source: " (link "https://github.com/respatialized/respatialized.github.io" (in-code "github")))] %>
+✳= [:div {:class "f3"} (strong "Site source: " (link "https://github.com/respatialized/respatialized.github.io" (in-code "github")))] 🔚

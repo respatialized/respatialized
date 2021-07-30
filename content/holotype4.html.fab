@@ -1,7 +1,9 @@
-<%(ns respatialized.holotype4
+✳(ns respatialized.holotype.4
     (:require [clojure2d.core :as clj2d]
               [respatialized.structure.fractals :as fractals]
               [respatialized.holotype :as holotype]
+              [respatialized.render :refer :all]
+              [site.fabricate.prototype.page :refer :all]
               [malli.core :as m]
               [garden.core :as garden]
               [garden.stylesheet :as style]
@@ -14,10 +16,10 @@
               [criterium.core :as criterium])
     (:import [tech.v3.tensor DirectTensor]))
 
-%>
+🔚
 
 
-<%(def page-style
+✳(def page-style
   (garden/css
    (style/at-import "https://fonts.googleapis.com/css2?family=Anonymous+Pro&family=Share+Tech+Mono&display=swap")
    [:body {:font-family "'Share Tech Mono'"
@@ -31,29 +33,29 @@
        :letter-spacing "-0.12rem"
        :color "#DDD"
        :text-transform "uppercase"}]
-       [:article {:color "#DDD"}]))%>
+       [:article {:color "#DDD"}]))🔚
 
-<% (def metadata {:title "HOLOTYPE//4"
-                  :page-style page-style}) %>
+✳ (def metadata {:title "HOLOTYPE//4"
+                  :page-style page-style}) 🔚
 
-<%= (header (:title metadata)) %>
-<%= (header {:level :h4} "Computational texture generation with attractors + clustering") %>
+✳= (header (:title metadata)) 🔚
+✳= (header {:level :h4} "Computational texture generation with attractors + clustering") 🔚
 
-<%=(header {:level :h2} "synthetic topographies / 1")%>
+✳=(header {:level :h2} "synthetic topographies / 1")🔚
 
 generate a density map using Clifford attractors and draw contour lines around the points using the density as a height estimator.
 
 general strategy: sort the resulting values into layers based on density and draw contours around each of them.
 
-<% (def empty-img (buf-img/new-image 1100 650 :int-rgb)) %>
-<% (def img-tensor (buf-img/as-ubyte-tensor empty-img)) %>
+✳ (def empty-img (buf-img/new-image 1100 650 :int-rgb)) 🔚
+✳ (def img-tensor (buf-img/as-ubyte-tensor empty-img)) 🔚
 
-<% (def canvas (clj2d/with-canvas->
+✳ (def canvas (clj2d/with-canvas->
                  (clj2d/canvas 900 1400)
                  (clj2d/set-background 0 0 0 0)
-                 )) %>
+                 )) 🔚
 
-<%
+✳
 ;; let's get some pixels on the page, shall we?
 (defn save-insert! [img fpath]
   (do
@@ -63,30 +65,30 @@ general strategy: sort the resulting values into layers based on density and dra
                       .getName
                       (#(str "/media/" %)))]
       [:figure
-       [:img {:src img-url}]]))) %>
+       [:img {:src img-url}]]))) 🔚
 
-<% (defn tensor-de-jong [^Double a ^Double b ^Double c ^Double d]
+✳ (defn tensor-de-jong [^Double a ^Double b ^Double c ^Double d]
   ;; this probably isn't the best implementation
   ;; but it's a starting point
   (fn tensor-de-jong-iter [[^DirectTensor xs ^DirectTensor ys]]
     [(dtype/clone (dtype-fn/- (dtype-fn/sin (dtype-fn/* a ys))
                         (dtype-fn/cos (dtype-fn/* b xs))))
      (dtype/clone (dtype-fn/- (dtype-fn/sin (dtype-fn/* c xs))
-                              (dtype-fn/cos (dtype-fn/* d ys))))])) %>
+                              (dtype-fn/cos (dtype-fn/* d ys))))])) 🔚
 
-<% (def starting-pts-linear
+✳ (def starting-pts-linear
   [(dtype/make-container (fastmath.core/slice-range -3 3 6))
-   (dtype/make-container (fastmath.core/slice-range 3 -3 6))]) %>
+   (dtype/make-container (fastmath.core/slice-range 3 -3 6))]) 🔚
 
 
-<% (def starting-pts-de-jong
+✳ (def starting-pts-de-jong
   (let [dejong-res (take 15 (iterate (fractals/de-jong 1.618 2.013 0.001 2.07)  [-0.1 1.0]))]
     [(dtype/make-container (map first dejong-res))
-     (dtype/make-container (map last dejong-res))])) %>
+     (dtype/make-container (map last dejong-res))])) 🔚
 
 
 
-<%
+✳
 
 (defn iter-img
   ([starting-img starting-pts attractor rasterizer! iterations]
@@ -101,9 +103,9 @@ general strategy: sort the resulting values into layers based on density and dra
   ([starting-img starting-pts attractor rasterizer!]
    (fn [iterations] (iter-img starting-img starting-pts attractor rasterizer! iterations))))
 
-%>
+🔚
 
-<% (defn iter-cnvs
+✳ (defn iter-cnvs
      ([cnvs pts attractor rasterizer iterations]
       (loop [n iterations
              current pts
@@ -118,9 +120,9 @@ general strategy: sort the resulting values into layers based on density and dra
                next-cnvs)))))
   ([cnvs pts attractor rasterizer]
    (fn [iterations]
-     (iter-cnvs cnvs pts attractor rasterizer)))) %>
+     (iter-cnvs cnvs pts attractor rasterizer)))) 🔚
 
-<%
+✳
 (defn coords+tensor!
   ([^DirectTensor xs ^DirectTensor ys ^DirectTensor t magnitude]
    (let [xarray (dtype/->double-array xs)
@@ -137,9 +139,9 @@ general strategy: sort the resulting values into layers based on density and dra
          #_(println "invalid coord" x "," y))))
    t))
 
-%>
+🔚
 
-<% (defn paint-canvas [^DirectTensor xs ^DirectTensor ys canvas]
+✳ (defn paint-canvas [^DirectTensor xs ^DirectTensor ys canvas]
   (println "timing type conv:")
   (let [xarray (time (dtype/->double-array xs))
         yarray (time (dtype/->double-array ys))]
@@ -149,14 +151,14 @@ general strategy: sort the resulting values into layers based on density and dra
          (#(do
              (doseq [x xarray y yarray]
                (clj2d/rect % (Math/floor x) (Math/floor y) 1 1))
-             %))))) %>
+             %))))) 🔚
 
 
 
-<%(defn normalize [^DirectTensor t ^Double old-extent  ^Long new-extent ^Long offset]
-  (dtype-fn/round (dtype-fn/+ (dtype-fn/* (dtype-fn// t old-extent) new-extent) offset))) %>
+✳(defn normalize [^DirectTensor t ^Double old-extent  ^Long new-extent ^Long offset]
+  (dtype-fn/round (dtype-fn/+ (dtype-fn/* (dtype-fn// t old-extent) new-extent) offset))) 🔚
 
-<%
+✳
 
 (defn rasterize-xys
   ([[^DirectTensor xs ^DirectTensor ys] ^DirectTensor tens ^Long magnitude]
@@ -171,9 +173,9 @@ general strategy: sort the resulting values into layers based on density and dra
 
   ([^Long magnitude] (fn [[^DirectTensor xs ^DirectTensor ys] ^DirectTensor tens] (rasterize-xys [xs ys] tens magnitude))))
 
-%>
+🔚
 
-<% (defn canvas-xys
+✳ (defn canvas-xys
   ([[xs ys] cnvs]
    (println "time for xnorm,ynorm,canvas update")
    (let [two-pi (* Math/PI 2)
@@ -185,25 +187,25 @@ general strategy: sort the resulting values into layers based on density and dra
          ys-normed (time (normalize ys Math/PI (* height 1.5) y-center))]
 
      (paint-canvas xs-normed ys-normed cnvs)))
-  ([] (fn [[xs ys] cnvs] (canvas-xys [xs ys] cnvs)))) %>
+  ([] (fn [[xs ys] cnvs] (canvas-xys [xs ys] cnvs)))) 🔚
 
-<% (def dejong-iter-img (iter-img
+✳ (def dejong-iter-img (iter-img
                          img-tensor
                          starting-pts-de-jong
                          (tensor-de-jong 1.318 2.014 0.001 2.07)
                          (rasterize-xys 4)
                          40000
-                         ))  %>
+                         ))  🔚
 
-<%= (header {:level :h4} "An example starting point") %>
+✳= (header {:level :h4} "An example starting point") 🔚
 
-<%= (save-insert! empty-img "./public/media/holotype4-1.png") %>
+✳= (save-insert! empty-img "./public/media/holotype4-1.png") 🔚
 
-<%= (header {:level :h4} "Reducing over the time dimension") %>
+✳= (header {:level :h4} "Reducing over the time dimension") 🔚
 
-<% (def ten-k (take 10000 (iterate (tensor-de-jong 1.318 2.013 0.0001 2.07) starting-pts-de-jong))) %>
+✳ (def ten-k (take 10000 (iterate (tensor-de-jong 1.318 2.013 0.0001 2.07) starting-pts-de-jong))) 🔚
 
-<% (defn iter-bounds [iter-seq]
+✳ (defn iter-bounds [iter-seq]
   (let [[start-x start-y] (first iter-seq)
         elemwise-bounds (reduce (fn [{:keys [max-x max-y
                          min-x min-y]}
@@ -218,11 +220,11 @@ general strategy: sort the resulting values into layers based on density and dra
     {:x [(apply min (:min-x elemwise-bounds))
          (apply max (:max-x elemwise-bounds))]
      :y [(apply min (:min-y elemwise-bounds))
-         (apply max (:max-y elemwise-bounds))]})) %>
+         (apply max (:max-y elemwise-bounds))]})) 🔚
 
 Instead of writing to the image tensor on each iteration of the attractor, a more efficient approach would take an arbitrary number of iterations and reduce over all of them to produce a raster image. This resulting density map is also a necessary input for clustering / topography.
 
-<% (defn inc-tensor!
+✳ (defn inc-tensor!
   ([[^DirectTensor xs ^DirectTensor ys] ^DirectTensor t [xnorm ynorm]]
       (let [xarray (dtype/->double-array (xnorm xs))
             yarray (dtype/->double-array (ynorm ys))
@@ -236,19 +238,19 @@ Instead of writing to the image tensor on each iteration of the attractor, a mor
       t)
   ([normalizer]
    (fn [[^DirectTensor xs ^DirectTensor ys] ^DirectTensor t]
-     (inc-tensor! [xs ys] t normalizer))))  %>
+     (inc-tensor! [xs ys] t normalizer))))  🔚
 
-<% (def unbounded-tensor (tensor/new-tensor [1100 650] {:datatype :int64})) %>
+✳ (def unbounded-tensor (tensor/new-tensor [1100 650] {:datatype :int64})) 🔚
 
-<% (def total-res
+✳ (def total-res
   (iter-img unbounded-tensor
             starting-pts-de-jong
             (tensor-de-jong 1.318 2.014 0.001 2.07)
             (inc-tensor! [(fn [xs] (normalize xs 4 1100 (/ 1100 2)))
                           (fn [ys] (normalize ys 4 650 (/ 650 2)))])
-            50000)) %>
+            50000)) 🔚
 
-<% (def tens2
+✳ (def tens2
   (let [log-transformed (dtype-fn/max 0.0 (dtype-fn/log10 unbounded-tensor))
         max-log (apply max (map #(apply max %) log-transformed))
         pixel-scale (/ 255 max-log)]
@@ -259,10 +261,10 @@ Instead of writing to the image tensor on each iteration of the attractor, a mor
                    (.ndReadDouble x y)
                    (* pixel-scale)
                    (Math/round))]
-         [v v v])))))  %>
+         [v v v])))))  🔚
 
 
-<%= (header {:level :h5} "Other ideas") %>
+✳= (header {:level :h5} "Other ideas") 🔚
 
 Tensor attractors - what if the dynamical system was a vector instead of a point?
 

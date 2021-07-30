@@ -1,33 +1,20 @@
 (ns respatialized.archive
-  "Namespace for defining note schemas and specs."
-  (:require [clojure.edn :as edn]
-            [clojure.string :as str]
-            [clojure.spec.alpha :as spec]
-            [spec-provider.provider :as sp]
-            ))
+  "Namespace for persisting document elements"
+  (:require
+   [respatialized.document :as doc]
+   [datahike.api :as d]
+   [clojure.edn :as edn]
+   [clojure.string :as str]
+   [malli.core :as m]
+   [clojure.spec.alpha :as spec]
+   ))
 
-(def zk-note-attributes
-  "Schema for Zettelkasten paper notes."
-  [{:db/ident :prose
-    :db/doc "Prose text, represented as a string."
-    :db/valueType :db.type/string
-    :db/cardinality :db.cardinality/one}
-   {:db/ident :zk-number
-    :db/doc "the Zettelkasten style note number as a string - 14.2.1"
-    :db/valueType :db.type/string
-    :db/cardinality :db.cardinality/one
-    :db/unique :db.unique/value
-    :db/index true}
-   {:db/ident :date
-    :db/doc "A date, represented as a instant."
-    :db/valueType :db.type/instant
-    :db/cardinality :db.cardinality/one
-    :db/index true}
-   {:db/ident :uuid
-    :db/doc "a uuid that uniquely identifies this entity."
-    :db/valueType :db.type/uuid
-    :db/cardinality :db.cardinality/one
-    :db/unique :db.unique/identity}])
+;; the approach that makes the most sense right now:
+;; schema-on-read at the DB level, with malli schemas
+;; to destructure and enforce consistency at the boundaries
+;; of transaction fns
+
+
 
 (def text-file-attributes
   "Attributes for writing parsed from a plaintext file."

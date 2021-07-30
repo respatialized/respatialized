@@ -1,6 +1,10 @@
-<% (def metadata {:title "A Working Definition"}) %>
+✳ (ns respatialized.writing.working-definition
+(:require [respatialized.render :refer :all]
+[site.fabricate.prototype.page :refer :all])) 🔚
 
-<%=(header {:level :h3 :date "2019-07-05"} (:title metadata))%>
+✳ (def metadata {:title "A Working Definition"}) 🔚
+
+✳=(header {:level :h3 :date "2019-07-05"} (:title metadata))🔚
 
 I had a conversation recently about ecological limits that ended up here:
 
