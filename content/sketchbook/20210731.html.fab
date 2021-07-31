@@ -1,0 +1,72 @@
+✳(ns respatialized.sketches.20210731
+ (:require [respatialized.render :refer :all]
+           [site.fabricate.prototype.page :refer :all]
+           [respatialized.holotype :as holotype]
+           [fastmath.random :as r]))🔚
+
+✳ (def metadata {:title "20210731"
+:output-file "./public/sketchbook/20210731.html"
+:page-style (garden.core/css (garden.stylesheet/at-import "https://respatialized.github.io/css/main.css"))}) 🔚
+
+✳=[:h2 "Sketchbook|" (:title metadata)]🔚
+
+This sketchbook contains examples of inlined SVG, both as Hiccup literals and as computationally generated.
+
+✳=[:h4 "Example 1: " [:a {:href "https://developer.mozilla.org/en-US/docs/Web/SVG/Element/feGaussianBlur"} "MDN Gaussian Blur"] ]🔚
+
+✳ (def mdn-fe-gaussian-blur
+  [:svg {:width 230 :height 120
+         :xmlns "http://www.w3.org/2000/svg"
+         :xmlns:xlink "http://www.w3.org/1999/xlink"}
+   [:filter {:id "blurMe"}
+    [:feGaussianBlur {:in "SourceGraphic" :stdDeviation "5"}]]
+   [:circle {:cx 60 :cy 60 :r 50 :fill "#9D644A"}]
+   [:circle {:cx 170 :cy 60 :r 50 :fill "#9D644A"
+             :filter "url(#blurMe)"}]]) 🔚
+
+✳=mdn-fe-gaussian-blur🔚
+
+✳=[:h4 "Example 2: Gaussian blur, intensity modulated by billow noise" ]🔚
+
+
+✳(defn ->circle [{:keys [x y radius filter-id]}]
+  [:circle {:cx x :cy y :r radius :filter (str "url(#" filter-id ")")}])🔚
+
+✳(defn ->rect [{:keys [x y w h filter-id]}]
+  [:circle {:x x :y y :width w :height h :filter (str "url(#" filter-id ")")}])🔚
+
+✳(def noise-svg
+  (let [noise-fn (r/billow-noise {:seed 2983 :interpolation :none})
+        coords (for [x (range -1.0 1.0 0.13)
+               y (range -1.0 1.0 0.13)]
+           {:x x :y y
+            :rect-x (-> x (+ 1.0) (/ 2.0) (* 600) (+ 10))
+            :rect-y (-> y (+ 1.0) (/ 2.0) (* 600) (+ 10))})
+        filters
+        (into {}
+              (map (fn [{:keys [x y]}]
+                     (let [noise-val
+                           (-> (noise-fn x y)
+                               (* 100)
+                               (Math/round)
+                               (/ 100)
+                               (* 6)
+                               double)]
+                       [(str "x-" x "y-" y)
+                        {:id (str "blur-" noise-val)
+                         :filter [:filter {:id (str "blur-" noise-val)}
+                                  [:feGaussianBlur {:in "SourceGraphic" :stdDeviation noise-val}]]}])
+                     )
+                   coords))]
+    (into [:svg {:width (+ 50 (apply max (map :rect-x coords)))
+                 :height (+ 50 (apply max (map :rect-y coords)))}]
+          (concat (map :filter (vals filters))
+                  (map (fn [{:keys [x y rect-x rect-y]}]
+                         [:rect {:x rect-x :y rect-y :width 35 :height 35
+                                 :fill "#CFA655"
+                                 :filter (str "url(#" (get-in filters [(str "x-" x "y-" y) :id]) ")")}])
+                       coords
+                       )))))🔚
+
+
+✳=noise-svg🔚
