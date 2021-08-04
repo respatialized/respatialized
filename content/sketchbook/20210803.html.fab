@@ -1,0 +1,51 @@
+✳(ns respatialized.sketchbook.20210803
+(:require [hickory.core :as hickory]
+  [babashka.curl :as curl]))🔚
+
+✳ (def metadata {:title "20210803: HTML as medium"
+:page-style (garden.core/css (garden.stylesheet/at-import "https://respatialized.github.io/css/main.css"))}) 🔚
+
+✳=[:h2 (:title metadata)]🔚
+
+Challenge accepted on this tweet:
+
+
+✳(defn http-get [url]
+   )🔚
+
+✳ (defn convo? [elem] (and (vector? elem)
+                                     (= (first elem) :div)
+                                     (= (get (second elem) :class)
+                                        "conversation"))) 🔚
+
+✳(defn pull-tweet [tweet-url]
+(let [url (clojure.string/replace tweet-url
+             #"^https://twitter.com/"
+             "https://nitter.1d4.us/")
+      tweet-res (curl/get url)
+parsed (hickory/as-hiccup (hickory/parse (:body tweet-res)))
+content (->> parsed
+             (tree-seq #(or (vector? %) (seq? %)) rest)
+             (filter (fn [elem] (and (vector? elem)
+                                     (= (first elem) :div)
+                                     (= (get (second elem) :class)
+                                        "conversation"))))
+             first)]
+content)
+    )🔚
+
+✳=(count (curl/get "https://nitter.1d4.us/meekaale/status/1421739097459240962"
+  ) )🔚
+
+
+✳ (def parsed (pull-tweet "https://twitter.com/meekaale/status/1421739097459240962")) 🔚
+
+✳=parsed 🔚
+
+This sketchbook post examines how Fabricate can give users the power to assimilate a tweet into their own website's style.
+
+✳=[:h3 "Requirements"]🔚
+
+✳=[:ul [:li "No JavaScript"] [:li "No API keys"]
+   [:li "Maintain the provenance of the tweet"]
+ [:li "Provide metadata about when it was retrieved"]]🔚
