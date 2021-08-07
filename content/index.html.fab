@@ -8,6 +8,8 @@
 
 ✳=(header {:level :h2} "recent work")🔚
 ✳=(ul
+(list [:p [:a {:href "https://github.com/fabricate-site/fabricate"} "Fabricate"]]
+      [:p "A Clojure-based static website generator extracted from this website's history, implementing conceps similar to Matthew Butterick's " [:code "pollen."]])
       (list [:p [:a {:href "/not-a-tree.html"} "This Website Is Not A Tree"]]
        [:p "a metatextual introduction to this site as it is and as it could be."])
        (list [:p [:a {:href "/against-metadata.html"} "Against Metadata"]]

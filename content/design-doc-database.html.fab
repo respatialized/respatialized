@@ -1,0 +1,54 @@
+✳(ns respatialized.writing.design.database
+(:require [respatialized.render :refer :all]
+[site.fabricate.prototype.page :refer :all]))🔚
+
+✳(def metadata {:title "database design notes"})🔚
+
+✳=[:header
+[:h1 (:title metadata)]
+[:h4 [:time {:datetime "2021-08-07 15:28"} "2021-08-07"]]]🔚
+
+✳=[:figure [:blockquote "The work of art may be regarded as a machine programmed by the artist to produce a deferred output. Its objective is survival— by survival I mean not continued acclamation but a continued ability to stand intact as the organized system that the artist originally intended."]
+[:figcaption "Jonathan Benthall, on the work of cybernetic sculptor Wen-Ying Tsai"]]🔚
+
+✳=[:h2 "Goal 1: Reduce superfluous computation"]🔚
+
+The simplest way to achieve this is to store a file hash and avoid re-rendering unchanged files.
+
+A more sophisticated way of doing this, that allows for more granularity in what gets persisted and recomputed, would be to "memoize" certain expressions, storing their input arguments and outputs in the database so they can be re-used.
+
+
+✳=[:h2 "Goal 2: Be fully reconstructible"]🔚
+
+The second goal, in tension with the first, is that the database should not be the "source of truth" for the static site. The history of pages can be rebuilt from Git, should the database file ever get corrupted.
+
+✳=[:h4 "What about things that don't need to be saved as individual files, like small SVG glyphs?"]🔚
+
+Git can still be the source of truth for those, I believe, if ✳=[:a {:href "https://git-scm.com/book/en/v2/Git-Internals-Git-Objects"} [:code "git hash-object"]]🔚 is used correctly.
+
+
+✳=[:h2 "Goal 3: Grant the author leverage"]🔚
+
+✳=[:em "See: " [:a {:href "/not-a-tree.html"} "Structur and Alpha"] ", the writing tools employed by John McPhee for his books, implemented as extensions for Kedit"]🔚
+
+If a database is to have broader use beyond just speeding up the page generation process, it needs to become part of the writing experience.
+
+It should permit queries like "show me every quotation appearing in one of my writings, organized by the page it appears on." Most static website generators are unambitious in this regard, embracing a 1:1 model of "input file" → "output page" that makes seeing ✳=[:em "across"]🔚 writing difficult or impossible beyond your basic browser control+F.
+
+The database, in short, should support the creation and maintenance of the "organized system" that digital writing and generative art is so often ✳=[:em "not"]🔚 a part of.
+
+
+✳=[:h2 "Concept: Reconstructing history"]🔚
+
+Where goals 2 and 3 intersect is where things get really tricky. If the database becomes corrupted, how can it be reconstructed without repeatedly re-evalutating every revision of every file? The queries depend upon some state of the world that may not exist anymore, and is potentially expensive to recompute.
+
+For one thing, that may not actually be a problem if the pages can be re-evaluated asynchronously. The object hash provided by git already also gives a deduplication mechanism if used intelligently.
+
+✳=[:pre [:code "(query! all-quotes-query)"]]🔚
+This query would need to capture its revision hash at time of execution for reproducibility. If a query tries to reach a commit not in the DB, that revision can be checked out and re-evaluated.
+
+✳=[:h4 "One way of implementing this: " [:code "konserve-git"]]🔚
+
+The general idea is that git would still handle all the plumbing and Datahike would be a kind of cache or porcelain atop it, giving users Clojure and fabricate-specific query capabilities. Might be unfeasible for performance reasons, as content-addressed files accessed through git may not be fast enough for real queries (counterexample: sqlite). Evaluated pages/forms could be stored directly in git using write-object, providing the caching mechanism for results.
+
+✳=[:aside "prior art: " [:a {:href "https://github.com/Datomic/codeq"}[:code "codeq"]]]🔚
