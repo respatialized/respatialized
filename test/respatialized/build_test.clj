@@ -2,6 +2,7 @@
   (:require [respatialized.build :refer :all]
             [respatialized.render :as render]
             [site.fabricate.prototype.write :as write]
+            [site.fabricate.prototype.read :as read]
             [site.fabricate.prototype.fsm :as fsm]
             [malli.core :as m]
             [clojure.java.io :as io]
@@ -61,6 +62,11 @@
 
 (def allowed-failures
   {"./content/holotype-blueprint.html.fab" 1})
+
+(t/deftest compatibility
+  (let [nat-f (io/file "content/not-a-tree.html.fab")]
+    (t/is (= "content/not-a-tree.html.fab"
+             (read/->dir-local-path nat-f)))))
 
 (t/deftest conformance
   (let [pages (get-template-files "./content" ".fab")]
