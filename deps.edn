@@ -8,14 +8,16 @@
 
   ;; site generation
   site.fabricate/fabricate {:git/url "https://github.com/fabricate-site/fabricate.git"
-                            :sha "695743805b7cbbf81db82d5a400fdfa1455c125f"}
+                            :sha "f49de6eb39b9ef847909b9657c791b5044b611e0"}
   hiccup/hiccup {:mvn/version "2.0.0-alpha2" :exclusions [org.clojure/clojure]}
+  hickory/hickory {:mvn/version "0.7.1"}
   garden/garden {:mvn/version "1.3.9"}
 
   ;; data munging
   metosin/malli {:mvn/version "0.5.1"}
   com.gfredericks/test.chuck {:mvn/version "0.2.10"}
   org.flatland/ordered {:mvn/version "1.5.9"}
+  babashka/babashka.curl {:mvn/version "0.0.3"}
 
   ;; site content
   clojure2d/clojure2d {:mvn/version "1.4.3"}
