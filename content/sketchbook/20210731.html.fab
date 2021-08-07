@@ -8,9 +8,9 @@
 :output-file "./public/sketchbook/20210731.html"
 :page-style (garden.core/css (garden.stylesheet/at-import "https://respatialized.github.io/css/main.css"))}) 🔚
 
-✳=[:h2 "Sketchbook|" (:title metadata)]🔚
+✳=[:h2 "Sketchbook | " (:title metadata)]🔚
 
-This sketchbook contains examples of inlined SVG, both as Hiccup literals and as computationally generated.
+This sketchbook contains examples of inlined SVG, both as Hiccup literals and as computationally generated forms.
 
 ✳=[:h4 "Example 1: " [:a {:href "https://developer.mozilla.org/en-US/docs/Web/SVG/Element/feGaussianBlur"} "MDN Gaussian Blur"] ]🔚
 
@@ -28,9 +28,8 @@ This sketchbook contains examples of inlined SVG, both as Hiccup literals and as
 
 ✳=[:h4 "Example 2: Gaussian blur, intensity modulated by billow noise" ]🔚
 
-
 ✳(defn ->circle [{:keys [x y radius filter-id]}]
-  [:circle {:cx x :cy y :r radius :filter (str "url(#" filter-id ")")}])🔚
+[:circle {:cx x :cy y :r radius :filter (str "url(#" filter-id ")")}])🔚
 
 ✳(defn ->rect [{:keys [x y w h filter-id]}]
   [:circle {:x x :y y :width w :height h :filter (str "url(#" filter-id ")")}])🔚
@@ -47,9 +46,9 @@ This sketchbook contains examples of inlined SVG, both as Hiccup literals and as
               (map (fn [{:keys [x y]}]
                      (let [noise-val
                            (-> (noise-fn x y)
-                               (* 100)
+                               (* 20)
                                (Math/round)
-                               (/ 100)
+                               (/ 20)
                                (* 6)
                                double)]
                        [(str "x-" x "y-" y)

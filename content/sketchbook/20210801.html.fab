@@ -1,0 +1,26 @@
+✳(ns respatialized.sketches.20210801
+ (:require [respatialized.render :refer :all]
+           [site.fabricate.prototype.page :refer :all]
+           [respatialized.holotype :as holotype]
+           [garden.core :refer [css]]
+           [garden.stylesheet :refer [at-import]]
+           [fastmath.random :as r]))🔚
+
+✳(def page-style
+  (list
+   [:.big {:font-size "8rem"
+:line-height "9.5rem"
+:color "#65182D"
+:font-weight 900
+#_#_:font-family "monospace"}]
+   ))🔚
+
+
+✳ (def metadata {:title "20210801"
+               :page-style (css
+                            (at-import "https://respatialized.github.io/css/main.css")
+                            page-style)}) 🔚
+
+✳= [:div {:class "big"} "RE▀▀▀▀" [:br] "▅SPAT     ▉" [:br] "▀IAL   ▐▐" [:br] "I▗▖Z   ▮▮▮" [:br] "▇  E  ▇  D  ▇"] 🔚
+
+It's easy to see why flexbox was invented after messing around with Unicode block characters to create the above graphic.
