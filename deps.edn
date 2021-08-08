@@ -2,7 +2,7 @@
  :deps
  {
   ;; core
-  org.clojure/clojure {:mvn/version "1.11.0-alpha1"}
+  org.clojure/clojure {:mvn/version "1.10.3"}
   org.clojure/test.check {:mvn/version "1.1.0"}
   org.clojure/math.combinatorics {:mvn/version "0.1.6"}
 
@@ -22,6 +22,7 @@
   ;; site content
   clojure2d/clojure2d {:mvn/version "1.4.3"}
   thi.ng/geom {:mvn/version "1.0.0-RC4"}
+  org.apache.commons/commons-math3 {:mvn/version "3.6.1"}
   generateme/fastmath {:mvn/version "2.1.5"}
   cnuernber/dtype-next {:mvn/version "7.04"}
   techascent/tech.ml.dataset {:mvn/version "5.13"}
@@ -37,9 +38,17 @@
   ;; site building functions
   }
  :jvm-opts ["--illegal-access=deny" "-Xms4G" "-Xmx8G"]
- :aliases {:test {:extra-paths ["test"]
-                  :extra-deps  {lambdaisland/kaocha {:mvn/version "1.0.732"}}
-                  :main-opts   ["-m" "kaocha.runner"]}
-           :serve {:extra-deps {nasus/nasus {:mvn/version "0.1.7"}}
-                   :main-opts ["-m" "http.server" "--dir" "public"]}}
+ :aliases
+
+ {
+  :test {:extra-paths ["test"]
+         :extra-deps {org.clojure/test.check {:mvn/version "1.1.0"}}}
+  :runner
+  {:extra-deps {com.cognitect/test-runner
+                {:git/url "https://github.com/cognitect-labs/test-runner.git"
+                 :sha "334f2e2a5491747dff52f9ca8cbb4a53f54d344d"}}
+   :main-opts ["-m" "cognitect.test-runner"
+               "-d" "test"]}
+  :serve {:extra-deps {nasus/nasus {:mvn/version "0.1.7"}}
+          :main-opts ["-m" "http.server" "--dir" "public"]}}
  }

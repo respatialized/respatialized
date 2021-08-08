@@ -1,0 +1,41 @@
+✳(ns respatialized.sketches.extruder
+ (:require [respatialized.render :refer :all]
+           [site.fabricate.prototype.page :refer :all]
+[respatialized.holotype :as holotype]
+[malli.core :as m]
+           [fastmath.random :as r]))🔚
+
+✳(def page-style
+  (list
+   (garden.stylesheet/at-import "https://respatialized.github.io/css/main.css")
+   (garden.stylesheet/at-import "https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap")
+[:article {:font-family "Atkinson Hyperlegible"}]
+[:article [:h1 {:font-family "IBM Plex Sans"}]]
+   ))🔚
+
+✳ (def metadata {:title "extruder"
+:page-style (garden.core/css page-style)}) 🔚
+
+✳= [:header [:h1 (:title metadata)]
+[:h4 "2021/08/08"]]🔚
+
+This post explores the idea of an extruder to create generative designs.
+
+The simplest way to explore this concept in two dimensions is to implement extruded segments as a kind of constrained Brownian motion. The basic constraints:
+✳=[:ul [:li "Segments have a fixed length"]
+       [:li "Segments may not overlap or intersect with other segments"]]🔚
+If a segment "hits" another, it can adjust its heading to continue. If it cannot continue without hitting another segment, then it stops.
+
+Before it is completed, a segment must hold on to three pieces of state:
+✳=[:ul [:li "The positions of other segments"]
+[:li "Its current heading"]
+[:li "Its remaining 'fuel' "]]🔚
+
+✳(def segment [:+ [:schema [:cat :int :int]]])🔚
+
+✳(assert (m/validate segment [[1 2] [1 3]]))🔚
+
+✳(defn extend-segment [segment ])🔚
+
+✳(defn extrude-segment [{:keys []}]
+  (reduce ()))🔚
