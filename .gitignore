@@ -1,3 +1,4 @@
 public/*.html
 public/**/*.html
 public/*.rss
+/.cache/

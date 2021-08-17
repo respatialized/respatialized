@@ -3,137 +3,83 @@
   (:require
    [respatialized.document :as doc]
    [datahike.api :as d]
+   [datahike.migrate :as migrate]
    [clojure.edn :as edn]
    [clojure.string :as str]
-   [malli.core :as m]
-   [clojure.spec.alpha :as spec]
-   ))
+   [malli.core :as m])
+  (:import [java.security MessageDigest]))
 
 ;; the approach that makes the most sense right now:
 ;; schema-on-read at the DB level, with malli schemas
 ;; to destructure and enforce consistency at the boundaries
 ;; of transaction fns
 
-
-
-(def text-file-attributes
-  "Attributes for writing parsed from a plaintext file."
-  [{:db/ident :file
-    :db/doc "the file path of the information's source."
-    :db/valueType :db.type/string
-    :db/cardinality :db/cardinality/one}
-   {:db/ident :prose-elements
-    :db/doc "The prose elements of a given file - refs to other entities."
-    :db/valueType :db.type/ref
-    :db/cardinality :db.cardinality/many}])
-
-(defn same-size? [colls]
-  (apply = (map count colls)))
-(defn col-kvs? [table-map] (spec/valid? (spec/map-of string? vector?)
-                                        (dissoc table-map ::table-meta)))
-
-(spec/def ::same-size same-size?)
-(spec/def ::eq-columns #(same-size? (filter sequential? (vals %))))
-(spec/def ::col-kvs col-kvs?)
-
-(spec/def ::table-whole-meta map?)
-(spec/def ::table-body-meta map?)
-(spec/def ::table-header-meta map?)
-
-(spec/def ::table-meta
-  (spec/keys :req [::table-whole-meta ::table-body-meta ::table-header-meta]))
-
-(spec/def ::tidy-table
-  (spec/and
-   (spec/keys :opt [::table-meta])
-   ::col-kvs
-   ::eq-columns))
-
-;; this spec can and should be refined using the sequence syntax
-(spec/def ::hiccup-table (spec/and vector? #(= (first %) :table)))
-
-; so should this, but it's not quite clear how
-(spec/def ::hiccup-quote (spec/and vector? #(= (first %) :blockquote)))
-
-(defn tidy-quote [hiccup-quote]
-  (->>
-   hiccup-quote
-   (tree-seq vector? identity)
-   (filter string?)
-   (map str/trim)
-   (apply vector)))
-
-(spec/fdef tidy-quote
-  :args ::hiccup-quote
-  :ret (spec/coll-of string?))
-
-(defn hiccup-table-header-values [table-header]
-  (->> table-header
-       (drop 2)
-       (map (fn [[_ _ [_ _ e]]] e))))
-
-(defn hiccup-row-values [table-body]
-  (let [rows (drop 2 table-body)
-        col-count (count (drop 2 (first rows)))]
-    (reduce (fn [acc r]
-              (let [rvals (map (fn [[_ _ e]] e) (drop 2 r))]
-                (map-indexed (fn [i v] (conj v (nth rvals i))) acc)))
-            (into [] (take col-count (repeat [])))
-            rows)))
-
-(spec/fdef hiccup-table-header
-  :args ::hiccup-table
-  :ret (spec/coll-of string?))
-
-(defn tidy-hiccup-table
-  [[_ tattrs header body]]
-  (let [hattrs (first (filter map? header))
-        hvals (hiccup-table-header-values header)
-        battrs (first (filter map? body))]
-    (into
-     {::table-meta {::table-whole-meta tattrs
-                    ::table-body-meta battrs
-                    ::table-header-meta hattrs}}
-     (zipmap hvals (hiccup-row-values body)))))
-
-(spec/fdef tidy-hiccup-table
-  :args ::hiccup-table
-  :ret ::tidy-table)
+(def config {:store {:backend :file
+                     :path (str (System/getProperty "user.dir") "/.cache/db")}
+             :schema-flexibility :read})
 
 (comment
-  (sp/infer-specs (respatialized.relay.io/load-edn "resources/quotes.edn") ::quote)
+  (d/create-database config)
+
+  (d/delete-database config)
+
   )
 
-(clojure.spec.alpha/def :respatialized.archive/title clojure.core/string?)
-(clojure.spec.alpha/def :respatialized.archive/url clojure.core/string?)
-(clojure.spec.alpha/def :respatialized.archive/medium clojure.core/string?)
-(clojure.spec.alpha/def :respatialized.archive/author clojure.core/string?)
-(clojure.spec.alpha/def
-  :respatialized.archive/source
-  (clojure.spec.alpha/keys
-   :req-un
-   [:respatialized.archive/author]
-   :opt-un
-   [:respatialized.archive/medium
-    :respatialized.archive/title
-    :respatialized.archive/url]))
-(clojure.spec.alpha/def :respatialized.archive/quotation clojure.core/string?)
-(clojure.spec.alpha/def
-  :respatialized.archive/quote
-  (clojure.spec.alpha/keys
-   :req-un
-   [:respatialized.archive/quotation :respatialized.archive/source]))
+(def db (d/connect config))
 
-(defn excerpt
-  "A function to include a quotation in the text. Yields a nested map with nils removed."
-  [text & {:keys [author title url medium]}]
-  {:quotation text
-   :source (into {} (filter (comp some? val)
-                             {:author (if author author "Unknown")
-                              :title title
-                              :url url
-                              :medium medium}))})
+(defn git-sha []
+  (clojure.string/trim-newline
+   (:out (clojure.java.shell/sh "git" "log" "--format=%H" "-n" "1"))))
 
-(spec/fdef excerpt
-  :args {:text string?}
-  :ret ::quote)
+(defn md5 [^String s]
+  (let [algorithm (MessageDigest/getInstance "MD5")
+        raw (.digest algorithm (.getBytes s))]
+    (format "%032x" (BigInteger. 1 raw))))
+
+(defn file-hash
+  "Combines the file with a git SHA to provide a weak cache reset mechanism"
+  ([file-contents sha]
+   (md5 (str sha file-contents)))
+  ([file-contents] (file-hash file-contents (git-sha))))
+
+(comment
+  (def example-page (get @site.fabricate.prototype.write/pages
+                         "content/design-doc-database.html.fab"))
+
+  (keys example-page)
+
+  (clojure.repl/doc d/connect)
+  (clojure.repl/doc d/transact!))
+
+(defn record-post! [{:keys [evaluated-content
+                            rendered-content
+                            unparsed-content
+                            input-file
+                            title]
+                     :as page-data}
+                    db]
+  (let [current-sha (git-sha)
+        post-hash (file-hash unparsed-content
+                             current-sha)]
+    (d/transact
+     db
+     [{:site.fabricate.prototype.read/unparsed-content unparsed-content
+       :site.fabricate.prototype.read/evaluated-content evaluated-content
+       :site.fabricate.prototype.write/rendered-content rendered-content
+       :respatialized.writing/title title
+       :file/path (.toString input-file)
+       :git/sha current-sha
+       ::file-hash post-hash}])))
+
+(comment
+  (record-post! example-page db)
+
+  (d/q '[:find ?e ?sha
+         :where
+         [?e :file/path "content/design-doc-database.html.fab"]
+         [?e :git/sha ?sha]]
+       @db)
+
+  (migrate/export-db @db "/tmp/eavt-dump")
+
+  )

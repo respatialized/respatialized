@@ -2,7 +2,7 @@
 (:require [respatialized.render :refer :all]
 [site.fabricate.prototype.page :refer :all]))🔚
 
-✳(def metadata {:title "database design notes"})🔚
+✳(def metadata {:title "Database Design Notes"})🔚
 
 ✳=[:header
 [:h1 (:title metadata)]

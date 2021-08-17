@@ -8,9 +8,11 @@
    [site.fabricate.prototype.write :as write]
    [site.fabricate.prototype.page :refer :all]
    [juxt.dirwatch :refer [close-watcher]]
+   [datahike.api :as d]
    [respatialized.css :as css]
    [respatialized.render :as render :refer :all]
    [respatialized.holotype :as holotype]
+   [respatialized.archive :as archive]
    [clojure.string :as str]))
 
 (defn get-template-files [dir suffix]
@@ -63,7 +65,27 @@
   ([& files]
    ))
 
+
+(defn db-rerender
+  "Rerenders the post, but only if the input has changed"
+  [path db]
+  (let [res
+        (d/q
+         '[:find ?e ?h
+           :where
+           [?e :file/path "content/design-doc-database.html.fab"]
+           [?e ::archive/file-hash ?h]]
+         @db)
+        [_ fh] (first res)
+        current-hash (archive/file-hash (slurp path))]
+    (if (= fh current-hash) @db
+        (let [finished (fsm/complete
+                        write/operations
+                        path)]
+          (archive/record-post! finished db)))))
+
 (comment
+  (db-rerender "content/design-doc-database.html.fab" archive/db)
 
   )
 
