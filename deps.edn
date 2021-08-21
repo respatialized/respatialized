@@ -28,9 +28,7 @@
   techascent/tech.ml.dataset {:mvn/version "5.13"}
 
   ;; site indexing and dbs
-  io.replikativ/datahike {:mvn/version "0.3.5"}
-  spec-provider/spec-provider {:mvn/version "0.4.14"}
-  provisdom/spectomic {:mvn/version "0.7.11"}
+  org.clojars.quoll/asami {:mvn/version "2.1.2"}
 
   ;; performance
   criterium/criterium {:mvn/version "0.4.6"}

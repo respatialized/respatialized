@@ -8,7 +8,7 @@
    [site.fabricate.prototype.write :as write]
    [site.fabricate.prototype.page :refer :all]
    [juxt.dirwatch :refer [close-watcher]]
-   [datahike.api :as d]
+   [asami.core :as d]
    [respatialized.css :as css]
    [respatialized.render :as render :refer :all]
    [respatialized.holotype :as holotype]
@@ -71,18 +71,19 @@
   [path db]
   (let [res
         (d/q
-         '[:find ?e ?h
+         '[:find ?post-id ?hash
+           :in $ ?path
            :where
-           [?e :file/path "content/design-doc-database.html.fab"]
-           [?e ::archive/file-hash ?h]]
-         @db)
+           [?post-id :file/path ?path]
+           [?post-id ::archive/file-hash ?hash]]
+         (d/db db) path)
         [_ fh] (first res)
         current-hash (archive/file-hash (slurp path))]
-    (if (= fh current-hash) @db
+    (if (= fh current-hash) db
         (let [finished (fsm/complete
                         write/operations
                         path)]
-          (archive/record-post! finished db)))))
+          @(archive/record-post! finished db)))))
 
 (comment
   (db-rerender "content/design-doc-database.html.fab" archive/db)
