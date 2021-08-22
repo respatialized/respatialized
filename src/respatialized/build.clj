@@ -86,7 +86,9 @@
           @(archive/record-post! finished db)))))
 
 (comment
-  (db-rerender "content/design-doc-database.html.fab" archive/db)
+
+  (do (db-rerender "content/design-doc-database.html.fab" archive/db)
+      (println "rendered"))
 
   )
 
