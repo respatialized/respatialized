@@ -1,11 +1,33 @@
 ✳(ns respatialized.writing.design.database
 (:require [respatialized.render :refer :all]
-[site.fabricate.prototype.page :refer :all]))🔚
+[site.fabricate.prototype.page :refer :all]
+[garden.core :as garden :refer [style css]]
+[garden.stylesheet :refer [at-import]]))🔚
 
-✳(def metadata {:title "Database Design Notes"})🔚
+✳(def page-css
+  (css
+   [:h1 :h2 :h3 :h4 :h5 :h6
+    {:font-family "Anybody"
+     :font-weight 900
+     :color "#F1D1BD"
+     :text-transform "Uppercase"}]
+   [:h1 :h2 {:font-stretch  "ultra-expanded"}]
+   [:h2 {:font-size "1.7rem"
+         :line-height "1.7rem"}]
+   [:blockquote
+    {:font-family "Atkinson Hyperlegible"}]
+   [:figcaption {:font-family "Atkinson Hyperlegible"}]
+   [:article {:font-family "Atkinson Hyperlegible"}]
+   [:a {:color "#F1D1BD"}]
+   [:pre :code {:font-family "Azeret Mono"
+                :color "#F1D1BD"}]
+   [:body {:background-color "#CE3B32" }]))🔚
+
+✳(def metadata {:title "Database Design Notes"
+                 :page-style page-css})🔚
 
 ✳=[:header
-[:h1 (:title metadata)]
+ [:h1  "fabricate: " (:title metadata)]
 [:h4 [:time {:datetime "2021-08-07 15:28"} "2021-08-07"]]]🔚
 
 ✳=[:figure [:blockquote "The work of art may be regarded as a machine programmed by the artist to produce a deferred output. Its objective is survival— by survival I mean not continued acclamation but a continued ability to stand intact as the organized system that the artist originally intended."]
@@ -52,3 +74,19 @@ This query would need to capture its revision hash at time of execution for repr
 The general idea is that git would still handle all the plumbing and Datahike would be a kind of cache or porcelain atop it, giving users Clojure and fabricate-specific query capabilities. Might be unfeasible for performance reasons, as content-addressed files accessed through git may not be fast enough for real queries (counterexample: sqlite). Evaluated pages/forms could be stored directly in git using write-object, providing the caching mechanism for results.
 
 ✳=[:aside "prior art: " [:a {:href "https://github.com/Datomic/codeq"}[:code "codeq"]]]🔚
+
+✳=[:h1 "Implementation Choices"]🔚
+
+
+✳=[:h2 "Database: Asami"]🔚
+
+
+Asami is the database to use right now, for the following reasons:
+
+✳= (ol "Powerful graph model" "First-class support for transitive relations"
+      "Schemaless, but able to enforce a uniqueness constraint for individual entities via :db/ident"  "Open-world assumption about relations" "On-disk storage") 🔚
+
+
+✳=[:h2 "Relational Model"]🔚
+
+For the time being, the following property is assumed of all posts: 1 input file, 1 post, 1 output page. Top-level metadata are encoded as attributes of the page. Sub-page elements are modeled as descendent entities.
