@@ -12,7 +12,6 @@
     (d/create-database test-db-uri)
     (def conn (d/connect test-db-uri))
     (f)
-    #_(d/release)
     (d/delete-database test-db-uri)))
 
 (t/use-fixtures :once db-fixture)
@@ -79,15 +78,26 @@
 ;;     (t/is (= quotation-hiccup
 ;;              (asami->hiccup quotation-asami)))))
 
+(def example-post
+  {:evaluated-content [:html [:head] [:body]]
+   :rendered-content (hiccup.core/html [:html [:head] [:body]])
+   :unparsed-content "✳(def metadata {:title \"Empty Example\"})🔚"
+   :input-file "example-file.html.fab"
+   :title "Empty Example"})
+
 (t/deftest recording
-  (let [post-tx @(d/transact conn {:tx-data [quotation-asami]})
+
+  (let [quot-tx @(d/transact conn {:tx-data [quotation-asami]})
         figs (d/q '[:find  [?tag ?attr-prop]
                     :where [?e :html/tag :figure]
                     [?e :html/tag ?tag]
                     [?e :html.attribute/itemprop ?attr-prop]]
                   (d/db conn))]
 
-    (t/is (any? post-tx)
+    (t/is (any? @(record-post! example-post conn))
+          "Post data should be recorded without errors.")
+
+    (t/is (any? quot-tx)
           "Element data should be recorded without errors.")
 
     (t/is (>= (count figs) 1)

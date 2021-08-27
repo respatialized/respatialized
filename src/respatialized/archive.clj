@@ -75,16 +75,33 @@
    db]
   (let [current-sha (git-sha)
         post-hash (file-hash unparsed-content
-                             current-sha)]
-    (d/transact
-     db
-     {:tx-data
-      [{:site.fabricate.prototype.read/unparsed-content' unparsed-content
-        :respatialized.writing/title' title
-        :file/path' (.toString input-file)
-        :db/ident (.toString input-file)
-        :git/sha' current-sha
-        ::file-hash' post-hash}]})))
+                             current-sha)
+        existing-post
+        (d/q '[:find ?post-id
+              :in $ ?post-id
+              :where
+              [?post-id :file/path ?post-id]]
+             (d/db db) input-file)]
+    (if (empty?
+         existing-post)
+      (d/transact
+       db
+       {:tx-data
+        [{:site.fabricate.prototype.read/unparsed-content unparsed-content
+          :respatialized.writing/title title
+          :file/path (.toString input-file)
+          :db/ident (.toString input-file)
+          :git/sha current-sha
+          ::file-hash post-hash}]})
+      (d/transact
+       db
+       {:tx-data
+        [{:site.fabricate.prototype.read/unparsed-content' unparsed-content
+          :respatialized.writing/title' title
+          :file/path' (.toString input-file)
+          :db/ident (.toString input-file)
+          :git/sha' current-sha
+          ::file-hash' post-hash}]}))))
 
 (comment
 
