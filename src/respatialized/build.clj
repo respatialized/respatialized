@@ -65,10 +65,7 @@
   ([& files]
    ))
 
-
-(defn db-rerender
-  "Rerenders the post, but only if the input has changed"
-  [path db]
+(defn post-hashes [path db]
   (let [res
         (d/q
          '[:find ?post-id ?hash
@@ -79,16 +76,41 @@
          (d/db db) path)
         [_ fh] (first res)
         current-hash (archive/file-hash (slurp path))]
-    (if (= fh current-hash) db
-        (let [finished (fsm/complete
-                        write/operations
-                        path)]
-          @(archive/record-post! finished db)))))
+    {:recorded-hash fh
+     :current-hash current-hash}))
+
+(def fabricate-operations
+  (assoc write/operations
+         write/file-state
+         (fn [{:keys [input-file] :as page-data}]
+           (let [hashes (post-hashes (.toString input-file) archive/db)]
+             println hashes
+             (if (= (:recorded-hash hashes) (:current-hash hashes))
+               (do
+                 (println "Page at" (.toString input-file)
+                          "up to date, skipping")
+                 page-data)
+               (assoc page-data :unparsed-content (slurp input-file)))))
+         write/rendered-state
+         (fn [{:keys [rendered-content output-file] :as page-data}]
+           (do
+             (println "writing page content to" output-file)
+             (spit output-file rendered-content)
+             (println "Recording page data in database")
+             @(archive/record-post! page-data archive/db)
+             page-data))))
 
 (comment
 
-  (do (db-rerender "content/design-doc-database.html.fab" archive/db)
-      (println "rendered"))
+  (keys write/operations)
+
+  (do (fsm/complete fabricate-operations
+                    "content/design-doc-database.html.fab" )
+      (println "done"))
+
+  (do (fsm/complete fabricate-operations
+                    "content/working-definition.html.fab" )
+      (println "done"))
 
   )
 
@@ -100,9 +122,11 @@
   (alter-var-root #'site.fabricate.prototype.page/doc-header
                   (constantly site-page-header))
 
+  (alter-var-root #'site.fabricate.prototype.write/operations
+                  (constantly fabricate-operations))
+
   (def drafts
-    (write/draft)
-    )
+    (write/draft))
 
   (close-watcher drafts)
 

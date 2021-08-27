@@ -35,10 +35,9 @@
 
 ✳=[:h2 "Goal 1: Reduce superfluous computation"]🔚
 
-The simplest way to achieve this is to store a file hash and avoid re-rendering unchanged files.
+The simplest way to achieve this is to store a file hash and avoid re-rendering unchanged files. This method was used to render this post.
 
-A more sophisticated way of doing this, that allows for more granularity in what gets persisted and recomputed, would be to "memoize" certain expressions, storing their input arguments and outputs in the database so they can be re-used.
-
+A more sophisticated way of doing this, that allows for more granularity in what gets persisted and recomputed, would be to "memoize" certain expressions, storing their input arguments and outputs in the database so they can be re-used. There are currently some ✳=[:a {:href "https://github.com/repl-acement/editors"} "efforts"]🔚 in the Clojure community to stitch together many of the same pieces that Fabricate is built from to realize this concept in a powerful and general way.
 
 ✳=[:h2 "Goal 2: Be fully reconstructible"]🔚
 

@@ -10,6 +10,7 @@
    [clojure.string :as str]
    [malli.core :as m]
    [malli.transform :as mt]
+   [clojure.java.shell :as sh]
    [malli.util :as mu])
   (:import [java.security MessageDigest]))
 
@@ -38,7 +39,7 @@
 
 (defn git-sha []
   (clojure.string/trim-newline
-   (:out (clojure.java.shell/sh "git" "log" "--format=%H" "-n" "1"))))
+   (:out (sh/sh "git" "log" "--format=%H" "-n" "1"))))
 
 (defn md5 [^String s]
   (let [algorithm (MessageDigest/getInstance "MD5")

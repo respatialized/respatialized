@@ -2,6 +2,7 @@
   (:require [clojure.test :as t]
             [asami.core :as d]
             [malli.core :as m]
+            [hiccup.core :as hiccup]
             [respatialized.archive :refer :all]))
 
 (def test-db-uri "asami:mem://respatialized-test")
@@ -80,7 +81,7 @@
 
 (def example-post
   {:evaluated-content [:html [:head] [:body]]
-   :rendered-content (hiccup.core/html [:html [:head] [:body]])
+   :rendered-content (hiccup/html [:html [:head] [:body]])
    :unparsed-content "✳(def metadata {:title \"Empty Example\"})🔚"
    :input-file "example-file.html.fab"
    :title "Empty Example"})
