@@ -111,7 +111,6 @@
 
 
 
-
 (comment
   (keys example-page)
 
@@ -119,149 +118,14 @@
 
   (element-parser (nth (:evaluated-content example-page) 6)))
 
-(defn parsed-zipper [parsed-data]
-  (zip/zipper
-   #(or (and (vector? %)
-             (keyword? (first %))) (and (map? %) (:children %)))
-   :contents
-   (fn [n cs] (assoc n :children cs))
-   parsed-data))
 
-(defn element->entity
-  "Converts the given element to a format"
-  [elem])
 
 (comment
-
-  (->
-   [:figure
-    [:blockquote
-     "The work of art may be regarded as a machine programmed by the artist to produce a deferred output. Its objective is survival— by survival I mean not continued acclamation but a continued ability to stand intact as the organized system that the artist originally intended."]
-    [:figcaption
-     {:itemprop "Source"
-      :data-subject "Wen-Ying Tsai"
-      :data-author "Jonathan Benthall"}
-     "Jonathan Benthall, on the work of cybernetic sculptor Wen-Ying Tsai"]]
-   element-parser
-   parsed-zipper
-   zip/next
-   zip/node))
-
-(defn attempt
-    [schema d]
-    (let [parsed (m/parse schema d)]
-      (cond (= :s (first parsed))
-            (fn [s] {:s s})
-            (= :v (first parsed))
-            (fn [v] {:type :v
-                     :contents (rest v)}))))
-
-(comment
-  (def example-transformer
+  ;; placeholder for functions that should eventually
+  ;; exist but don't work yet
+  (defn hiccup->asami []
     (mt/transformer
      {:decoders
       {:html/atomic-element
-       {:compile (fn [schema _] (fn [e] {:html/atomic-element e}))}
-       ::html/em
-       {:compile (fn [schema _]
-                   (fn [e] {:html/tag (first e)
-                            :html/contents (rest e)}))}}}))
-
-  (element-parser "string")
-  (element-parser [:div [:em "string"]])
-
-  (m/decode element "string" example-transformer)
-
-  (m/decode element [:em "string"] example-transformer)
-
-  (def basic-schema
-    [:orn
-     [:s [:string {:decode/fun (fn [s] {:atomic/string s})}]]
-     [:v
-      [:cat
-       {:decode/fun (fn [t & rest] {:tag t
-                                    :contents rest})}
-       [:enum :t]
-       [:* :string]]]])
-
-  (def basic-transformer
-    (mt/transformer
-     {:decoders
-      {:s
-       {:compile
-        (fn [schema _] (fn [s] {:s s}))}
-       :v
-       {:compile
-        (fn [schema _]
-          (fn [v] {:type :v
-                   :contents (rest v)}))}
-       basic-schema
-       {:compile attempt}}}))
-
-  (m/parse basic-schema "string")
-
-  (m/parse basic-schema [:t "string" "string"])
-
-  (m/decode basic-schema [:t "string" "string"]
-            (mt/transformer {:name :fn}))
-
-  (m/decode basic-schema "string"
-            (mt/transformer {:name :fn}))
-
-  (m/decode [:map {:decode/fn #(update % :a inc)}
-             [:a :int]
-             [:b :string]]
-            {:a 2 :b "b"}
-            (mt/transformer {:name :fn}))
-
-
-
-  (defn index-by
-    [f xs]
-    (reduce (fn [acc x] (assoc acc (f x) x)) {} xs))
-
-  (defn join
-    [{:keys [events details]}]
-    (let [details (index-by :id details)]
-      (reduce
-       (fn [acc {:keys [details-id] :as event}]
-         (conj acc (-> event
-                       (dissoc :details-id)
-                       (merge (get details details-id)))))
-       []
-       events)))
-
-  (def source-shape
-    [:map
-     {:decode/fun join}
-     [:events [:sequential
-               [:map
-                [:id int?]
-                [:desc string?]
-                [:details-id int?]]]]
-     [:details [:sequential
-                [:map
-                 [:id int?]
-                 [:content string?]]]]])
-
-  (def data
-    {:events [{:id 1
-               :desc "Blah"
-               :details-id 11}]
-     :details [{:id 11
-                :content "Blargh"
-                :content2 "guh"}]})
-
-  (m/decode
-   source-shape
-   data
-   (mt/transformer {:name :fun}))
-
-  )
-
-(defn hiccup->asami []
-  (mt/transformer
-   {:decoders
-    {:html/atomic-element
-     {:compile (fn [schema _] identity)}}}))
-(defn asami->hiccup [n] nil)
+       {:compile (fn [schema _] identity)}}}))
+  (defn asami->hiccup [n] nil))

@@ -71,13 +71,13 @@
        :html/contents [{:html/text "Red Mars"}]}
       {:html/text ", p. 261"}]}]})
 
-(t/deftest conversion
-  (t/testing "Bidirectional conversion"
-    (t/is (= quotation-asami
-             (hiccup->asami quotation-hiccup)))
+;; (t/deftest conversion
+;;   (t/testing "Bidirectional conversion"
+;;     (t/is (= quotation-asami
+;;              (hiccup->asami quotation-hiccup)))
 
-    (t/is (= quotation-hiccup
-             (asami->hiccup quotation-asami)))))
+;;     (t/is (= quotation-hiccup
+;;              (asami->hiccup quotation-asami)))))
 
 (t/deftest recording
   (let [post-tx @(d/transact conn {:tx-data [quotation-asami]})
