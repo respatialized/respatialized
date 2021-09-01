@@ -28,6 +28,7 @@ Before it is completed, a segment must hold on to three pieces of state:
 ✳(def drawing-segment
   [:map
    [:segment segment]
+   [:headings :map]
    [:heading [:fn fn?]]
    [:fuel :int]])🔚
 
@@ -43,6 +44,8 @@ Alternatively, it could be a function that takes a position and heading and retu
 ✳(assert (m/validate drawing-segment
                     {:segment [[1 2] [1 3]]
                      :heading (fn [[x y]] [(inc x) y])
+                     :headings {(fn [[x y]] [(inc x) y])
+                                (fn [[x y]] [x (inc y)])}
                      :fuel 20}))🔚
 
 
@@ -74,7 +77,8 @@ Alternatively, it could be a function that takes a position and heading and retu
             (apply concat (conj other-segments (:segment current-segment)))
             ;; lazily compute possible next directions + points
             possible-next-headings
-            (iterate-map (:heading current-segment) clockwise-cardinal-headings)
+            (iterate-map (:heading current-segment)
+                         (:headings current-segment))
             next (->> possible-next-headings
                       (map (fn [h] [h (h current-position)]))
                       (filter (fn [[h next-pos]] (not-any? #(= % next-pos)
@@ -100,7 +104,7 @@ Alternatively, it could be a function that takes a position and heading and retu
   [:polyline
    (merge
     {:points (clojure.string/join " " (map #(clojure.string/join "," %) segment))}
-    svg-attrs)])🔚
+  svg-attrs)])🔚
 
 
 ✳= [:header [:h1 "Extrusion 1"]
@@ -108,11 +112,27 @@ Alternatively, it could be a function that takes a position and heading and retu
 
 This is a visual test to ensure the reducing functions that yield extruded segments work properly. I haven't yet developed a function to define the interaction between two segments in the way that matches my initial sketches, but reducing over a sequential collection of points is a powerful and general way of building up the segments, and defining the heading as a function is a clever way of anticipating and accomodating future changes.
 
+✳
+(let [s1 {:segment [[20 49]]
+          :heading south
+          :headings clockwise-cardinal-headings
+          :fuel 20}
+      others [[[20 50] [20 80]]]]
+  (extend-segment s1 others)
+  (assert (= {:segment [[20 49] [19 49]]
+                :heading west
+                :headings clockwise-cardinal-headings
+                :fuel 19}
+             (extend-segment s1 others))))
+
+🔚
+
 ✳=
 (let [starting-segments
       (map (fn [sx sy sh f]
              {:segment [[sx sy]]
               :heading sh
+              :headings clockwise-cardinal-headings
               :fuel f})
            (range 20 480 6)
            (range 20 480 6)
