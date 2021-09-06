@@ -48,6 +48,33 @@ Alternatively, it could be a function that takes a position and heading and retu
                                 (fn [[x y]] [x (inc y)])}
                      :fuel 20}))🔚
 
+Using the latter concept, the idea of fuel can be generalized: if a segment has to change direction or collides with another segment, then more fuel can be consumed. This lets a segment pick the least expensive option. One assumption guiding this implementation: it's the job of a heading function to produce a new location, not to detect collisions or update fuel. That can only be done once you have a position to check!
+
+
+✳
+(defn least-expensive-next
+  [{:keys [segment heading fuel headings]
+    :as current-segment} other-segments]
+  (let [all-points
+        (apply concat (conj other-segments (:segment current-segment)))
+        nexts
+        (->> (iterate-map heading headings)
+             (map (fn [h]
+                    (let [np (h (peek segment))
+                          nf (cond
+                               ;; collision
+                               (some #(= % np) all-points) 0
+                               ;; straight path
+                               (= heading h) (dec fuel)
+                               ;; turn
+                               :else (- fuel 2))]
+                      (-> current-segment
+                          (update :segment conj np)
+                          (assoc :heading h)
+                          (assoc :fuel nf))))))]
+    (apply max-key :fuel nexts)))
+
+🔚
 
 ✳ (defn east [[x y]] [(inc x) y])  🔚
 ✳ (defn west [[x y]] [(dec x) y])  🔚
@@ -66,33 +93,16 @@ Alternatively, it could be a function that takes a position and heading and retu
     (list nil))) 🔚
 
 
-✳(defn extend-segment
-   {:malli/schema
-    [:=> [:cat drawing-segment [:* [:schema segment]]]
-     [:or segment drawing-segment]]}
-   [current-segment other-segments]
+✳
+(defn extend-segment
+  {:malli/schema
+   [:=> [:cat drawing-segment [:* [:schema segment]]]
+    [:or segment drawing-segment]]}
+  [current-segment other-segments]
   (if (<= (:fuel current-segment) 0) (:segment current-segment)
-      (let [current-position (peek (:segment current-segment))
-            all-points
-            (apply concat (conj other-segments (:segment current-segment)))
-            ;; lazily compute possible next directions + points
-            possible-next-headings
-            (iterate-map (:heading current-segment)
-                         (:headings current-segment))
-            next (->> possible-next-headings
-                      (map (fn [h] [h (h current-position)]))
-                      (filter (fn [[h next-pos]] (not-any? #(= % next-pos)
-                                                           all-points)))
-                      ;; take the first one that works
-                      first)]
-        (if next (-> current-segment
-                     (update :fuel dec)
-                     (update :segment conj (last next))
-                     (assoc :heading (first next)))
-            (:segment current-segment))
+      (least-expensive-next current-segment other-segments)))
 
-
-        )))🔚
+🔚
 
 ✳(defn extrude-segment [current-segment other-segments]
   (loop [s current-segment]
@@ -119,10 +129,10 @@ This is a visual test to ensure the reducing functions that yield extruded segme
           :fuel 20}
       others [[[20 50] [20 80]]]]
   (extend-segment s1 others)
-  (assert (= {:segment [[20 49] [19 49]]
-                :heading west
+  (assert (= {:segment [[20 49] [21 49]]
+                :heading east
                 :headings clockwise-cardinal-headings
-                :fuel 19}
+                :fuel 18}
              (extend-segment s1 others))))
 
 🔚
