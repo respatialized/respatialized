@@ -147,3 +147,26 @@
       {:html/atomic-element
        {:compile (fn [schema _] identity)}}}))
   (defn asami->hiccup [n] nil))
+
+
+(comment
+  (def atomic-parser (m/parser html/atomic-element))
+
+  (def atomic-with-decoder
+    (m/schema
+     (mu/update-properties
+      html/atomic-element
+      assoc :decode/asami
+      {:enter (fn [value]
+                     (let [[t v] (atomic-parser value)]
+                       {:html/atomic-element t
+                        :html/text v}))}
+      :description "A HTML atomic element with an Asami decoder")))
+
+  (m/decode atomic-with-decoder 123 (mt/transformer {:name :asami}))
+
+  (m/parse html/atomic-element 123)
+
+
+
+  )
