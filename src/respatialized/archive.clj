@@ -158,12 +158,60 @@
       html/atomic-element
       assoc :decode/asami
       {:enter (fn [value]
-                     (let [[t v] (atomic-parser value)]
-                       {:html/atomic-element t
-                        :html/text v}))}
+                (let [[t v] (atomic-parser value)]
+                  {:html/atomic-element t
+                   :html/text v}))}
       :description "A HTML atomic element with an Asami decoder")))
 
-  (m/decode atomic-with-decoder 123 (mt/transformer {:name :asami}))
+  ;; I'm thinking about recursion
+  (html/parse-element-flat
+   ;; why?
+   [:body
+    [:article
+     ;; see line 166 for why
+     [:h1 "The article"]
+     [:section
+      [:h2 "The section"]
+      [:p "The first paragraph"]
+      [:p "The second paragraph, " [:em "with feeling"]]
+      ]]])
+
+  (def example-html-decoder
+    (mu/update-properties
+     html/element
+     assoc :decode/parse
+     {:enter html/parse-element-flat
+      ;; it's easier to pattern match on what's already parsed;
+      ;; the structure is either (literally) atomic or parseable
+      ;; into a map with tag, attr, contents
+      ;; this makes using functions like tree-seq easier.
+      ;;
+      ;; it seems redundant to walk something that's already been parsed,
+      ;; but this is purely a proof of concept. a clearer way to decode
+      ;; the values in one pass will only come in time
+      :exit (fn [elem-type {:keys [tag attr contents]}])
+      }
+     :description "A HTML element with a fabricate HTML decoder"))
+
+  (m/decode
+   example-html-decoder
+   123 (mt/transformer {:name :parse}))
+
+  (m/decode
+   example-html-decoder
+   [:em "emphasized text"] (mt/transformer {:name :parse}))
+
+  (m/decode
+   (m/schema [int? {:math/multiplier 10
+                    :decode/math
+                    {:compile '(fn [schema _]
+                                 (let [multiplier (:math/multiplier (m/properties schema))]
+                                   (fn [x] (* x multiplier))))}}])
+   12
+   (mt/transformer {:name :math}))
+
+
+  (m/decode atomic-with-decoder-2 123 (mt/transformer {:name :asami}))
 
   (m/parse html/atomic-element 123)
 
