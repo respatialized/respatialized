@@ -148,6 +148,54 @@
        {:compile (fn [schema _] identity)}}}))
   (defn asami->hiccup [n] nil))
 
+(defn html-attr->kw [attr-name]
+  (cond
+    (keyword? attr-name) (keyword "html.attribute" (name attr-name))
+    (.startsWith attr-name "data-")
+    (keyword "html.attribute.data"
+             (second (clojure.string/split attr-name #"-")))
+    :else (keyword "html.attribute"
+                   attr-name)))
+
+(defn attrs->ns-map [attrs]
+  (into
+   {}
+   (map
+    (fn [[a v]]
+      [(html-attr->kw a) v])
+    attrs)))
+
+(defn parsed-element->asami
+  [e]
+  (cond (vector? e)
+        (let [[elem-type {:keys [tag attrs contents]}] e]
+          (merge (attrs->ns-map attrs)
+                 {:html/tag tag
+                  :html/contents contents}))
+        (map? e)
+        (let [{:keys [tag attrs contents]} e]
+          (merge (attrs->ns-map attrs)
+                 {:html/tag tag
+                  :html/contents contents}))))
+
+(defn parsed->asami [[elem-type elem]]
+  (cond (= :atomic-element elem-type)
+        (let [[t e] elem]
+          {(keyword "html" (name t)) e})
+        (= ::html/element elem-type)
+        (let [[content-category [sub-type sub-elem]] elem]
+          (if (#{:flow :phrasing :node} content-category)
+            (parsed-element->asami sub-elem)
+            (parsed-element->asami elem)))
+
+        ;; ( elem-type)
+        ;; (let [[_ sub-elem] elem] (parsed->asami sub-elem))
+        ))
+
+(html/parse-element-flat [:p "paragraph with" [:em "emphasized text"]])
+(html/parse-element-flat [:p "paragraph "])
+(html/parse-element-flat "abc")
+
 
 (comment
   (def atomic-parser (m/parser html/atomic-element))
@@ -179,8 +227,8 @@
   (def example-html-decoder
     (mu/update-properties
      html/element
-     assoc :decode/parse
-     {:enter html/parse-element-flat
+     assoc :decode/asami
+     {:enter (comp parsed->asami html/parse-element-flat)
       ;; it's easier to pattern match on what's already parsed;
       ;; the structure is either (literally) atomic or parseable
       ;; into a map with tag, attr, contents
@@ -189,9 +237,9 @@
       ;; it seems redundant to walk something that's already been parsed,
       ;; but this is purely a proof of concept. a clearer way to decode
       ;; the values in one pass will only come in time
-      :exit (fn [elem-type {:keys [tag attr contents]}])
       }
-     :description "A HTML element with a fabricate HTML decoder"))
+     ;; :decode/parse {:enter html/parse-element-flat}
+     :description "A HTML element with a HTML decoder"))
 
   (m/decode
    example-html-decoder

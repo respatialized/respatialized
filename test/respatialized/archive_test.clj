@@ -3,7 +3,9 @@
             [asami.core :as d]
             [malli.core :as m]
             [hiccup.core :as hiccup]
-            [respatialized.archive :refer :all]))
+            [site.fabricate.prototype.html :as html]
+            [respatialized.archive :refer :all]
+            [malli.transform :as mt]))
 
 (def test-db-uri "asami:mem://respatialized-test")
 (declare conn)
@@ -71,13 +73,45 @@
        :html/contents [{:html/text "Red Mars"}]}
       {:html/text ", p. 261"}]}]})
 
-;; (t/deftest conversion
-;;   (t/testing "Bidirectional conversion"
-;;     (t/is (= quotation-asami
-;;              (hiccup->asami quotation-hiccup)))
 
-;;     (t/is (= quotation-hiccup
-;;              (asami->hiccup quotation-asami)))))
+(comment
+  (m/decode
+   example-html-decoder
+   quotation-hiccup
+   (mt/transformer {:name :asami})
+   )
+
+  )
+
+(t/deftest conversion
+  (t/testing "Bidirectional conversion"
+
+    (t/is (any? (parsed-element->asami
+                 {:tag :p,
+                  :attrs nil,
+                  :contents
+                  [[:atomic-element [:text "paragraph with"]]
+                   [:node
+                    [:em
+                     {:tag :em,
+                      :attrs nil,
+                      :contents [[:atomic-element [:text "emphasized text"]]]}]]]})))
+
+    (t/is (= :p
+             (-> [:p "paragraph with" [:em "emphasized text"]]
+                 html/parse-element-flat
+                 parsed->asami
+                 :html/tag)))
+
+    (t/is (= quotation-asami
+             (m/decode
+              example-html-decoder
+              quotation-hiccup
+              (mt/transformer {:name :asami})
+              )))
+
+    (t/is (= quotation-hiccup
+             #_(asami->hiccup quotation-asami)))))
 
 (def example-post
   {:evaluated-content [:html [:head] [:body]]
