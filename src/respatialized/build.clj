@@ -24,6 +24,12 @@
                      (.endsWith (.toString %) suffix)))
        (map #(.toString %))))
 
+(def server-opts
+  {:cors-allow-headers nil,
+   :dir (str (System/getProperty "user.dir") "/public"),
+   :port 8000,
+   :no-cache true})
+
 (comment
   ;; store the post data and the html and only update it if
   ;; it renders without errors
@@ -118,6 +124,9 @@
 
   (alter-var-root #'site.fabricate.prototype.write/default-site-settings
                   (constantly site-settings))
+
+  (alter-var-root #'site.fabricate.prototype.write/default-server-opts
+                  (constantly server-opts))
 
   (alter-var-root #'site.fabricate.prototype.page/doc-header
                   (constantly site-page-header))
