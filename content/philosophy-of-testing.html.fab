@@ -1,0 +1,64 @@
+✳ (ns respatialized.writing.phil-of-testing
+(:require [site.fabricate.prototype.page :refer :all]
+ [respatialized.render :refer :all])) 🔚
+
+✳ (def metadata {:title "Philosophy of testing"}) 🔚
+
+✳= (header {:level :h1} (:title metadata)) 🔚
+
+✳= (header {:level :h4} "Representing and Intervening in Software Systems") 🔚
+
+Ian Hacking's book Representing and Intervening is a stellar text. I felt the need to revisit it after several years out of the field of philosophy of science and in the field of programming and data science when I read the following passage near the end:
+
+✳= [:figure
+    [:blockquote "We spend a lot of time building prototypes that don't work. We get rid of innumerable bugs. Often we have to give up and try another approach. Debugging is not a matter of theoretically explaining or predicting what is going wrong. It is partly a matter of getting rid of 'noise' in the apparatus. Although it has a precise meaning, 'noise' often means all the events that are not understood by any theory. The instrument must be able to isolate, physically, the properties of the entities that we wish to use, and damp down all the other effects that might get in our way."] [:figcaption "Representing and Intervening, pg. 265"]] 🔚
+
+Hacking is setting up his description of PEGGY II, a polarizing electron gun, but the story he relates about how the researchers got it working furnishes some reflections on debugging that resonate a lot with me after several years of professional work as a programmer and amateur interest in programming langugages research.
+
+
+
+✳= (header {:level :h2} "Representation as concrete artifact") 🔚
+
+Ian Hacking has a nice defintion of representation that attempts to bring it back down to earth. He contrasts it with the use of the term that takes it to mean a mental image or unuttered private concept.
+
+✳= [:figure
+    [:blockquote "When I speak of representations I first of all mean physical objects: figurines, statues, pictures, engravings, objects that are themselves to be examined, regarded. ... Representations are external and public, be they the simplest sketch on a wall, or, when I stretch the word 'representation', the most sophisticated theory about electromagnetic, strong, weak, or gravitational forces."] [:figcaption "Ian Hacking, Representing and Intervening, pg. 133"]] 🔚
+
+In the context of software, what might such representations be? Some ideas:
+✳=(ul "A test suite with reports produced by an automated build process"
+"A system of type definitions"
+"A series of runtime properties that a monitoring system observes"
+"Service-level objectives, the metrics by which success and failure of those objectives are met, and the instrumentation installed to observe those metrics.")🔚
+
+Our representations of software systems are tools: they do not aim for maximum fidelity in transmitting the exact state of the computer they run on, but rather for identifying the parts of the system in which we can intervene when something goes wrong.
+
+The context of the problem determines the conventions of the representation we might need to use:
+✳[:q "... styles do not precede representation. They grow with representation as materials are worked..." "(pg. 137)"]🔚. For a SLO, tracking every event that contributed to a given failure might be completely unfeasible due to the volume. For a security breach, you had better hope you can do exactly that.
+
+✳= (header {:level :h2} "Atomism in test and in language" ) 🔚
+
+Hacking offers a clue as to why unit tests fail once systems begin to "grow up" and have mutually interacting parts.
+✳[:figure [:blockquote
+"Ordinary simple sentences are not representations of anything. ...In physics and much other interesting conversation we do make representations - pictures in words, if you like. In physics we do this by elaborate systems of modeling, structuring, theorizing, calculating, and approximating. These are real, articulated representations of how the world is. The representations of physics are entirely different from the simple, non-representational assertions about the location of my typewriter. There is a truth of the matter about the typewriter. In physics there is no final truth of the matter, only a barrage of more or less instructive representations."] [:figcaption "(pg. 144-145)"]]🔚
+
+The exact qualities that make unit tests easy to write and run - they can be tested in isolation and have very simple success or failure conditions (or you might say there's an easily identifiable truth of the matter as to whether they work) make them incapable of representing the more complex or higher-order behavior present in our software systems. They freeze certain simple assertions in place, constraining what we can't and can't say later (unless we rewrite them).
+
+
+✳= (header {:level :h2} "No determinate relationship between representation and intervention") 🔚
+✳= (header {:level :h4} (em "But you still need both")) 🔚
+
+Hacking repeatedly emphasizes throughout the text that the picture of science embraced by philosophers of science like Karl Popper (and some scientists like Justus von Liebig) of theory -> experiment -> falsification is flatly wrong when we consider cases in the history of science where an observation precedes any theory about what it means, like the discovery of the cosmic background radiation by Arno Penzias and R.W. Wilson or the identification of the meson.
+
+✳= [:figure [:blockquote
+"Some profound experimental work is generated entirely by theory. Some great theories spring from pre-theoretical experiment. Some theories languish for lack of mesh with the real world, while some experimental phenomena sit idle for lack of theory. There are also happy families, in which theory and experiment coming from different directions meet."] [:figcaption "(pg. 159)"]] 🔚
+
+Hacking's pluralistic account of science accords well with my own understanding of programming as a practice, where practicioners who have identified a method that works well for themselves (type systems, discrete event simulation) will go on to make grand pronouncements about how it represents the superior or True practice of programming while countless other programmers get on with their work just fine without that One Weird Trick. Practitioner knowledge does not always readily translate itself into representations that make it to the top of Hacker News.
+
+Sometimes type systems allow you to pierce through years' worth of accumulated intermediate representations and abstractions to grasp the true essence of an algorithm. Other times they lead you down a monadic cul de sac. Sometimes dynamic typing lets you build flexible, extensible systems that ordinary users can build on top of. Other times dynamically-typed systems rely so heavily on runtime redefinition that they can only be reconstructed through folk knowledge of which patches and changes to apply and when. Maybe (following Stephen Kell) system safety doesn't belong at the language level.
+
+It's fair to stretch the term "theory" a bit to cover these types of contrasting approaches to the design and use of software systems. The shortcomings of theory-first approaches to philosophy of science that Hacking discusses explain why these debates can and will continue forever - because they fail to capture many dimensions of what software systems look like when we're running them and changing them over time. You can't deduce how a system will behave from the "first principles" of facts about the language it's written in. You need to "twist the lion's tail."
+
+✳= (header {:level :h2} "Bugs and the experiments we run to figure out how to squash them") 🔚
+
+✳= [:figure
+    [:blockquote "Short descriptions make it all sound too easy, so let us pause to reflect on debugging. Many of the bugs are never understood. They are eliminated by trial and error. Let us illustrate three different kinds:" [:ol [:li "the essential technical limitations that in the end have to be factored into the analysis of error;"] [:li "simpler mechanical defects you never think of until they are forced on you;"] [:li "hunches about what might go wrong."]]] [:figcaption "Representing and Intervening, pg. 269"]] 🔚
