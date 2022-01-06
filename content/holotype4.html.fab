@@ -240,7 +240,7 @@ Instead of writing to the image tensor on each iteration of the attractor, a mor
    (fn [[^DirectTensor xs ^DirectTensor ys] ^DirectTensor t]
      (inc-tensor! [xs ys] t normalizer))))  🔚
 
-✳ (def unbounded-tensor (tensor/new-tensor [1100 650] {:datatype :int64})) 🔚
+✳ (def unbounded-tensor (tensor/new-tensor [1100 650] :datatype :int64)) 🔚
 
 ✳ (def total-res
   (iter-img unbounded-tensor
