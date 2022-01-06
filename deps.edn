@@ -8,7 +8,7 @@
 
   ;; site generation
   site.fabricate/fabricate {:git/url "https://github.com/fabricate-site/fabricate/"
-                            :sha "5e002b550158f2f0810cf6f7d576ee914a1e968b"}
+                            :sha "c19e2e334a484ddca7345a59c7e0bb23ea7d4b2b"}
   hiccup/hiccup {:mvn/version "2.0.0-alpha2" :exclusions [org.clojure/clojure]}
   hickory/hickory {:mvn/version "0.7.1"}
   garden/garden {:mvn/version "1.3.9"}

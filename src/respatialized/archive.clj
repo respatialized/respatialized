@@ -67,11 +67,11 @@
 
 (defn record-post!
   "Records the post in the database. Associates data with known entities for that path"
-  [{:keys [evaluated-content
-           rendered-content
-           unparsed-content
-           input-file
-           title]
+  [{:keys [site.fabricate.page/evaluated-content
+           site.fabricate.page/rendered-content
+           site.fabricate.page/unparsed-content
+           site.fabricate.file/input-file
+           site.fabricate.page/title]
     :as page-data}
    db]
   (let [current-sha (git-sha)

@@ -7,69 +7,12 @@
    [site.fabricate.prototype.fsm :as fsm]
    [site.fabricate.prototype.write :as write]
    [site.fabricate.prototype.page :refer :all]
-   [juxt.dirwatch :refer [close-watcher]]
    [asami.core :as d]
    [respatialized.css :as css]
    [respatialized.render :as render :refer :all]
    [respatialized.holotype :as holotype]
    [respatialized.archive :as archive]
    [clojure.string :as str]))
-
-(defn get-template-files [dir suffix]
-  (->> dir
-       io/file
-       file-seq
-       (filter #(and (.isFile %)
-                     (not (.isDirectory %))
-                     (.endsWith (.toString %) suffix)))
-       (map #(.toString %))))
-
-(def server-opts
-  {:cors-allow-headers nil,
-   :dir (str (System/getProperty "user.dir") "/public"),
-   :port 8000,
-   :no-cache true})
-
-(comment
-  ;; store the post data and the html and only update it if
-  ;; it renders without errors
-
-  ;; the simplest implementation: just print the error and rerender with
-  ;; the last known state
-  ;; from there, we can begin to think about how to store exceptions
-  ;; as values representing state
-  ;; Throwable->map will probably help with this
-  (def example-post-map
-    {"./content/holotype1.html.ct"
-     {:data [#_ "post data"]
-      :html "<doctype html>..."  ; not a requirement but may improve performance
-      }})
-
-  ;; after the initial implementation, other ideas are possible
-  ;; 1. print exceptions in the rendered page by
-  ;; 2. split up the successfully eval'd fns from the errors
-  ;; 3. begin saving a succession of successful renders in a database with commits as "checkpoints"
-  ;; 4. use the state map to drive a nicer terminal UI (e.g. 10/11 files rendered ...)
-  ;; 5. use the state map to drive a web UI that leverages htmx to display rich information about the state of the site being built
-  )
-
-(def site-settings
-  {:template-suffix ".fab"
-   :input-dir "./content"
-   :output-dir "./public"})
-
-
-(defn -main
-  ([]
-   (with-redefs [site.fabricate.prototype.write/default-site-settings
-                site-settings
-                site.fabricate.prototype.page/doc-header
-                site-page-header]
-     (write/publish {:dirs ["./content/"]})
-    )
-   )
-  ([& files]
-   ))
 
 (defn post-hashes [path db]
   (let [res
@@ -85,10 +28,11 @@
     {:recorded-hash fh
      :current-hash current-hash}))
 
-(def fabricate-operations
-  (assoc write/operations
+(def operations
+  (assoc write/default-operations
          write/file-state
-         (fn [{:keys [input-file] :as page-data}]
+         (fn [{:keys [site.fabricate.file/input-file] :as page-data}
+              application-state-map]
            (let [hashes (post-hashes (.toString input-file) archive/db)]
              println hashes
              (if (= (:recorded-hash hashes) (:current-hash hashes))
@@ -96,9 +40,12 @@
                  (println "Page at" (.toString input-file)
                           "up to date, skipping")
                  page-data)
-               (assoc page-data :unparsed-content (slurp input-file)))))
+               (assoc page-data :site.fabricate.page/unparsed-content
+                      (slurp input-file)))))
          write/rendered-state
-         (fn [{:keys [rendered-content output-file] :as page-data}]
+         (fn [{:keys [site.fabricate.page/rendered-content
+                      site.fabricate.file/output-file] :as page-data}
+              application-state-map]
            (do
              (println "writing page content to" output-file)
              (spit output-file rendered-content)
@@ -106,36 +53,64 @@
              @(archive/record-post! page-data archive/db)
              page-data))))
 
+(def initital-state
+  (merge write/initial-state
+         {:site.fabricate/settings
+          {:site.fabricate.file/template-suffix ".fab"
+           :site.fabricate.file/input-dir "./content"
+           :site.fabricate.file/output-dir "./public"
+           :site.fabricate.file/operations operations
+           :site.fabricate.page/doc-header site-page-header
+           :site.fabricate.server/config
+           {:cors-allow-headers nil,
+            :dir (str (System/getProperty "user.dir") "/public"),
+            :port 8000,
+            :no-cache true}}}))
+
+(defn -main
+  ([]
+   (send write/state (constantly initital-state))
+
+   (write/publish! {:dirs ["./content/"]})
+
+   )
+
+  ([& files]
+   ))
+
+
+
 (comment
 
   (keys write/operations)
 
-  (do (fsm/complete fabricate-operations
-                    "content/design-doc-database.html.fab" )
+  (do (fsm/complete operations
+                    "content/design-doc-database.html.fab"
+                    initital-state)
       (println "done"))
 
-  (do (fsm/complete fabricate-operations
-                    "content/working-definition.html.fab" )
+  (do (fsm/complete operations
+                    "content/working-definition.html.fab"
+                    initital-state)
       (println "done"))
 
   )
 
 (comment
 
-  (alter-var-root #'site.fabricate.prototype.write/default-site-settings
-                  (constantly site-settings))
+  (send write/state (constantly initital-state))
 
-  (alter-var-root #'site.fabricate.prototype.write/default-server-opts
-                  (constantly server-opts))
 
-  (alter-var-root #'site.fabricate.prototype.page/doc-header
-                  (constantly site-page-header))
+  (-> write/state
+      (send (constantly initital-state))
+      (send-off write/draft!))
 
-  (alter-var-root #'site.fabricate.prototype.write/operations
-                  (constantly fabricate-operations))
+  (send-off write/state write/stop!)
 
-  (def drafts
-    (write/draft))
+  (get-in @write/state
+          [:site.fabricate/pages ]
+          )
+
 
   (close-watcher drafts)
 
