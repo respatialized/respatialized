@@ -1,6 +1,7 @@
  ✳(ns respatialized.genuary.2022.01
   (:require [clojure2d.core :as clj2d]
             [hiccup.core :refer [html]]
+            [respatialized.fractals :as fractals]
             [site.fabricate.prototype.page :refer :all]
             [malli.core :as m]
             [fastmath.random :as random]
@@ -121,3 +122,17 @@ Histogram of radius sizes:
       (viz/svg-plot2d-cartesian)
       (#(svg/svg {:width 700 :height 320} %))
       html) 🔚
+
+✳=[:h2 "10,000 points"]🔚
+✳=[:h3 "Iteration 1: de Jong attractor in polar coordinates"]🔚
+
+
+✳(def iteration-1 (iterate (de-jong 1.32 2.23 0.05 2.13) [0.0 0.0]))🔚
+
+
+✳=(->> iteration-1
+(take 10000)
+(map (fn [[x y]]
+(let [[x y] (v/from-polar (v/vec2 x y))]
+[:circle {:cx (+ 400 (* 200 x)) :cy (+ 400 (* 200 y)) :r 1.2 :stroke "none" :fill-opacity 0.3}])))
+(into [:svg {:viewBox "0 0 800 800" :width 800 :height 800}]))🔚
