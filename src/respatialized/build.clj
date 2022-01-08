@@ -98,9 +98,6 @@
 
 (comment
 
-  (send write/state (constantly initital-state))
-
-
   (-> write/state
       (send (constantly initital-state))
       (send-off write/draft!))
@@ -111,8 +108,8 @@
           [:site.fabricate/pages ]
           )
 
+  (restart-agent write/state initital-state)
 
-  (close-watcher drafts)
 
   (def completed-posts
     (with-redefs [site.fabricate.prototype.write/default-site-settings
