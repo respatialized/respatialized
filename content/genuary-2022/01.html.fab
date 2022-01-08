@@ -1,15 +1,19 @@
  ✳(ns respatialized.genuary.2022.01
-    (:require [clojure2d.core :as clj2d]
-              [site.fabricate.prototype.page :refer :all]
-              [malli.core :as m]
-              [fastmath.random :as random]
-              [fastmath.vector :as v]
-              [thi.ng.geom :as geom]
-              [thi.ng.geom.viz.core :as viz]
-              [thi.ng.geom.vector :as vec]
-              [thi.ng.geom.svg.core :as svg]
-              [fastmath.core :as math]
-              [garden.core :as garden]))🔚
+  (:require [clojure2d.core :as clj2d]
+            [hiccup.core :refer [html]]
+            [site.fabricate.prototype.page :refer :all]
+            [malli.core :as m]
+            [fastmath.random :as random]
+            [fastmath.vector :as v]
+            [thi.ng.math.core :as mth]
+            [thi.ng.geom.core :as geom]
+            [thi.ng.geom.viz.core :as viz]
+            [thi.ng.geom.vector :as vec]
+            [thi.ng.geom.svg.core :as svg]
+            [fastmath.core :as math]
+            [fastmath.random :as random]
+            [fastmath.stats :as stats]
+            [garden.core :as garden])) 🔚
 
 ✳ (def metadata {:title "Genuary 2022.01"}) 🔚
 
@@ -56,13 +60,15 @@
 
 ✳(def circle-distribution-2 (random/distribution :pareto {:scale 0.66 :shape 1.4}))🔚
 
+
+✳(def circle-dist-2-sample
+  (let [radius 1.0 c 0.3]
+    (for [_ (range 10001 )]
+      (+ c (* radius (random/sample circle-distribution-2)))))) 🔚
+
 ✳= (let [radius 1.0
           c 0.3
-         data (for [_ (range 10001)]
-                (+ c (math/* radius
-                             #_ math/log10
-                             (random/sample circle-distribution-2))))
-         coordinates
+          coordinates
          (for [r (math/slice-range 50 340 50)
                 theta (math/slice-range 1.03 (+ 1.0 math/TWO_PI) 200)]
            (v/from-polar (v/vec2 r theta)))]
@@ -73,5 +79,45 @@
                           :stroke-width 1.5
                           :stroke-opacity 0.5 :stroke "black"}])
               coordinates
-              (sort data)))) 🔚
+              (sort circle-dist-2-sample)))) 🔚
 
+Histogram of radius sizes:
+
+✳ (def circle-hist (:bins (stats/histogram circle-dist-2-sample 20))) 🔚
+
+✳(defn bar-spec
+  [num width]
+  (fn [idx col]
+    {:values     circle-hist
+     :attribs    {:stroke       col
+                  :stroke-width (str (dec width) "px")}
+     :layout     viz/svg-bar-plot
+     :interleave num
+     :bar-width  width
+     :offset     idx}))🔚
+
+✳(def viz-spec
+  {:x-axis (viz/linear-axis
+            {:domain [(apply min circle-dist-2-sample)
+                      (apply max circle-dist-2-sample)]
+             :range  [50 580]
+             :major  100
+             :minor 25
+             :pos    280
+             :label  (viz/default-svg-label int)})
+   :y-axis (viz/log-axis
+            {:domain   [0 10001]
+             :range       [280 20]
+             ;; :major       1000
+             ;; :minor       250
+             :pos         50
+             :label-dist  15
+             :label-style {:text-anchor "end"}})
+   :grid   {:minor-y false}}) 🔚
+
+
+✳=(-> viz-spec
+      (assoc :data [((bar-spec 1 16) 0 "#000")] )
+      (viz/svg-plot2d-cartesian)
+      (#(svg/svg {:width 700 :height 320} %))
+      html) 🔚
