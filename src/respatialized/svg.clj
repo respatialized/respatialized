@@ -103,11 +103,12 @@
                  g
                  (->> (str/split pts-str #",")
                       (map #(Double/parseDouble %))
-                      matrix32->matrix44))))
+                      #_matrix32->matrix44
+                      (apply matrix/matrix32)
+                      (#(.transpose %))))))
           :default identity)
         g-rect (rect/rect x y width height)]
-    (t g-rect))
-  )
+    (t g-rect)))
 
 (defn element->geom [e]
   (cond (and (vector? e) (= :path (first e)))
@@ -153,5 +154,23 @@
         (last respatialized.sketches.20220117/svg))
        )
 
+  (rect->geom-rect
+   [:rect {:style "fill:#eaa083;fill-rule:evenodd;stroke-width:0.56407923;fill-opacity:1",
+           :id "rect4520", :width 63.496769, :height 140.30934,
+           :x 7.4835467, :y -4.6250167,
+           :transform "matrix(0.70710678,0.70710678,0,1,0,0)"}])
+
+  (let
+      [pts-str "0.70710678,0.70710678,0,1,0,0"
+       mtx (->> (str/split pts-str #",")
+                (map #(Double/parseDouble %))
+                (apply matrix/matrix32))]
+      (g/transform
+       (poly/polygon2 [0 0 [1 0] [1 1] [0 0]])
+       mtx)
+      )
+
+  (g/transform (poly/polygon2 [0 0 [1 0] [1 1] [0 0]])
+               (matrix/matrix44 (range 1 16)))
 
   )

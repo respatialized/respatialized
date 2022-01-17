@@ -7,10 +7,11 @@
   (-> "resources/respatialized/2022-01-17.svg"
       slurp
       utils/svg-str->hiccup))
+
 (def example-geoms
   (mapv (fn [e] [e (try (element->geom e)
-                               (catch Exception e nil))])
-               (drop 2 (last example-svg))))
+                        (catch Exception e nil))])
+        (drop 2 (last example-svg))))
 
 (t/deftest svg-to-geometry
   (doseq [[svg-input geom] example-geoms]
