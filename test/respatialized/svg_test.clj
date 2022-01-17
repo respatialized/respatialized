@@ -19,3 +19,16 @@
       (t/is converted)
       (if (not converted)
         (println "error when processing input:" svg-input)))))
+
+(comment
+(->>
+ example-geoms
+ (filter
+  #(.startsWith (:id (second (first %))) "rect4520"))
+ last
+ first
+ path->geom-polygon
+ )
+
+
+  )
