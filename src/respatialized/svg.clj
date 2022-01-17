@@ -62,23 +62,52 @@
      )
     ))
 
+;; example input:
+;; 1 2 3
+;; 4 5 6
+;;
+;; translated into svg's affine transform to 3x3:
+;; 1 2 3
+;; 4 5 6
+;; 0 0 1
+;;
+;; to 4x4 rotation matrix
+;; 1 2 3 0
+;; 4 5 6 0
+;; 0 0 1 0
+;; 0 0 0 1
+;; and then transposed (there's a fn for that
+
+(defn matrix32->matrix44 [values]
+  (->> values
+       (partition 3)
+       (mapv #(conj (into [] %) 0))
+       (#(conj % [0 0 1 0] [0 0 0 1]))
+       flatten
+       (apply matrix/matrix44)))
+
+(comment
+  (matrix32->matrix44 [1 2 3 4 5 6])
+
+  )
+
 (defn rect->geom-rect [r]
   (let [[_ {:keys [x y width height transform]}] r
-  t
+        t
         (cond
           (and (some? transform) (.startsWith transform "matrix"))
           (fn [g]
             (let
                 [pts-str (last (re-find #"(?:\()(.*)(?:\))" transform))]
-              (g/transform
-               g
-               (->> (str/split pts-str #",")
-                    (map #(Double/parseDouble %))
-                    (apply matrix/matrix32 )))))
-           :default identity)
+                (g/transform
+                 g
+                 (->> (str/split pts-str #",")
+                      (map #(Double/parseDouble %))
+                      matrix32->matrix44))))
+          :default identity)
         g-rect (rect/rect x y width height)]
     (t g-rect))
-    )
+  )
 
 (defn element->geom [e]
   (cond (and (vector? e) (= :path (first e)))
@@ -123,5 +152,6 @@
         #(and (vector? %) (= :path (first %)))
         (last respatialized.sketches.20220117/svg))
        )
+
 
   )

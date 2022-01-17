@@ -29,6 +29,6 @@
 
 
 ✳= (svg-adapter/all-as-svg
-(into [:svg
-(let [{:keys [width height]} (second svg)]
-  {:width width :height height}) ] geometry)) 🔚
+  (into [:svg
+  (let [{:keys [width height]} (second svg)]
+                {:width width :height height}) ] geometry)) 🔚
