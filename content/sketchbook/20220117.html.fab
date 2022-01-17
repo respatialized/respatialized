@@ -1,0 +1,13 @@
+✳(ns respatialized.sketches.20210117
+  (:require
+   [clojure.java.io :as io]
+   [thi.ng.geom.core :as g]
+   [thi.ng.geom.circle :as c]
+   [garden.core :refer [css]]
+   [svg-clj.utils :as utils]
+   [thi.ng.geom.polygon :as poly]))🔚
+
+✳(def metadata {:title "Sketchbook / 20220117"
+:page-style (css [:html {:background-color "#FCE093"}])})🔚
+
+✳=(slurp "resources/respatialized/2022-01-17.svg") 🔚
