@@ -91,22 +91,21 @@
 
   )
 
+(defn svg-mtx->mtx32 [mtx-str]
+  (let [pts-str (last (re-find #"(?:\()(.*)(?:\))" mtx-str))
+        [a b c d e f] (mapv #(Double/parseDouble %) (str/split pts-str #","))]
+    (matrix/matrix32 a c e b d f)))
+
+(defn parse-transform [transform]
+  (cond
+    (and (some? transform) (.startsWith transform "matrix"))
+    (let [mtx (svg-mtx->mtx32 transform)]
+      (fn [g] (g/transform g mtx)))
+    :default identity))
+
 (defn rect->geom-rect [r]
   (let [[_ {:keys [x y width height transform]}] r
-        t
-        (cond
-          (and (some? transform) (.startsWith transform "matrix"))
-          (fn [g]
-            (let
-                [pts-str (last (re-find #"(?:\()(.*)(?:\))" transform))]
-                (g/transform
-                 g
-                 (->> (str/split pts-str #",")
-                      (map #(Double/parseDouble %))
-                      #_matrix32->matrix44
-                      (apply matrix/matrix32)
-                      (#(.transpose %))))))
-          :default identity)
+        t (parse-transform transform)
         g-rect (rect/rect x y width height)]
     (t g-rect)))
 
@@ -172,5 +171,10 @@
 
   (g/transform (poly/polygon2 [0 0 [1 0] [1 1] [0 0]])
                (matrix/matrix44 (range 1 16)))
+
+
+  (g/transform
+   (rect/rect 12 12 12 12)
+   (matrix/matrix32 0.70710678,0.70710678,0,1,0,0))
 
   )
