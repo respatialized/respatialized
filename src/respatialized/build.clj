@@ -9,6 +9,7 @@
    [site.fabricate.prototype.page :refer :all]
    [asami.core :as d]
    [respatialized.css :as css]
+   [juxt.dirwatch :refer [watch-dir]]
    [respatialized.render :as render :refer :all]
    [respatialized.holotype :as holotype]
    [respatialized.archive :as archive]
@@ -100,7 +101,25 @@
 
   (-> write/state
       (send (constantly initital-state))
-      (send-off write/draft!))
+      (send-off write/draft!)
+      (send-off
+       (fn [{:keys [site.fabricate/settings]
+             :as application-state-map}]
+         (println "watching output dir for changes")
+         (let [output-dir (:site.fabricate.file/output-dir settings)
+               out-dir-trailing (if (not (.endsWith output-dir "/"))
+                                  (str output-dir "/") output-dir)]
+           (assoc application-state-map
+                  :site.fabricate.file.output/watcher
+                  (watch-dir
+                   (fn [{:keys [file count action]}]
+                     (if (#{:create :modify} action)
+                       (do
+                         (println "syncing")
+                         (let [r (clojure.java.shell/sh "sync-respatialized.sh")]
+                           (println (or (:out r) (:err r)))))))
+                   (io/file output-dir))))))
+      )
 
   (send-off write/state write/stop!)
 

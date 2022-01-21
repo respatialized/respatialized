@@ -23,12 +23,13 @@
 
 
 ✳(def geometry
-(mapv #(try (svg/element->geom %)
+(mapv #(try
+         (g/scale (svg/element->geom %) (/ 1.0 0.27))
 (catch Exception e (do (println %) nil)))
 (drop 2 (last svg-sketch)))) 🔚
 
 
 ✳= (svg-adapter/all-as-svg
   (into [:svg
-  (let [{:keys [width height]} (second svg)]
+  (let [{:keys [width height]} (second svg-sketch)]
                 {:width width :height height}) ] geometry)) 🔚
