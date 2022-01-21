@@ -30,6 +30,8 @@
   cnuernber/dtype-next {:mvn/version "7.04"}
   techascent/tech.ml.dataset {:mvn/version "5.13"}
   io.github.adam-james-v/svg-clj {:mvn/version "0.0.11"}
+  applied-science/darkstar {:git/url "https://github.com/applied-science/darkstar/"
+                            :sha "541a3ff36065c59e92fe6aa61e41a4385ba6f893"}
 
   ;; site indexing and dbs
   org.clojars.quoll/asami {:mvn/version "2.1.2"}
