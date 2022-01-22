@@ -7,6 +7,8 @@
             [thi.ng.geom.core :as g]
             [thi.ng.geom.polygon :as poly]
             [thi.ng.geom.rect :as rect]
+            [thi.ng.geom.path :as g-path]
+            [thi.ng.geom.svg.core :as g-svg]
             [thi.ng.geom.matrix :as matrix]
             [clojure.string :as str]
             [clojure.data.xml :as xml]))
@@ -62,6 +64,8 @@
      )
     ))
 
+
+
 ;; example input:
 ;; 1 2 3
 ;; 4 5 6
@@ -109,19 +113,27 @@
         g-rect (rect/rect x y width height)]
     (t g-rect)))
 
+(defn join-geoms [geoms]
+  (poly/polygon2 (apply concat (map :points geoms))))
+
+(defn path->geom [[t {:keys [d]}]]
+  (let [parsed (g-path/parse-svg-path d)]
+    (try (join-geoms parsed))))
+
 (defn element->geom [e]
   (cond (and (vector? e) (= :path (first e)))
-        (path->geom-polygon e)
+        #_(path->geom-polygon e)
+        (path->geom e)
         (and (vector? e) (= :rect (first e)))
         (rect->geom-rect e)))
 
 (comment
+  (g-path/parse-svg-path [:path {:d "M150 0 L75 200 L225 200 Z"}])
+
   (->> respatialized.sketches.20220117/svg
        last
        (filter #(and (vector? %) (= :path (first %))))
        first
-       second
-       :d
        #_ path/path-str->cmds
        ;; (#(#'path/path-cmd-strs %))
        ;; (map #(#'path/cmd-str->cmd %))
@@ -176,5 +188,41 @@
   (g/transform
    (rect/rect 12 12 12 12)
    (matrix/matrix32 0.70710678,0.70710678,0,1,0,0))
+
+  )
+
+
+(comment
+  (require '[clj-async-profiler.core :as prof])
+
+  (require '[criterium.core :as crit])
+
+  (let [f (slurp "resources/respatialized/2022-01-17.svg") ]
+    (prof/profile
+     (dotimes [_ 15]
+       (mapv #(try
+                (g/scale (element->geom %) (/ 1.0 0.27))
+                (catch Exception e (do (println %) nil)))
+             (drop 2 (last (utils/svg-str->hiccup f))))
+       )))
+
+
+  (let [f (slurp "resources/respatialized/2022-01-17.svg")
+        parsed (drop 2 (last (utils/svg-str->hiccup f))) ]
+    (prof/profile (dotimes [_ 5]
+                    (mapv
+                     #(try
+                        (g/scale (element->geom %) (/ 1.0 0.27))
+                        (catch Exception e (do (println %) nil)))
+                     parsed))))
+
+  (prof/serve-files 8089)
+
+  (def geometries
+    (drop 2 (last (utils/svg-str->hiccup (slurp "resources/respatialized/2022-01-17.svg")))))
+
+
+   (element->geom (first (filter #(= :path (first %)) geometries)))
+
 
   )
