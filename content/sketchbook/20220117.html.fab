@@ -19,14 +19,10 @@
  [thi.ng.geom.rect :as rect])) 🔚
 
 ✳(def metadata {:title "Sketchbook | 20220117"
-:page-style (css [:html {:background-color "#BC450F"}])}) 🔚
-
-
+:page-style respatialized.writing.design.database/page-css}) 🔚
 ✳(def svg-sketch
 (svg-utils/svg-str->hiccup
    (slurp "resources/respatialized/2022-01-17.svg"))) 🔚
-
-
 ✳(def geometry
 (mapv #(try
          (g/scale (svg/element->geom %) (/ 1.0 0.27))
@@ -36,16 +32,12 @@
 ✳ (def quadtree
   (let  [{:keys [width height]} (second svg-sketch)]
     (stree/quadtree 0 0 width height))) 🔚
-
-
 ✳(comment
    (let [q (reduce #(g/add-point % %2 %2) quadtree  (g/sample-uniform (c/circle 200 200 50) 8 false) )]
      (map #(stree/select-with-shape q %) geometry)
      )
 
    (g/add-point quadtree [-1 -1] [-1 -1]))🔚
-
-
 ✳ (def arc-points-tree
     (->> (range 400 1900 10)
          (map #(g/sample-uniform (c/circle -400 0 %) 7 false))
@@ -61,18 +53,16 @@
                       (filter #(g/contains-point? g %) bounded-pts))))
        (apply concat)
        distinct)) 🔚
-
-
-
 ✳(comment
   (filter empty? (map #(stree/select-with-shape arc-points-tree (g/bounds %)) geometry))
 
    (count (stree/get-children arc-points-tree))
 
    )🔚
+✳= [:h2 "20220117"] 🔚
 
-
-✳= (svg-adapter/all-as-svg
-  (into [:svg
-  (let [{:keys [width height]} (second svg-sketch)]
-  {:width width :height height}) ] (pmap #(c/circle % 3) intersecting-points))) 🔚
+✳= [:figure (svg-adapter/all-as-svg
+             (into [:svg
+                    (let [{:keys [width height]} (second svg-sketch)]
+                      {:width width :height height}) ] (pmap #(c/circle % 3) intersecting-points)))
+  [:figcaption "SVG from Inkscape parsed into " [:code "thi.ng"] " geometry for procedural element generation. Renders speedily due to " [:code "thi.ng"] "'s helpful " [:a {:href "https://github.com/thi-ng/geom/blob/257eb850fbe3932099da44c779a93e8e4a293b1b/src/thi/ng/geom/path.cljc#L55"} "SVG path parser"] " and " [:a {:href "https://github.com/thi-ng/geom/blob/feature/no-org/src/thi/ng/geom/spatialtree.cljc"} "spatial tree"] " implementation."]] 🔚
