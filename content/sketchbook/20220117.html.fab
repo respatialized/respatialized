@@ -19,7 +19,7 @@
  [thi.ng.geom.rect :as rect])) 🔚
 
 ✳(def metadata {:title "Sketchbook | 20220117"
-:page-style (css [:html {:background-color "#FCE093"}])}) 🔚
+:page-style (css [:html {:background-color "#BC450F"}])}) 🔚
 
 
 ✳(def svg-sketch
@@ -47,8 +47,8 @@
 
 
 ✳ (def arc-points-tree
-    (->> (range 400 1900 14)
-         (map #(g/sample-uniform (c/circle -400 0 %) 8 false))
+    (->> (range 400 1900 10)
+         (map #(g/sample-uniform (c/circle -400 0 %) 7 false))
          (apply concat)
          distinct
          (reduce (fn [tree pt] (let [r (g/add-point tree pt pt)]
