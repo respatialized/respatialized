@@ -1,24 +1,28 @@
 ✳(ns respatialized.sketches.20220117
 (:require
-   [respatialized.svg :as svg]
-   [clojure.java.io :as io]
-   [thi.ng.geom.core :as g]
-   [thi.ng.geom.circle :as c]
-   [clojure.string :as str]
-   [garden.core :refer [css]]
-   [svg-clj.path :as path]
-   [svg-clj.utils :as utils]
-   [thi.ng.geom.svg.adapter :as svg-adapter]
-   [thi.ng.geom.polygon :as poly]
-   [thi.ng.geom.matrix :as matrix]
-   [thi.ng.geom.rect :as rect])) 🔚
+ [respatialized.svg :as svg]
+ [clojure.java.io :as io]
+ [thi.ng.math.core :as math]
+ [thi.ng.math.noise :as noise]
+ [thi.ng.geom.core :as g]
+ [thi.ng.geom.circle :as c]
+ [thi.ng.geom.bezier :as b]
+ [thi.ng.geom.utils :as utils]
+ [clojure.string :as str]
+ [garden.core :refer [css]]
+ [svg-clj.path :as path]
+ [svg-clj.utils :as svg-utils]
+ [thi.ng.geom.svg.adapter :as svg-adapter]
+ [thi.ng.geom.polygon :as poly]
+ [thi.ng.geom.matrix :as matrix]
+ [thi.ng.geom.rect :as rect])) 🔚
 
 ✳(def metadata {:title "Sketchbook | 20220117"
 :page-style (css [:html {:background-color "#FCE093"}])})🔚
 
 
 ✳(def svg-sketch
-(utils/svg-str->hiccup
+(svg-utils/svg-str->hiccup
    (slurp "resources/respatialized/2022-01-17.svg"))) 🔚
 
 
@@ -29,7 +33,19 @@
 (drop 2 (last svg-sketch)))) 🔚
 
 
+
+✳
+(def arc-points
+  (->> (range 400 1900 14)
+       (pmap (fn [r]
+               (filter
+                (fn [pt] (some #(g/contains-point? % pt) geometry))
+                (g/sample-uniform (c/circle -400 0 r) 8 false))))
+       (apply concat)))
+
+🔚
+
 ✳= (svg-adapter/all-as-svg
   (into [:svg
   (let [{:keys [width height]} (second svg-sketch)]
-                {:width width :height height}) ] geometry)) 🔚
+  {:width width :height height}) ] (pmap #(c/circle % 3) arc-points))) 🔚
