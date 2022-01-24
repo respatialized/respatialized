@@ -35,27 +35,23 @@
 
 (def eval-error? (m/validator error-schema))
 
-(defn error-post? [path]
-  (with-redefs [site.fabricate.prototype.write/default-site-settings
-                site-settings
-                site.fabricate.prototype.page/doc-header
-                render/site-page-header]
-    (let [eval-op (dissoc write/operations
-                          write/html-state
-                          write/markdown-state
-                          write/rendered-state)
-          fab-error? (m/validator error-schema)]
-      (->> path
-           (fsm/complete eval-op)
-           :evaluated-content
-           (tree-seq vector? identity)
-           (some fab-error?)
-           true?
-           ))))
+(defn error-post? [path {:keys [site.fabricate/settings]
+                         :as application-state-map}]
+  (let [eval-op (dissoc (:site.fabricate.file/operations settings)
+                        write/html-state
+                        write/markdown-state
+                        write/rendered-state)
+        fab-error? (m/validator error-schema)]
+    (->> path
+         (fsm/complete eval-op application-state-map)
+         :site.fabricate.page/evaluated-content
+         (tree-seq vector? identity)
+         (some fab-error?)
+         true?)))
 
 
 (def eval-ops
-  (dissoc write/operations
+  (dissoc operations
           write/html-state
           write/markdown-state
           write/rendered-state))
@@ -69,16 +65,16 @@
              (read/->dir-local-path nat-f)))))
 
 (t/deftest conformance
-  (let [pages (get-template-files "./content" ".fab")]
+  (let [pages  (shuffle (write/get-template-files "./content" ".fab"))]
     (doseq [p pages]
-      (let [{:keys [title evaluated-content]
-             :or {title p}
-             :as finished} (fsm/complete eval-ops p)
-            errors (->> evaluated-content
-                        (tree-seq vector? identity)
-                        (filter eval-error?))]
-
-        (t/testing (str title "\n" p)
+      (t/testing (str "page " p)
+        (println "reading page " p)
+        (let [{:keys [title evaluated-content]
+               :or {title p}
+               :as finished} (fsm/complete eval-ops p initital-state)
+              errors (->> evaluated-content
+                          (tree-seq vector? identity)
+                          (filter eval-error?))]
           (t/is (or (= 0 (count errors))
                     (= (count errors) (allowed-failures p)))
                 (str "Post " title " had " (count errors) " evaluation errors")))))))

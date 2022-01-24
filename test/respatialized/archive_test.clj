@@ -83,7 +83,7 @@
 
   )
 
-(t/deftest conversion
+#_(t/deftest conversion
   (t/testing "Bidirectional conversion"
 
     (t/is (any? (parsed-element->asami
@@ -114,11 +114,11 @@
              #_(asami->hiccup quotation-asami)))))
 
 (def example-post
-  {:evaluated-content [:html [:head] [:body]]
-   :rendered-content (hiccup/html [:html [:head] [:body]])
-   :unparsed-content "✳(def metadata {:title \"Empty Example\"})🔚"
-   :input-file "example-file.html.fab"
-   :title "Empty Example"})
+  {:site.fabricate.page/evaluated-content [:html [:head] [:body]]
+   :site.fabricate.page/rendered-content (hiccup/html [:html [:head] [:body]])
+   :site.fabricate.page/unparsed-content "✳(def metadata {:title \"Empty Example\"})🔚"
+   :site.fabricate.file/input-file "example-file.html.fab"
+   :site.fabricate.page/title "Empty Example"})
 
 (t/deftest recording
 
