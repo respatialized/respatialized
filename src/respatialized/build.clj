@@ -1,6 +1,7 @@
 (ns respatialized.build
   (:require
    [clojure.java.io :as io]
+   [malli.core :as m]
    [hiccup2.core :as hiccup]
    [hiccup.page :as hp]
    [site.fabricate.prototype.html :as html]
@@ -34,9 +35,10 @@
          write/file-state
          (fn [{:keys [site.fabricate.file/input-file] :as page-data}
               application-state-map]
-           (let [hashes (post-hashes (.toString input-file) archive/db)]
+           (let [hashes (try (post-hashes (.toString input-file) archive/db)
+                             (catch Exception e nil))]
              println hashes
-             (if (= (:recorded-hash hashes) (:current-hash hashes))
+             (if (and hashes (= (:recorded-hash hashes) (:current-hash hashes)))
                (do
                  (println "Page at" (.toString input-file)
                           "up to date, skipping")
@@ -68,6 +70,8 @@
             :port 8000,
             :no-cache true}}}))
 
+(assert (m/validate write/state-schema initital-state))
+
 (defn -main
   ([]
    (send write/state (constantly initital-state))
@@ -85,13 +89,20 @@
 
   (keys write/operations)
 
-  (do (fsm/complete operations
+  (do (fsm/complete write/default-operations
                     "content/design-doc-database.html.fab"
+                    write/initial-state)
+      (println "done"))
+
+
+
+  (do (fsm/complete operations
+                    "content/working-definition.html.fab"
                     initital-state)
       (println "done"))
 
   (do (fsm/complete operations
-                    "content/working-definition.html.fab"
+                    "content/not-a-tree.html.fab"
                     initital-state)
       (println "done"))
 

@@ -33,7 +33,7 @@
 (comment
   (d/create-database db-uri)
 
-  (d/delete-database db-uri))
+  (d/delete-database db-uri) )
 
 (def db (d/connect db-uri))
 
@@ -78,11 +78,12 @@
         post-hash (file-hash unparsed-content
                              current-sha)
         existing-post
-        (d/q '[:find ?post-id
-              :in $ ?post-id
-              :where
-              [?post-id :file/path ?post-id]]
-             (d/db db) input-file)]
+        (try (d/q '[:find ?post-id
+                    :in $ ?post-id
+                    :where
+                    [?post-id :file/path ?post-id]]
+                  (d/db db) (.toString input-file))
+             (catch Exception e nil))]
     (if (empty?
          existing-post)
       (d/transact
@@ -263,6 +264,14 @@
 
   (m/parse html/atomic-element 123)
 
+  (d/q '[:find ?post-id .
+         :where
+         [?post-id :file/path "./content/not-a-tree.html.fab"]]
+       (d/db db)
+       )
 
+  (d/q '[:find ?e :file/path ?v
+         :where [?e :file/path ?v]]
+       (d/db db))
 
   )
