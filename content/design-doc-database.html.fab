@@ -1,6 +1,8 @@
 ✳(ns respatialized.writing.design.database
 (:require [respatialized.render :refer :all]
 [site.fabricate.prototype.page :refer :all]
+[asami.core :as d]
+[respatialized.archive :as archive]
 [garden.core :as garden :refer [style css]]
 [garden.stylesheet :refer [at-import]]))🔚
 
@@ -95,3 +97,24 @@ For the time being, the following property is assumed of all posts: 1 input file
 At present, the database is rather simplistic, consisting of page data without a relational model applied to the page contents.
 
 Can we run transformers on that simple content to produce things?
+
+
+✳=[:h2 "Indexing the site"]🔚
+
+In the more old-school sense of the phrase "index."
+
+✳+= (archive/query->table
+    '[:find ?title ?fp
+      :where
+      [?e :file/path ?fp]
+      [?e :respatialized.writing/title ?title]] (d/db archive/db)
+    {:col-renames {'?title "Title" '?fp "input file path"}})🔚
+
+
+✳=[:h2 "A potential problem: cycles"]🔚
+
+What about cycles? Pages' contents may be added to the database as data, then queried by other pages. If a page's content query adds more content or is self-referential (e.g. it inserts a quote element as a quote, which then gets queried), then there is a potential for an infinite loop.
+
+✳=[:h4 "possible solutions"]🔚
+
+✳=[:dl [:dt "UUIDs"] [:dd "Assigning every element a unique identifier could prevent the same element from being returned multiple times if it happens to occur in multiple places."]]]🔚

@@ -3,6 +3,7 @@
   (:require
    [respatialized.document :as doc]
    [site.fabricate.prototype.html :as html]
+   [site.fabricate.prototype.page :as page]
    [asami.core :as d]
    [clojure.edn :as edn]
    [clojure.set :as set]
@@ -273,5 +274,105 @@
   (d/q '[:find ?e :file/path ?v
          :where [?e :file/path ?v]]
        (d/db db))
+
+  (meta (d/q '[:find ?title ?fp
+               :where
+               [?e :file/path ?fp]
+               [?e :respatialized.writing/title ?title]]
+             (d/db db)
+             ))
+
+  )
+
+(comment (def table-query-schema
+           (m/schema
+            [:catn
+             [:f [:= :find]]
+             [:result-bindings [:+ [:cat :keyword :symbol]]]
+             [:rest [:cat [:= :where] [:+ :any]]]]))
+
+         (m/validate table-query-schema
+                     '[:find :title ?title :path ?fp
+                       :where
+                       [?e :file/path ?fp]
+                       [?e :respatialized.writing/title ?title]]))
+
+(defn query->table
+  [q db {:keys [col-renames]
+         :or {col-renames {}}
+         :as opts}]
+  (let [res (d/q q db)
+        {:keys [cols]} (meta res)
+        header (into [:thead] (mapv (fn [col-name] [:th (str (col-renames col-name col-name))]) cols))
+        rows (mapv (fn [r] (reduce conj [:tr] (mapv (fn [rv] [:td rv]) r))) res)]
+    (reduce conj [:table header] rows)))
+
+(def parsed-html-schema
+  (m/schema
+   [:schema {:registry {"element"
+                        [:map
+                         [:tag :keyword]
+                         [:attrs [:or :map :nil]]
+                         [:contents [:* [:or html/atomic-element
+                                         [:schema [:ref "element"]]]]]]}}
+    "element"]))
+
+(comment
+  (query->table '[:find ?title ?fp
+                  :where
+                  [?e :file/path ?fp]
+                  [?e :respatialized.writing/title ?title]] (d/db db)
+                {:col-renames '{?title "Title" ?fp "file path"}})
+
+  (d/q '[:find ?a  #_ ?v
+         :where
+         [?e :file/path "./content/database-driven-applications.html.fab"]
+         [?e ?a ?v]]
+       (d/db db))
+
+
+  (d/create-database "asami:mem://test-db")
+
+  (def test-db (d/connect "asami:mem://test-db"))
+  ;; load existing data into in-memory db
+  (d/import-data
+   test-db
+   (d/export-data db))
+
+  (d/delete-database "asami:mem://test-db")
+
+  (d/q '[:find ?a  #_ ?v
+         :where
+         [?e :file/path "./content/database-driven-applications.html.fab"]
+         [?e ?a ?v]]
+       (d/db test-db))
+
+  (keys (get @site.fabricate.prototype.write/state
+             :site.fabricate/pages))
+
+  (get-in @site.fabricate.prototype.write/state
+          [:site.fabricate/pages
+           "./content/relay.html.fab"])
+
+  (->> @site.fabricate.prototype.write/state
+       :site.fabricate/pages
+       vals
+       (filter #(contains? % :site.fabricate.page/evaluated-content))
+       first)
+
+  (def test-post (get-in @site.fabricate.prototype.write/state
+                         [:site.fabricate/pages
+                          "content/relay.html.fab"]))
+
+
+  (m/validate parsed-html-schema
+              (m/parse html/element
+                       (concat [:article] (:site.fabricate.page/evaluated-content test-post))))
+
+  (m/explain parsed-html-schema
+             (m/parse html/element
+                      (concat [:article] (:site.fabricate.page/evaluated-content test-post)))
+
+             )
 
   )
