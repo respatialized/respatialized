@@ -266,11 +266,14 @@
     @(d/transact test-db articles)
     )
 
-  (d/q '[:find ?e ?contents ?subtag
+  (d/q '[:find ?c :tg/contains ?q
          :where [?e :html/tag :blockquote]
-         [?e :html/contents ?contents]
-         [?contents :html/tag ?subtag]]
+         [?e :html/tag ?t]
+         [?e :html/contents ?c]
+         [?c :tg/contains ?q]]
        (d/db test-db))
+
+
 
   (first (get  @write/state :site.fabricate/pages))
 
