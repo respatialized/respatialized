@@ -129,38 +129,20 @@
                          (println "syncing")
                          (let [r (clojure.java.shell/sh "sync-respatialized.sh")]
                            (println (or (:out r) (:err r)))))))
-                   (io/file output-dir))))))
-      )
+                   (io/file output-dir)))))))
 
   (send-off write/state write/stop!)
 
   (get-in @write/state
-          [:site.fabricate/pages ]
-          )
+          [:site.fabricate/pages
+           "./content/design-doc-database.html.fab"
+           :site.fabricate.page/evaluated-content])
 
   (restart-agent write/state initital-state)
 
 
-  (def completed-posts
-    (with-redefs [site.fabricate.prototype.write/default-site-settings
-                  site-settings
-                  site.fabricate.prototype.page/doc-header
-                  site-page-header]
-      (->> (get-template-files "./content" ".fab")
-           (map (fn [p]
-                  (println "rendering" p)
-                  [p (fsm/complete write/operations p)]))
-           (into {}))))
-
-  (def current-post
-    (with-redefs [site.fabricate.prototype.write/default-site-settings
-                  site-settings
-                  site.fabricate.prototype.page/doc-header
-                  site-page-header]
 
 
-      (fsm/complete write/operations "./content/database-driven-applications.html.fab")
 
-      ))
 
   )

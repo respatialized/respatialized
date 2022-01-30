@@ -4,6 +4,7 @@
    [respatialized.document :as doc]
    [site.fabricate.prototype.html :as html]
    [site.fabricate.prototype.page :as page]
+   [site.fabricate.prototype.write :as write]
    [asami.core :as d]
    [clojure.edn :as edn]
    [clojure.set :as set]
@@ -160,142 +161,11 @@
                    attr-name)))
 
 (defn attrs->ns-map [attrs]
-  (into
-   {}
+  (into {}
    (map
     (fn [[a v]]
       [(html-attr->kw a) v])
     attrs)))
-
-(defn parsed-element->asami
-  [e]
-  (cond (vector? e)
-        (let [[elem-type {:keys [tag attrs contents]}] e]
-          (merge (attrs->ns-map attrs)
-                 {:html/tag tag
-                  :html/contents contents}))
-        (map? e)
-        (let [{:keys [tag attrs contents]} e]
-          (merge (attrs->ns-map attrs)
-                 {:html/tag tag
-                  :html/contents contents}))))
-
-(defn parsed->asami [[elem-type elem]]
-  (cond (= :atomic-element elem-type)
-        (let [[t e] elem]
-          {(keyword "html" (name t)) e})
-        (= ::html/element elem-type)
-        (let [[content-category [sub-type sub-elem]] elem]
-          (if (#{:flow :phrasing :node} content-category)
-            (parsed-element->asami sub-elem)
-            (parsed-element->asami elem)))
-
-        ;; ( elem-type)
-        ;; (let [[_ sub-elem] elem] (parsed->asami sub-elem))
-        ))
-
-(html/parse-element-flat [:p "paragraph with" [:em "emphasized text"]])
-(html/parse-element-flat [:p "paragraph "])
-(html/parse-element-flat "abc")
-
-
-(comment
-  (def atomic-parser (m/parser html/atomic-element))
-
-  (def atomic-with-decoder
-    (m/schema
-     (mu/update-properties
-      html/atomic-element
-      assoc :decode/asami
-      {:enter (fn [value]
-                (let [[t v] (atomic-parser value)]
-                  {:html/atomic-element t
-                   :html/text v}))}
-      :description "A HTML atomic element with an Asami decoder")))
-
-  ;; I'm thinking about recursion
-  (html/parse-element-flat
-   ;; why?
-   [:body
-    [:article
-     ;; see line 166 for why
-     [:h1 "The article"]
-     [:section
-      [:h2 "The section"]
-      [:p "The first paragraph"]
-      [:p "The second paragraph, " [:em "with feeling"]]
-      ]]])
-
-  (def example-html-decoder
-    (mu/update-properties
-     html/element
-     assoc :decode/asami
-     {:enter (comp parsed->asami html/parse-element-flat)
-      ;; it's easier to pattern match on what's already parsed;
-      ;; the structure is either (literally) atomic or parseable
-      ;; into a map with tag, attr, contents
-      ;; this makes using functions like tree-seq easier.
-      ;;
-      ;; it seems redundant to walk something that's already been parsed,
-      ;; but this is purely a proof of concept. a clearer way to decode
-      ;; the values in one pass will only come in time
-      }
-     ;; :decode/parse {:enter html/parse-element-flat}
-     :description "A HTML element with a HTML decoder"))
-
-  (m/decode
-   example-html-decoder
-   123 (mt/transformer {:name :parse}))
-
-  (m/decode
-   example-html-decoder
-   [:em "emphasized text"] (mt/transformer {:name :parse}))
-
-  (m/decode
-   (m/schema [int? {:math/multiplier 10
-                    :decode/math
-                    {:compile '(fn [schema _]
-                                 (let [multiplier (:math/multiplier (m/properties schema))]
-                                   (fn [x] (* x multiplier))))}}])
-   12
-   (mt/transformer {:name :math}))
-
-
-  (m/decode atomic-with-decoder-2 123 (mt/transformer {:name :asami}))
-
-  (m/parse html/atomic-element 123)
-
-  (d/q '[:find ?post-id .
-         :where
-         [?post-id :file/path "./content/not-a-tree.html.fab"]]
-       (d/db db)
-       )
-
-  (d/q '[:find ?e :file/path ?v
-         :where [?e :file/path ?v]]
-       (d/db db))
-
-  (meta (d/q '[:find ?title ?fp
-               :where
-               [?e :file/path ?fp]
-               [?e :respatialized.writing/title ?title]]
-             (d/db db)
-             ))
-
-  )
-
-(comment (def table-query-schema
-           (m/schema
-            [:catn
-             [:f [:= :find]]
-             [:result-bindings [:+ [:cat :keyword :symbol]]]
-             [:rest [:cat [:= :where] [:+ :any]]]]))
-
-         (m/validate table-query-schema
-                     '[:find :title ?title :path ?fp
-                       :where
-                       [?e :file/path ?fp]
-                       [?e :respatialized.writing/title ?title]]))
 
 (defn query->table
   [q db {:keys [col-renames]
@@ -307,17 +177,30 @@
         rows (mapv (fn [r] (reduce conj [:tr] (mapv (fn [rv] [:td rv]) r))) res)]
     (reduce conj [:table header] rows)))
 
+(defn parsed->asami [{:keys [tag attrs contents]}]
+  (merge {:html/contents contents}
+         {:html/tag tag}
+         (attrs->ns-map attrs)))
+
 (def parsed-html-schema
   (m/schema
-   [:schema {:registry {"element"
-                        [:map
-                         [:tag :keyword]
-                         [:attrs [:or :map :nil]]
-                         [:contents [:* [:or html/atomic-element
-                                         [:schema [:ref "element"]]]]]]}}
+   [:schema
+    {:registry {"element"
+                [:map
+                 [:tag :keyword]
+                 [:attrs [:or :map :nil]]
+                 [:contents [:* [:or html/atomic-element
+                                 [:schema [:ref "element"]]]]]]}}
     "element"]))
 
+
+(def element-parser (m/parser html/element))
+
 (comment
+
+
+
+
   (query->table '[:find ?title ?fp
                   :where
                   [?e :file/path ?fp]
@@ -334,6 +217,7 @@
   (d/create-database "asami:mem://test-db")
 
   (def test-db (d/connect "asami:mem://test-db"))
+
   ;; load existing data into in-memory db
   (d/import-data
    test-db
@@ -354,25 +238,56 @@
           [:site.fabricate/pages
            "./content/relay.html.fab"])
 
-  (->> @site.fabricate.prototype.write/state
-       :site.fabricate/pages
-       vals
-       (filter #(contains? % :site.fabricate.page/evaluated-content))
-       first)
+  (def posts
+    (->> @site.fabricate.prototype.write/state
+         #_(filter #(contains? % :site.fabricate.page/evaluated-content))
+         #_(map #(->> %
+                      :site.fabricate.page/evaluated-content
+                      (concat [:article]))))
 
-  (def test-post (get-in @site.fabricate.prototype.write/state
-                         [:site.fabricate/pages
-                          "content/relay.html.fab"]))
+    )
+
+  (def test-post
+    (get-in @site.fabricate.prototype.write/state
+            [:site.fabricate/pages
+             "./content/database-driven-applications.html.fab"]))
+
+  (defn contents->asami [evald-content]
+    (->> evald-content
+         (concat [:article])
+         element-parser
+         (clojure.walk/postwalk #(if (map? %) (parsed->asami %) %))))
+
+  (let [articles (->> (get  @write/state :site.fabricate/pages)
+                      vals
+                      (map :site.fabricate.page/evaluated-content)
+                      (filter some?)
+                      (map contents->asami))]
+    @(d/transact test-db articles)
+    )
+
+  (d/q '[:find ?e ?contents ?subtag
+         :where [?e :html/tag :blockquote]
+         [?e :html/contents ?contents]
+         [?contents :html/tag ?subtag]]
+       (d/db test-db))
+
+  (first (get  @write/state :site.fabricate/pages))
 
 
-  (m/validate parsed-html-schema
-              (m/parse html/element
-                       (concat [:article] (:site.fabricate.page/evaluated-content test-post))))
+  (->> (:site.fabricate.page/evaluated-content test-post)
+       (concat [:article])
+       (m/parse html/element)
+       (clojure.walk/postwalk #(if (map? %) (parsed->asami %) %)))
 
-  (m/explain parsed-html-schema
-             (m/parse html/element
-                      (concat [:article] (:site.fabricate.page/evaluated-content test-post)))
+  ;; reproducing unparsing error
+  (->> (:site.fabricate.page/evaluated-content test-post)
+       (concat [:article])
+       (m/parse html/element)
+       (m/unparse html/element)
+       )
 
-             )
+
+
 
   )
