@@ -254,25 +254,46 @@
 
   (defn contents->asami [evald-content]
     (->> evald-content
-         (concat [:article])
+         (apply conj [:article])
          element-parser
-         (clojure.walk/postwalk #(if (map? %) (parsed->asami %) %))))
+         (clojure.walk/postwalk #(if (and (map? %)
+                                          (every? #{:tag :attrs :contents}
+                                                  (keys %)))
+                                   (parsed->asami %) %))))
 
   (let [articles (->> (get  @write/state :site.fabricate/pages)
                       vals
-                      (map :site.fabricate.page/evaluated-content)
-                      (filter some?)
-                      (map contents->asami))]
-    @(d/transact test-db articles)
-    )
+                      (map
+                       (fn [{:keys [site.fabricate.page/evaluated-content
+                                    site.fabricate.page/title
+                                    site.fabricate.file/filename]}]
+                         (when evaluated-content
+                           (let [asami-content (contents->asami evaluated-content)]
+                             (when (not= :malli.core/invalid asami-content)
+                               (assoc  asami-content
+                                       :respatialized.writing/title title
+                                       :filename filename))))))
+                      (filter some?)) ]
+    (d/transact test-db articles))
 
   (d/q '[:find ?c :tg/contains ?q
          :where [?e :html/tag :blockquote]
          [?e :html/tag ?t]
-         [?e :html/contents ?c]
-         [?c :tg/contains ?q]]
+         [?e :html/contents+ ?c]
+         [?c :tg/contains+ ?q]]
        (d/db test-db))
 
+
+  (d/q '[:find
+         ?title ?v
+         :where
+         [?p :respatialized.writing/title ?title]
+         [?p ?a* ?e]
+         (or [?e :html/tag :blockquote]
+             [?e :html/tag :q])
+         [?e ?a2* ?v]
+         [(string? ?v)]]
+       (d/db test-db))
 
 
   (first (get  @write/state :site.fabricate/pages))

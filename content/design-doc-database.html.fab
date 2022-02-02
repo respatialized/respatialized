@@ -60,6 +60,22 @@ It should permit queries like "show me every quotation appearing in one of my wr
 
 The database, in short, should support the creation and maintenance of the "organized system" that digital writing and generative art is so often ✳=[:em "not"]🔚 a part of.
 
+Here's an example of that power to find quotations:
+
+✳+= (archive/query->table
+    '[:find
+         ?title ?q
+         :where
+         [?p :respatialized.writing/title ?title]
+         [?p ?a* ?e]
+         (or [?e :html/tag :blockquote]
+             [?e :html/tag :q])
+         [?e ?a2* ?q]
+         [(string? ?q)]]
+    (d/db archive/test-db)
+    {:col-renames {'?title "Title" '?fp "input file path"}})🔚
+
+
 
 ✳=[:h2 "Concept: Reconstructing history"]🔚
 
