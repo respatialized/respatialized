@@ -77,7 +77,8 @@
    (send write/state (constantly initital-state))
 
    (write/publish! {:dirs ["./content/"]})
-
+   (send-off write/state write/stop!)
+   (shutdown-agents)
    )
 
   ([& files]
