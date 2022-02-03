@@ -67,6 +67,58 @@
 ;; upsert semantics for a path
 ;; the pragmatic choice right now: 1 path = 1 entity
 
+(defn html-attr->kw [attr-name]
+  (cond
+    (keyword? attr-name) (keyword "html.attribute" (name attr-name))
+    (.startsWith attr-name "data-")
+    (keyword "html.attribute.data"
+             (second (clojure.string/split attr-name #"-")))
+    :else (keyword "html.attribute"
+                   attr-name)))
+
+(defn attrs->ns-map [attrs]
+  (into {}
+        (map
+         (fn [[a v]]
+           [(html-attr->kw a) v])
+         attrs)))
+
+(defn parsed->asami [{:keys [tag attrs contents]}]
+  (merge {:html/contents contents}
+         {:html/tag tag}
+         (attrs->ns-map attrs)))
+
+(def parsed-html-schema
+  (m/schema
+   [:schema
+    {:registry {"element"
+                [:map
+                 [:tag :keyword]
+                 [:attrs [:or :map :nil]]
+                 [:contents [:* [:or html/atomic-element
+                                 [:schema [:ref "element"]]]]]]}}
+    "element"]))
+
+
+(def element-parser (m/parser html/element))
+
+(defn contents->asami [evald-content]
+  (->> evald-content
+       (apply conj [:html])
+       element-parser
+       (clojure.walk/postwalk #(if (and (map? %)
+                                        (every? #{:tag :attrs :contents}
+                                                (keys %)))
+                                 (parsed->asami %) %))))
+
+(defn replacement-annotation [kw]
+  (->> kw str (drop 1) (#(concat % (list \'))) (apply str) keyword))
+
+(comment
+  (replacement-annotation :some/kw)
+
+  )
+
 (defn record-post!
   "Records the post in the database. Associates data with known entities for that path"
   [{:keys [site.fabricate.page/evaluated-content
@@ -85,27 +137,31 @@
                     :where
                     [?post-id :file/path ?post-id]]
                   (d/db db) (.toString input-file))
-             (catch Exception e nil))]
+             (catch Exception e nil))
+        asami-post (contents->asami evaluated-content)]
     (if (empty?
          existing-post)
       (d/transact
        db
        {:tx-data
-        [{:site.fabricate.prototype.read/unparsed-content unparsed-content
-          :respatialized.writing/title title
-          :file/path (.toString input-file)
-          :db/ident (.toString input-file)
-          :git/sha current-sha
-          ::file-hash post-hash}]})
+        [(merge asami-post
+                {:site.fabricate.prototype.read/unparsed-content unparsed-content
+                 :respatialized.writing/title title
+                 :file/path (.toString input-file)
+                 :db/ident (.toString input-file)
+                 :git/sha current-sha
+                 ::file-hash post-hash})]})
       (d/transact
        db
        {:tx-data
-        [{:site.fabricate.prototype.read/unparsed-content' unparsed-content
-          :respatialized.writing/title' title
-          :file/path' (.toString input-file)
-          :db/ident (.toString input-file)
-          :git/sha' current-sha
-          ::file-hash' post-hash}]}))))
+        [(merge
+          (into {} (map (fn [[k v]] [(replacement-annotation k) v]) asami-post))
+          {:site.fabricate.prototype.read/unparsed-content' unparsed-content
+           :respatialized.writing/title' title
+           :file/path' (.toString input-file)
+           :db/ident (.toString input-file)
+           :git/sha' current-sha
+           ::file-hash' post-hash})]}))))
 
 (comment
 
@@ -151,21 +207,9 @@
        {:compile (fn [schema _] identity)}}}))
   (defn asami->hiccup [n] nil))
 
-(defn html-attr->kw [attr-name]
-  (cond
-    (keyword? attr-name) (keyword "html.attribute" (name attr-name))
-    (.startsWith attr-name "data-")
-    (keyword "html.attribute.data"
-             (second (clojure.string/split attr-name #"-")))
-    :else (keyword "html.attribute"
-                   attr-name)))
 
-(defn attrs->ns-map [attrs]
-  (into {}
-   (map
-    (fn [[a v]]
-      [(html-attr->kw a) v])
-    attrs)))
+
+
 
 (defn query->table
   [q db {:keys [col-renames]
@@ -176,25 +220,6 @@
         header (into [:thead] (mapv (fn [col-name] [:th (str (col-renames col-name col-name))]) cols))
         rows (mapv (fn [r] (reduce conj [:tr] (mapv (fn [rv] [:td rv]) r))) res)]
     (reduce conj [:table header] rows)))
-
-(defn parsed->asami [{:keys [tag attrs contents]}]
-  (merge {:html/contents contents}
-         {:html/tag tag}
-         (attrs->ns-map attrs)))
-
-(def parsed-html-schema
-  (m/schema
-   [:schema
-    {:registry {"element"
-                [:map
-                 [:tag :keyword]
-                 [:attrs [:or :map :nil]]
-                 [:contents [:* [:or html/atomic-element
-                                 [:schema [:ref "element"]]]]]]}}
-    "element"]))
-
-
-(def element-parser (m/parser html/element))
 
 (comment
 
@@ -252,14 +277,7 @@
             [:site.fabricate/pages
              "./content/database-driven-applications.html.fab"]))
 
-  (defn contents->asami [evald-content]
-    (->> evald-content
-         (apply conj [:article])
-         element-parser
-         (clojure.walk/postwalk #(if (and (map? %)
-                                          (every? #{:tag :attrs :contents}
-                                                  (keys %)))
-                                   (parsed->asami %) %))))
+
 
   (let [articles (->> (get  @write/state :site.fabricate/pages)
                       vals
