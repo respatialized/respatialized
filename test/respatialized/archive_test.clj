@@ -3,7 +3,9 @@
             [asami.core :as d]
             [malli.core :as m]
             [hiccup.core :as hiccup]
+            [site.fabricate.prototype.fsm :as fsm]
             [site.fabricate.prototype.html :as html]
+            [site.fabricate.prototype.write :as write]
             [respatialized.archive :refer :all]
             [malli.transform :as mt]))
 
@@ -138,3 +140,35 @@
     (t/is (>= (count figs) 1)
           "Element data should be queryable."))
   )
+
+
+;; what's the point of a test, anyway?
+;;
+;; - externalize your knowledge of a system into concrete properties
+;; - ensure you understand and can write code that performs what you want to do in the correct order
+;; - stabilize system properties
+
+(def test-post-files
+  ["content/not-a-tree.html.fab" "content/ai-and-labor.html.fab"
+   "./content/not-a-tree.html.fab" "./content/ai-and-labor.html.fab"
+   "content/database-driven-applications.html.fab"
+   "./content/database-driven-applications.html.fab"])
+
+
+(t/deftest post-database
+  (t/testing "database capabilities for writing"
+    (let [ops (dissoc write/default-operations write/rendered-state)
+          completed-posts
+          (->> test-post-files
+               (map #(fsm/complete ops % write/initial-state))
+               (filter map?)
+               (map :site.fabricate.page/evaluated-content)
+               (into []))]
+      (println (count completed-posts))
+      (t/testing "parsing posts into Asami format"
+        (let [asami-posts (mapv contents->asami completed-posts)]
+          (t/is (not-any? #(= :malli.core/invalid %)
+                          asami-posts))
+          (d/transact conn {:tx-data asami-posts}))
+        )
+      )))

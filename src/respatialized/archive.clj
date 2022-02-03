@@ -101,11 +101,12 @@
 
 
 (def element-parser (m/parser html/element))
+(def page-parser (m/parser html/html))
 
 (defn contents->asami [evald-content]
   (->> evald-content
        (apply conj [:html])
-       element-parser
+       page-parser
        (clojure.walk/postwalk #(if (and (map? %)
                                         (every? #{:tag :attrs :contents}
                                                 (keys %)))
