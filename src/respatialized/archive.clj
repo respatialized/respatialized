@@ -105,7 +105,6 @@
 
 (defn contents->asami [evald-content]
   (->> evald-content
-       (apply conj [:html])
        page-parser
        (clojure.walk/postwalk #(if (and (map? %)
                                         (every? #{:tag :attrs :contents}

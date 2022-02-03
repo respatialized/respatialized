@@ -154,6 +154,28 @@
    "content/database-driven-applications.html.fab"
    "./content/database-driven-applications.html.fab"])
 
+(comment
+  (def completed-posts
+    (->> test-post-files
+         (map #(fsm/complete (dissoc write/default-operations write/rendered-state)
+                             % write/initial-state))
+         (filter map?)
+         (map :site.fabricate.page/evaluated-content)
+         (into [])))
+
+  (second (first completed-posts))
+
+  (nth (apply conj [:html] (first completed-posts)) 2)
+
+  (m/explain html/html
+             (nth [:html
+                   (first (first completed-posts))
+                   (apply conj [:body] (second (first completed-posts)))]
+                  2)
+
+             )
+
+  )
 
 (t/deftest post-database
   (t/testing "database capabilities for writing"
@@ -164,9 +186,16 @@
                (filter map?)
                (map :site.fabricate.page/evaluated-content)
                (into []))]
-      (println (count completed-posts))
       (t/testing "parsing posts into Asami format"
-        (let [asami-posts (mapv contents->asami completed-posts)]
+        (let [asami-posts
+              (mapv
+               #(let [a (contents->asami %)]
+                  (if (= a :malli.core/invalid)
+                    (do (println
+                         (:errors
+                          (m/explain html/html %))) a)
+                    a))
+               completed-posts)]
           (t/is (not-any? #(= :malli.core/invalid %)
                           asami-posts))
           (d/transact conn {:tx-data asami-posts}))
