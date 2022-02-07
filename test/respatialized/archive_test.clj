@@ -204,4 +204,14 @@
                       :site.fabricate.page/evaluated-content
                       (fn [p] (let [h (pop p) t (peek p)]
                                 (conj h (conj t [:div "one final updated div"])))))]
-          (record-post! changed-post conn))))))
+          (record-post! changed-post conn)
+          (t/is (= (:site.fabricate.page/title random-post)
+                   (d/q `[:find ?title .
+                          :where
+                          [?p :respatialized.writing/title ?title]
+                          [?p :site.fabricate.page/title ~(:site.fabricate.page/title random-post)]
+                          [?p ?a+ ?d]
+                          [?d :html/tag :div]
+                          [?d :html/contents ?dc]
+                          [?dc :tg/contains "one final updated div"]]
+                        (d/db conn)))))))))
