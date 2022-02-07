@@ -35,7 +35,7 @@
 (comment
   (d/create-database db-uri)
 
-  (d/delete-database db-uri) )
+  (d/delete-database db-uri))
 
 (def db (d/connect db-uri))
 
@@ -99,25 +99,35 @@
                                  [:schema [:ref "element"]]]]]]}}
     "element"]))
 
-
 (def element-parser (m/parser html/element))
 (def page-parser (m/parser html/html))
 
-(defn contents->asami [evald-content]
-  (->> evald-content
+(defn page->asami [{:keys [site.fabricate.page/evaluated-content
+                           site.fabricate.file/filename
+                           site.fabricate.page/title
+                           site.fabricate.page/namespace
+                           site.fabricate.page/metadata]
+                    :as page-map}]
+  (->> evaluated-content
        page-parser
        (clojure.walk/postwalk #(if (and (map? %)
                                         (every? #{:tag :attrs :contents}
                                                 (keys %)))
-                                 (parsed->asami %) %))))
+                                 (parsed->asami %) %))
+       (#(assoc
+          %
+          :db/ident filename
+          :respatialized.writing/title title))
+       (merge (select-keys page-map [:site.fabricate.file/filename
+                                     :site.fabricate.page/title
+                                     :site.fabricate.page/namespace
+                                     :site.fabricate.page/metadata]))))
 
 (defn replacement-annotation [kw]
   (->> kw str (drop 1) (#(concat % (list \'))) (apply str) keyword))
 
 (comment
-  (replacement-annotation :some/kw)
-
-  )
+  (replacement-annotation :some/kw))
 
 (defn record-post!
   "Records the post in the database. Associates data with known entities for that path"
@@ -125,6 +135,7 @@
            site.fabricate.page/rendered-content
            site.fabricate.page/unparsed-content
            site.fabricate.file/input-file
+           site.fabricate.file/filename
            site.fabricate.page/title]
     :as page-data}
    db]
@@ -135,33 +146,19 @@
         (try (d/q '[:find ?post-id
                     :in $ ?post-id
                     :where
-                    [?post-id :file/path ?post-id]]
-                  (d/db db) (.toString input-file))
+                    (or
+                     [?post-id :db/ident $]
+                     [?post-id :site.fabricate.file/filename $])]
+                  (d/db db) filename)
              (catch Exception e nil))
-        asami-post (contents->asami evaluated-content)]
+        asami-post (page->asami page-data)]
     (if (empty?
          existing-post)
+      (d/transact db {:tx-data [asami-post]})
       (d/transact
        db
        {:tx-data
-        [(merge asami-post
-                {:site.fabricate.prototype.read/unparsed-content unparsed-content
-                 :respatialized.writing/title title
-                 :file/path (.toString input-file)
-                 :db/ident (.toString input-file)
-                 :git/sha current-sha
-                 ::file-hash post-hash})]})
-      (d/transact
-       db
-       {:tx-data
-        [(merge
-          (into {} (map (fn [[k v]] [(replacement-annotation k) v]) asami-post))
-          {:site.fabricate.prototype.read/unparsed-content' unparsed-content
-           :respatialized.writing/title' title
-           :file/path' (.toString input-file)
-           :db/ident (.toString input-file)
-           :git/sha' current-sha
-           ::file-hash' post-hash})]}))))
+        [(merge (into {} (map (fn [[k v]] [(replacement-annotation k) v]) asami-post)))]}))))
 
 (comment
 
@@ -186,16 +183,12 @@
       :unparsed-content
       (file-hash (git-sha))))
 
-
-
 (comment
   (keys example-page)
 
   (m/parse html (nth (:evaluated-content example-page) 6))
 
   (element-parser (nth (:evaluated-content example-page) 6)))
-
-
 
 (comment
   ;; placeholder for functions that should eventually
@@ -206,10 +199,6 @@
       {:html/atomic-element
        {:compile (fn [schema _] identity)}}}))
   (defn asami->hiccup [n] nil))
-
-
-
-
 
 (defn query->table
   [q db {:keys [col-renames]
@@ -223,21 +212,17 @@
 
 (comment
 
-
-
-
   (query->table '[:find ?title ?fp
                   :where
                   [?e :file/path ?fp]
                   [?e :respatialized.writing/title ?title]] (d/db db)
                 {:col-renames '{?title "Title" ?fp "file path"}})
 
-  (d/q '[:find ?a  #_ ?v
+  (d/q '[:find ?a  #_?v
          :where
          [?e :file/path "./content/database-driven-applications.html.fab"]
          [?e ?a ?v]]
        (d/db db))
-
 
   (d/create-database "asami:mem://test-db")
 
@@ -250,7 +235,7 @@
 
   (d/delete-database "asami:mem://test-db")
 
-  (d/q '[:find ?a  #_ ?v
+  (d/q '[:find ?a  #_?v
          :where
          [?e :file/path "./content/database-driven-applications.html.fab"]
          [?e ?a ?v]]
@@ -268,16 +253,12 @@
          #_(filter #(contains? % :site.fabricate.page/evaluated-content))
          #_(map #(->> %
                       :site.fabricate.page/evaluated-content
-                      (concat [:article]))))
-
-    )
+                      (concat [:article])))))
 
   (def test-post
     (get-in @site.fabricate.prototype.write/state
             [:site.fabricate/pages
              "./content/database-driven-applications.html.fab"]))
-
-
 
   (let [articles (->> (get  @write/state :site.fabricate/pages)
                       vals
@@ -291,7 +272,7 @@
                                (assoc  asami-content
                                        :respatialized.writing/title title
                                        :filename filename))))))
-                      (filter some?)) ]
+                      (filter some?))]
     (d/transact test-db articles))
 
   (d/q '[:find ?c :tg/contains ?q
@@ -300,7 +281,6 @@
          [?e :html/contents+ ?c]
          [?c :tg/contains+ ?q]]
        (d/db test-db))
-
 
   (d/q '[:find
          ?title ?v
@@ -313,9 +293,7 @@
          [(string? ?v)]]
        (d/db test-db))
 
-
   (first (get  @write/state :site.fabricate/pages))
-
 
   (->> (:site.fabricate.page/evaluated-content test-post)
        (concat [:article])
@@ -326,10 +304,4 @@
   (->> (:site.fabricate.page/evaluated-content test-post)
        (concat [:article])
        (m/parse html/element)
-       (m/unparse html/element)
-       )
-
-
-
-
-  )
+       (m/unparse html/element)))

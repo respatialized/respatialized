@@ -61,8 +61,8 @@
       {:html/tag :p
        :html/contents [{:html/text "“But were we talking about economics?” John said."}]}
       {:html/tag :p
-        :html/contents
-        [{:html/text "“But this is economics, don't you see, this is our eco-economics! Everyone should make their living, so to speak, based on a calculation of their real contribution to the human ecology. Everyone can increase their ecological efficiency by efforts to reduce how many kilocalories they use – this is the old Southern argument against the energy consumption of the Northern industrial nations. There was a real ecologic basis to that objection, because no matter how much the industrial nations produced, in the larger equation they could not be as efficient as the South.”"}]}
+       :html/contents
+       [{:html/text "“But this is economics, don't you see, this is our eco-economics! Everyone should make their living, so to speak, based on a calculation of their real contribution to the human ecology. Everyone can increase their ecological efficiency by efforts to reduce how many kilocalories they use – this is the old Southern argument against the energy consumption of the Northern industrial nations. There was a real ecologic basis to that objection, because no matter how much the industrial nations produced, in the larger equation they could not be as efficient as the South.”"}]}
       {:html/tag :p
        :html/contents [{:html/text "“They were predators on the South,” John said."}]}
       {:html/tag :p
@@ -75,45 +75,40 @@
        :html/contents [{:html/text "Red Mars"}]}
       {:html/text ", p. 261"}]}]})
 
-
 (comment
   (m/decode
    example-html-decoder
    quotation-hiccup
-   (mt/transformer {:name :asami})
-   )
-
-  )
+   (mt/transformer {:name :asami})))
 
 #_(t/deftest conversion
-  (t/testing "Bidirectional conversion"
+    (t/testing "Bidirectional conversion"
 
-    (t/is (any? (parsed-element->asami
-                 {:tag :p,
-                  :attrs nil,
-                  :contents
-                  [[:atomic-element [:text "paragraph with"]]
-                   [:node
-                    [:em
-                     {:tag :em,
-                      :attrs nil,
-                      :contents [[:atomic-element [:text "emphasized text"]]]}]]]})))
+      (t/is (any? (parsed-element->asami
+                   {:tag :p,
+                    :attrs nil,
+                    :contents
+                    [[:atomic-element [:text "paragraph with"]]
+                     [:node
+                      [:em
+                       {:tag :em,
+                        :attrs nil,
+                        :contents [[:atomic-element [:text "emphasized text"]]]}]]]})))
 
-    (t/is (= :p
-             (-> [:p "paragraph with" [:em "emphasized text"]]
-                 html/parse-element-flat
-                 parsed->asami
-                 :html/tag)))
+      (t/is (= :p
+               (-> [:p "paragraph with" [:em "emphasized text"]]
+                   html/parse-element-flat
+                   parsed->asami
+                   :html/tag)))
 
-    (t/is (= quotation-asami
-             (m/decode
-              example-html-decoder
-              quotation-hiccup
-              (mt/transformer {:name :asami})
-              )))
+      (t/is (= quotation-asami
+               (m/decode
+                example-html-decoder
+                quotation-hiccup
+                (mt/transformer {:name :asami}))))
 
-    (t/is (= quotation-hiccup
-             #_(asami->hiccup quotation-asami)))))
+      (t/is (= quotation-hiccup
+               #_(asami->hiccup quotation-asami)))))
 
 (def example-post
   {:site.fabricate.page/evaluated-content [:html [:head] [:body]]
@@ -138,9 +133,7 @@
           "Element data should be recorded without errors.")
 
     (t/is (>= (count figs) 1)
-          "Element data should be queryable."))
-  )
-
+          "Element data should be queryable.")))
 
 ;; what's the point of a test, anyway?
 ;;
@@ -171,11 +164,7 @@
              (nth [:html
                    (first (first completed-posts))
                    (apply conj [:body] (second (first completed-posts)))]
-                  2)
-
-             )
-
-  )
+                  2)))
 
 (t/deftest post-database
   (t/testing "database capabilities for writing"
@@ -183,13 +172,11 @@
           completed-posts
           (->> test-post-files
                (map #(fsm/complete ops % write/initial-state))
-               (filter map?)
-               (map :site.fabricate.page/evaluated-content)
-               (into []))]
+               (filter map?))]
       (t/testing "parsing posts into Asami format"
         (let [asami-posts
               (mapv
-               #(let [a (contents->asami %)]
+               #(let [a (page->asami %)]
                   (if (= a :malli.core/invalid)
                     (do (println
                          (:errors
@@ -198,6 +185,23 @@
                completed-posts)]
           (t/is (not-any? #(= :malli.core/invalid %)
                           asami-posts))
-          (d/transact conn {:tx-data asami-posts}))
-        )
-      )))
+          (d/transact conn {:tx-data asami-posts})))
+
+      (t/testing "queries for post contents by html attributes"
+        (let [q-res (d/q
+                     '[:find ?tag ?contents
+                       :where
+                       [?elem :html/tag :blockquote]
+                       [?elem :html/tag ?tag]
+                       [?elem ?a* ?contents]]
+                     conn)]
+          (t/is (not-empty q-res))))
+
+      (t/testing "update semantics for existing posts"
+        (let [random-post (first (shuffle completed-posts))
+              changed-post
+              (update random-post
+                      :site.fabricate.page/evaluated-content
+                      (fn [p] (let [h (pop p) t (peek p)]
+                                (conj h (conj t [:div "one final updated div"])))))]
+          (record-post! changed-post conn))))))
