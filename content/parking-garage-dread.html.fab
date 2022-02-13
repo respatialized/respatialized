@@ -1,0 +1,87 @@
+✳ (ns respatialized.writing.parking-garage-dread
+(:require [respatialized.render :refer :all]
+[site.fabricate.prototype.page :refer :all]
+[garden.core :as garden]
+[garden.stylesheet :refer [at-import]])) 🔚
+
+
+✳  (def page-css
+(garden/css
+(at-import "https://fonts.googleapis.com/css2?family=Teko:wght@600&display=swap")
+[:figure [:figcaption {:font-size "0.7em" :text-align "right"}]]
+               [:h1 :h2 :h3 :h4 :h5 :h6 {:font-family "'Teko', sans-serif"}]
+               [:h1 {:column-span "all"}]
+               [:a {:color "#fdf1c7"}]
+               [:h3 {:font-size "1.8rem"}]
+               [:article {:column-count 1
+                          :color "#fefde3"}]
+               [:body {:background-color "#070705"
+                       :color "#fefde3" }]
+               [:figure {:max-width "240ch"
+                         :padding 0}]
+               [:figure [:img {:max-width "100vw"
+                               :padding 0}]]
+               )) 🔚
+
+
+✳ (def metadata {:title "Subsumed Automotive Dread in the Parking Garage"
+                  :page-style page-css}) 🔚
+
+
+
+✳= [:figure
+  {:style (garden/style {:position "relative"})}
+    [:img {:src "media/nuremburg-parking-markusnl-cc.jpg"
+           :class "background-image"
+           :style (garden/style {:object-fit "cover"
+                                 :object-position "100% 0%"
+                                 :width "60ch"
+                                 :height "20em"}) }]
+    [:h1 {:class "overlay"
+          :style (garden/style
+                  {:position "absolute"
+                   :top "10%"
+                   :left "5%"
+                   :color "#fefde3"
+                   :font-size "2.5em"
+                   :line-height "1.1em"
+                   :font-weight "bold"
+                   :text-transform "uppercase"})}
+     "Subsumed Automotive Dread" [:br] "in the Parking Garage"]
+    [:figcaption [:a {:href "https://www.flickr.com/photos/46925878@N03/5794788696"} "\"Parking garage at Nuremberg airport\" by Markusnl"]  ", licensed under CC BY-NC-SA 2.0"]] 🔚
+
+The parking garage is a predictable site for scenes in horror films. They offer filmmakers a large space for a film crew, and are ubiquitous in the suburban and urban American landscape. Full of dirty shadows, their cast concrete textures compliment film grain and provide a subterranean affect regardless of the actual elevation.
+
+✳= [:figure
+  {:style (garden/style {:position "relative"})}
+    [:img {:src "media/nelson-atkins-garage-chrism70-cc.jpg"
+           :style (garden/style {:object-fit "cover"
+                                 :object-position "100% 40%"
+                                 :width "60ch"
+                                 :height "20ch"}) }]
+    [:figcaption [:a {:href "https://www.flickr.com/photos/78316603@N00/505050638"} "\"Nelson-Atkins Parking Garage\" by ChrisM70"]  ", licensed under CC BY-NC-SA 2.0"]] 🔚
+
+
+
+The moment of vulnerability in the interstitial space between the safety of the crowd in the mall and the private enclosure of the car provides an opportunity for violence to strike a character or for the ambient threat of it to loom over the character and audience's mind.
+
+Either the goal is clear, our character has the car in sight and must get to it before the threat of violence becomes actual, or the car goes missing in the serialized landscape of sections and levels distinguished from one another only by unnameable colors and impossible-to-remember numbers.
+
+Even in mundane situations, the dislocation and lack of navigable space created by the sheer repetition of the automotive form is played for laughs: no one can remember where they parked the car.
+
+✳=[:figure
+  {:style (garden/style {:position "relative"})}
+    [:img {:src "media/multistory-parking-fotograzio-cc.jpg"
+:style (garden/style {:object-fit "cover"
+  :mask-image "linear-gradient(to right, #7a6c5550, #7a6c5550, 100%)"
+                                 :object-position "100% 40%"
+                                 :width "60ch"
+                                 :height "20ch"}) }]
+    [:figcaption [:a {:href "https://www.flickr.com/photos/94075184@N00/24282020541"} "\"Multistory parking garage\" by Fotograzio"]  ", licensed under CC BY-NC-SA 2.0"]]🔚
+
+
+Car ads contain the frontier myth of open roads, no traffic, and a vast, rugged wilderness that the engine of the car permits you to explore on your own as a free individual. The parking garage contains the countermythology: confinement, uniformity, and crowds. They provide a place to get stuck between the freedom of movement provided by walkable spaces and the freedom of movement provided by a car actually in motion.
+
+The garage elevates the subterranean landscape above the surface to dominate its surrounding area. When in it we notice the gloom and odor of gasoline fumes and the slightly ajar feeling of being tilted a few degrees away from everything else by the angle of the parking deck surface. At once familiar and alien, these sensations remind us that we have entered a space not built for humans but for machines. Within the garage, people will permit themselves to feel uneasy with the consequences of a society dominated by the car.
+
+Attackers in garages kill hundreds of people each year in garages in the United States; cars in motion kill tens of thousands. The very parts of the car imagined to keep us safe from the phantasms in the garage - speed, steel, glass - inflict mundane carnage on bodies when cars collide. The fear generated by the danger of cars in motion lurks in the shadows once the driver comes to a stop and turn the engine off.
