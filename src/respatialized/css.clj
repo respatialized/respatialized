@@ -1,7 +1,7 @@
 (ns respatialized.css
   "Compositional css generated with garden"
   (:require [garden.core :as garden]
-            [garden.stylesheet :refer [at-media at-import]]
+            [garden.stylesheet :refer [at-media at-import at-font-face]]
             [garden.selectors :as select :refer [attr-starts-with attr before after]]
             [garden.units :as u]
             [garden.color]))
@@ -15,11 +15,12 @@
               :version 2.0
               :url "https://www.mozilla.org/en-US/MPL/2.0/"}}
   [#_[:*
-    (before) (after)
-    {:box-sizing "border-box"}]         ; unclear if I got the selectors right here
+      (before) (after)
+      {:box-sizing "border-box"}]    ; unclear if I got the selectors right here
    [:html {:line-sizing "normal"}]
    [:body {:margin "0"}]
    [(attr "hidden") {:display "none"}]
+   [:h1 :h2 :h3 :h4 :h5 :h6 {:font-weight "800" }]
    [:h1 {:font-size "2rem"}]
    [:h2 {:font-size "1.5rem"}]
    [:h3 {:font-size "1.17rem"}]
@@ -32,7 +33,7 @@
          :color "inherit", :height "0", :overflow "visible"}]
    [:img :svg :video :canvas :audio :iframe :embed :object
     {:display "block", :vertical-align "middle", :max-width "100%"}]
-     #_ [:audio ":not([controls])" {:display "none"}]
+   #_ [:audio ":not([controls])" {:display "none"}]
    [:picture {:display "contents"}]
    [:source {:display "none"}]
    [:img :svg :video :canvas {:height "auto"}]
@@ -82,7 +83,7 @@
 (defn create-scale [])
 
 (def base-font-size (u/em 1.5))
-(def line-height (u/em 1.45))
+(def line-height (u/em 1.25))
 (def baseline (u/em-div line-height 2))
 (def column-gap (u/em* baseline 4))
 (def row-gap (u/em* baseline 2))
@@ -104,9 +105,44 @@
 ;; DISPLAY
 ;; FONTS
 
+(def font-spec
+  (list
+   (at-font-face
+    {:font-family "Default Sans"
+     :src ["url(../fonts/DefaultSans-Regular.woff2)"
+           "url(../fonts/DefaultSans-Black.woff2)"
+           "url(../fonts/DefaultSans-BlackItalic.woff2)"
+           "url(../fonts/DefaultSans-BoldItalic.woff2)"
+           "url(../fonts/DefaultSans-ExtraBold.woff2)"
+           "url(../fonts/DefaultSans-ExtraBoldItalic.woff2)"
+           "url(../fonts/DefaultSans-ExtraLight.woff2)"
+           "url(../fonts/DefaultSans-ExtraLightItalic.woff2)"
+           "url(../fonts/DefaultSans-Italic.woff2)"
+           "url(../fonts/DefaultSans-Light.woff2)"
+           "url(../fonts/DefaultSans-LightItalic.woff2)"
+           "url(../fonts/DefaultSans-Medium.woff2)"
+           "url(../fonts/DefaultSans-MediumItalic.woff2)"
+           "url(../fonts/DefaultSans-SemiBold.woff2)"
+           "url(../fonts/DefaultSans-SemiBoldItalic.woff2)"
+           "url(../fonts/DefaultSans-Thin.woff2)"
+           "url(../fonts/DefaultSans-ThinItalic.woff2)"]} )
+   (at-font-face
+    {:font-family "Mainframe"
+     :src ["url(../fonts/Mainframe-Regular.woff2)"
+           "url(../fonts/Mainframe-Bold.woff2)"
+           "url(../fonts/Mainframe-ExtraBold.woff2)"
+           "url(../fonts/Mainframe-ExtraLight.woff2)"
+           "url(../fonts/Mainframe-Light.woff2)"
+           "url(../fonts/Mainframe-Medium.woff2)"
+           "url(../fonts/Mainframe-SemiBold.woff2)"]})))
 
-(def sans-serif "\"Basier Square\"")
-(def monospace "\"Basier Square Mono\"")
+(comment
+  (garden/css font-spec)
+
+  )
+
+(def sans-serif "'Default Sans', sans-serif")
+(def monospace "'Red Hat Mono', monospace")
 
 (def html-rules
   [:html {:-webkit-font-smoothing "auto"
@@ -183,42 +219,58 @@
        (list
         (at-import
          "https://fonts.googleapis.com/css2?family=Inter:wght@600;900&display=swap")
-        (at-import
-         "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap")
-        (at-import
-         "https://fonts.googleapis.com/css2?family=Recursive&display=swap")
-        [:a {:color "#C14825"}]
-        [:body {:background-color "#EEE"
-                :font-size "24px"
-                :font-family "IBM Plex Sans"
-                :line-height 1.35
-                :color "#222"
-                :letter-spacing "-0.01rem"}]
-        [:header {:font-weight 600
-                  :font-family "Inter"}]
-        [:h1 :h2 :h3 {:font-size "3rem"
-                      :line-height "3rem"
-                      :margin-bottom "0.6em"
-                      :margin-top "0.2em"}]
+        (at-import "https://fonts.googleapis.com/css2?family=Karla:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Red+Hat+Mono:wght@700&display=swap")
+        [:a {:color "#C14825"
+             :text-decoration "none"}]
+        [(select/a select/after)
+         {:position "relative"
+          :vertical-align "super"
+          :margin-left "0.15em"
+          :margin-bottom "-0.15em"
+          :line-height "0.5em"
+          :margin-top "-0.15em"
+          :font-weight "Bold"
+          :font-size "0.7em"
+          :content "\"→\""}]
+        [:body {:background-color "#FFF"
+                :font-size "20px"
+                :font-weight "400"
+                :font-family "'Default Sans', sans-serif"
+                :line-height "27px"
+                :color "#444"}]
+        [:header {:font-weight "600"
+                  :font-family "Default Sans"}]
+        [:h1 {:font-size "2rem"}]
+        [:h2 {:font-size "1.7rem"}]
+        [:h3 {:font-size "1.5rem"}]
+        [:h4 {:font-size "1.3rem"}]
+        [:h5 {:font-size "1.3rem"}]
+        [:h6 {:font-size "1.3rem"}]
+        #_[:h1 :h2 :h3 {:font-size "3rem"
+                        :line-height "3rem"
+                        :margin-bottom "0.6em"
+                        :margin-top "0.2em"}]
         [:h4 :h5 :h6 {:font-size "1.5rem"}]
-        [:blockquote
-         {:font-weight 600
-          :font-size "1.45rem"
-          :font-family "Inter"
-          :line-height "2.05rem"}]
-        [:code {:font-size "0.95em"}]
+        [:blockquote :aside
+         {:font-size "0.9em"
+          :margin-left "1em"}]
+        [:code {:font-size "0.95em"
+                :line-height "1.2em"
+                :font-weight "500"}]
         [:pre :code
          {:white-space "pre-wrap"
-          :font-family "Recursive"
+          :font-family "'Red Hat Mono', monospace"
           :color "#66220e"}]
-        [:pre {:margin-bottom "0.4em"}]
-        [:dt {:font-family "Inter"
-              :margin-bottom "0.2rem"}]
+        [:pre {:margin-bottom "0.4em"
+               :line-height "27px"
+               :font-size "0.9em"}
+         [:code {:line-height "27px"}]]
+        [:dt {:margin-bottom "0.2rem"}]
         [:dd {:margin-bottom "0.4rem"}]
         [:summary {:margin-bottom "0.4em"}]
         [:article {:max-width "45rem"
                    :padding-left "20px"
-                   :color "#222"  }]
+                   :color "#333"  }]
         [:p {:margin-bottom "0.4em"
              :margin-top "0.2em"}]
         [:table {:font-size "0.95rem"
@@ -241,6 +293,7 @@
   (->> [remedy
         prism-rules
         page-style
+        font-spec
         ;; [:h1 :h2 :h3 :h4 :h5 :h6 {:color (get wal-colors "color6")}]
         ]
        garden/css
@@ -248,5 +301,16 @@
 
 (comment
   (-main)
+
+(->> [remedy
+        prism-rules
+        page-style
+        font-spec
+        ;; [:h1 :h2 :h3 :h4 :h5 :h6 {:color (get wal-colors "color6")}]
+        ]
+       garden/css
+       )
+
+
 
   )
