@@ -10,6 +10,10 @@ body {
   display: none;
 }
 
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 800;
+}
+
 h1 {
   font-size: 2rem;
 }
@@ -188,62 +192,95 @@ pre, [class*="language-"] {
 
 @import "https://fonts.googleapis.com/css2?family=Inter:wght@600;900&display=swap";
 
-@import "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap";
-
-@import "https://fonts.googleapis.com/css2?family=Recursive&display=swap";
+@import "https://fonts.googleapis.com/css2?family=Karla:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Red+Hat+Mono:wght@700&display=swap";
 
 a {
   color: #C14825;
+  text-decoration: none;
+}
+
+a::after {
+  line-height: 0.5em;
+  vertical-align: super;
+  position: relative;
+  margin-top: -0.15em;
+  margin-bottom: -0.15em;
+  font-weight: Bold;
+  content: "→";
+  margin-left: 0.15em;
+  font-size: 0.7em;
 }
 
 body {
-  background-color: #EEE;
-  font-size: 24px;
-  font-family: IBM Plex Sans;
-  line-height: 1.35;
-  color: #222;
-  letter-spacing: -0.01rem;
+  background-color: #FFF;
+  font-size: 20px;
+  font-weight: 400;
+  font-family: 'Default Sans', sans-serif;
+  line-height: 27px;
+  color: #444;
 }
 
 header {
   font-weight: 600;
-  font-family: Inter;
+  font-family: Default Sans;
 }
 
-h1, h2, h3 {
-  font-size: 3rem;
-  line-height: 3rem;
-  margin-bottom: 0.6em;
-  margin-top: 0.2em;
+h1 {
+  font-size: 2rem;
+}
+
+h2 {
+  font-size: 1.7rem;
+}
+
+h3 {
+  font-size: 1.5rem;
+}
+
+h4 {
+  font-size: 1.3rem;
+}
+
+h5 {
+  font-size: 1.3rem;
+}
+
+h6 {
+  font-size: 1.3rem;
 }
 
 h4, h5, h6 {
   font-size: 1.5rem;
 }
 
-blockquote {
-  font-weight: 600;
-  font-size: 1.45rem;
-  font-family: Inter;
-  line-height: 2.05rem;
+blockquote, aside {
+  font-size: 0.9em;
+  margin-left: 1em;
 }
 
 code {
   font-size: 0.95em;
+  line-height: 1.2em;
+  font-weight: 500;
 }
 
 pre, code {
   white-space: pre-wrap;
-  font-family: Recursive;
+  font-family: 'Red Hat Mono', monospace;
   color: #66220e;
 }
 
 pre {
   margin-bottom: 0.4em;
+  line-height: 27px;
+  font-size: 0.9em;
+}
+
+pre code {
+  line-height: 27px;
 }
 
 dt {
-  font-family: Inter;
   margin-bottom: 0.2rem;
 }
 
@@ -258,7 +295,7 @@ summary {
 article {
   max-width: 45rem;
   padding-left: 20px;
-  color: #222;
+  color: #333;
 }
 
 p {
@@ -287,4 +324,14 @@ td, th {
 table {
   border-collapse: collapse;
   max-width: 1400px;
+}
+
+@font-face {
+  font-family: Default Sans;
+  src: url(../fonts/DefaultSans-Regular.woff2), url(../fonts/DefaultSans-Black.woff2), url(../fonts/DefaultSans-BlackItalic.woff2), url(../fonts/DefaultSans-BoldItalic.woff2), url(../fonts/DefaultSans-ExtraBold.woff2), url(../fonts/DefaultSans-ExtraBoldItalic.woff2), url(../fonts/DefaultSans-ExtraLight.woff2), url(../fonts/DefaultSans-ExtraLightItalic.woff2), url(../fonts/DefaultSans-Italic.woff2), url(../fonts/DefaultSans-Light.woff2), url(../fonts/DefaultSans-LightItalic.woff2), url(../fonts/DefaultSans-Medium.woff2), url(../fonts/DefaultSans-MediumItalic.woff2), url(../fonts/DefaultSans-SemiBold.woff2), url(../fonts/DefaultSans-SemiBoldItalic.woff2), url(../fonts/DefaultSans-Thin.woff2), url(../fonts/DefaultSans-ThinItalic.woff2);
+}
+
+@font-face {
+  font-family: Mainframe;
+  src: url(../fonts/Mainframe-Regular.woff2), url(../fonts/Mainframe-Bold.woff2), url(../fonts/Mainframe-ExtraBold.woff2), url(../fonts/Mainframe-ExtraLight.woff2), url(../fonts/Mainframe-Light.woff2), url(../fonts/Mainframe-Medium.woff2), url(../fonts/Mainframe-SemiBold.woff2);
 }

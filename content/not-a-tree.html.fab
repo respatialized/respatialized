@@ -1,10 +1,21 @@
 ✳ (ns respatialized.writing.not-a-tree
-(:require [respatialized.render :refer :all]
-[site.fabricate.prototype.page :refer :all])) 🔚
+  (:require [respatialized.render :refer :all]
+            [garden.core :refer [style css]]
+            [site.fabricate.prototype.page :refer :all])) 🔚
 
 
 
-✳ (def metadata {:title "This Website Is Not A Tree"}) 🔚
+✳ (def metadata {:title "This Website Is Not A Tree"
+               :page-style (css [:aside {:padding-left "3em"
+                                         :font-style "italic"}
+                                 [:em {:font-style "normal"}]]
+                                [:table {
+                                         :display "table"
+                                         :margin "0 calc(80% - 80vw) 0 calc(0% - 0vw)"}]
+                                [:article {:hyphens "auto"
+:max-width "60ch"
+ #_ #_
+                                           :text-align "justify"}]) }) 🔚
 
 ✳=(header (:title metadata))🔚
 
@@ -13,16 +24,16 @@
    :source "A City Is Not A Tree"
    :url "https://www.patternlanguage.com/archive/cityisnotatree.html"}
   "It must be emphasized, lest the orderly mind shrink in horror from anything that is not clearly articulated and categorized in tree form, that the idea of overlap, ambiguity, multiplicity of aspect and the semilattice are not less orderly than the rigid tree, but more so. They represent a thicker, tougher, more subtle and more complex view of structure." )🔚
-✳= [:aside {:class "f7 tr"} "essential reading."] 🔚
+✳= [:aside "essential reading."] 🔚
 
 ✳=(header {:level :h3 :date "2019-03-10"} "Preliminaries")🔚
 
-This is the first post of respatialized, a website about actual and potential spaces. Part of the reason it took me so long to launch it is because nearly every static site generator forces your writing into a tree-like structure. Only one lets you extend the site generation methods to reflect your own ideas: Matthew Butterick's ✳=(link "https://docs.racket-lang.org/pollen/"  "pollen")🔚 Because I want to combine the sequential and additive writing style of a blog with the associational and iterative nature of a wiki, this was the only choice.
+This is the first post of respatialized, a website about actual and potential spaces. Part of the reason it took me so long to launch it is because nearly every static site generator forces your writing into a tree-like structure. Only one lets you extend the site generation methods to reflect your own ideas: Matthew Butterick's ✳=(link "https://docs.racket-lang.org/pollen/"  "pollen")🔚. Because I want to combine the sequential and additive writing style of a blog with the associational and iterative nature of a wiki, this was the only choice.
 
 It would have taken me even longer to get started if Joel Dueck hadn't already done the excellent work of creating  ✳=(in-code (link "https://github.com/otherjoel/thenotepad" "thenotepad"))🔚, which includes functions to produce many of the things we expect from blogs, like sequential indices and RSS feeds, and many that we should expect, but don't (like the ability to generate a PDF from the blog). The code that generates this blog is forked from  ✳=(link "https://github.com/otherjoel/thenotepad" "thenotepad")🔚 and licensed under the MIT License.
 
 ✳=(header {:level :h3 :date "2019-11-13"}
-           "Extensible Textual Notation")🔚
+           "Extensible textual notation")🔚
 
 I recently switched from ✳=(in-code "pollen")🔚 to ✳=(in-code "perun")🔚. ✳=(in-code "perun")🔚's model of publishing everything via a composable collection of ✳=(in-code "boot")🔚 tasks encapsulates everything that I want from ✳=(in-code "pollen")🔚's organizational and compositional capabilities. ✳=(in-code "pollen")🔚's pagetrees can be recreated by mapping and filtering the sequential collections of ✳=(in-code "hiccup")🔚 data structures ✳=(in-code "perun")🔚 generates, and applying those transformations to generic collections comes more readily to me than creating ✳=(in-code ".ptree")🔚 files (the Clojure refrain, it's just data, etc.). My artwork and other content is also written in and generated using Clojure, so I don't want to have to drop into a different language that I don't know as well just to get it out. For me, the ability to iterate quickly depends on low friction and the power of simplicity: ✳=(in-code "boot")🔚's Swiss army knife approach matches that perfectly. 
 
@@ -39,7 +50,7 @@ What I'm looking for, basically:
 
 [:em {:class \"topic\"} Extensibility]
 
-Clojure already supports this notion in its canonical representation of data, extensibile data notation. I want to bring it to textual information, and maybe, HTML Canvas objects as well. The full power of a programming language means that we can flexibly switch between graphical and textual representations, something that pollen doesn't yet support." "ws-normal bg-light-silver code") 🔚
+Clojure already supports this notion in its canonical representation of data, extensibile data notation. I want to bring it to textual information, and maybe, HTML Canvas objects as well. The full power of a programming language means that we can flexibly switch between graphical and textual representations, something that pollen doesn't yet support.") 🔚
 
 This approach also acts as a force-multiplier on immutable, compositional CSS tools like ✳=(in-code "tachyons")🔚 or ✳=(in-code "tailwind")🔚, because it brings the power of Clojure into the tool you're using to write the text, which in turn leverages tools like ✳=(in-code "tachyons")🔚 to apply a unified style to what you're writing using inline, simple notation.
 
@@ -49,11 +60,11 @@ Other examples in this space:
 
 Both of these are built atop Javascript, and are more focused on interactivity for users than on procedural generation of text at write-time. Clojure(script)'s homoiconicity makes it ideally suited for both purposes- it can be used to generate interactive programs as well as any other form of data you'd want to display. I'm personally more interested in the latter, right now.
 
-✳= (header {:level :h3 :date "2019-11-17"} "Extensible Textual Notation, part 2") 🔚
+✳= (header {:level :h3 :date "2019-11-17"} "Extensible textual notation, part 2") 🔚
 
 Within the Clojure world and beyond, there are a few tools that suggest directions for what I'm thinking of here.
 
-✳= (header (in-code "perun")) 🔚
+✳= [:h4 (in-code "perun")] 🔚
 
 This is what I'm using to write and compile the blog itself right now. However, I don't like that most of the decisions about how to parse markdown into HTML are decided by the fiats of ✳=(in-code "flexmark-java")🔚 I would much prefer to be able to manipulate the content in the form of  ✳=(in-code "hiccup")🔚  data structures as I see fit ✳=(em "before")🔚 passing it to ✳=(in-code "hiccup.core/html5")🔚 for rendering. ✳=(link "https://github.com/hashobject/perun/issues/30" "This was discussed") 🔚 in the ✳=(in-code "perun")🔚 repo, but was set aside when the use case of hyphenation didn' t actually require it.
 
@@ -75,9 +86,12 @@ Anything less feels like an arbitrary step backward.
 
 The major area in which programmers ✳=(em "currently")🔚 perform programmatic manipulation of prose and data in tandem is in the realm of documentation generators. In my experience, these tools fall into two broad categories:
 
-- narrative-first tools like ✳=(in-code "sphinx, reStructuredText")🔚, etc.
+
+✳= [:strong "Narrative-first"]🔚 tools like ✳=(in-code "sphinx, reStructuredText")🔚, etc.
 They have one primary benefit: if they're to be of any use at all they require the author to write a good amount of prose introducing the project, its rationale and purpose, and the main ways of interacting with it. However, in these tools, docs are generally separate from code - even if they live in the same repo, they're often in ✳=(in-code "docs/")🔚 and can easily come out of sync with the actual code.
-- code-first tools like any ✳=(in-code "javadoc, docco, Roxygen2")🔚, etc.
+
+
+✳= [:strong "Code-first"] 🔚 like any ✳=(in-code "javadoc, docco, Roxygen2")🔚, etc.
 These have the benefit of being much closer to the day-to-day work of developers and are much less likely to become out of sync with the code, because they are usually parsed out of docstrings and special comments and the process of updating documentation can be built into a project's deployment pipeline without much overhead. The drawbacks? You generally end up with a completely decontextualized list of classes or functions that doesn't inform or give examples of how you'd actually ✳=(em "use")🔚 them. 
 
 ✳= (header {:level :h6} (link "https://gdeer81.github.io/marginalia" (in-code "marginalia"))) 🔚
@@ -164,7 +178,7 @@ Many digital systems for doing this exist already. I chafe at using them because
 
 Obviously, I'm also taking notes here instead of on paper. Writing this doesn't provide exactly the same generative friction as pen and paper, but does a good enough job of forcing me to clarify my thoughts through the pressure of putting them in a public format. I also have complete control over the content (once I can overcome the limitations of markdown). Given that what I write has currently a 1:1 file:destination relationship, it also prevents association and composition of the information I record here. Ideally you'd want to break this input/output link, which would support both private views of some information and also let you think about how to refer to the same piece of information from multiple public views.
 
-The question on how to ✳=(link "https://plato.stanford.edu/entries/information-semantic/" "individuate pieces of information")🔚 is permanently open, so an ideal system would support "contention" in that it can facilitate multiple methods of splitting up and representing a topic. How to do that on a technical level is obviously also an open and extremely difficult problem.
+The question of how to ✳=(link "https://plato.stanford.edu/entries/information-semantic/" "individuate pieces of information")🔚 is permanently open, so an ideal system would support "contention" in that it can facilitate multiple methods of splitting up and representing a topic. How to do that on a technical level is obviously also an open and extremely difficult problem.
 
 It seems daunting to come up with a solution for this, but I've been reading about something that may offer a partial way out recently: Datascript, mentioned in passing earlier. Where Chiusano proposes algebraic data types to manage this, I would prefer to start with datoms that get freely composed into views through datalog queries. Pieces of information (or even bits of writing themselves) would be decomposed down into EAVT facts and recorded in some persistent database where they can change in the future without fear of losing knowledge by revising it.
 
@@ -186,19 +200,19 @@ A further source of information comes from the seemingly simple fact that these 
 
 ✳=(header {:level :h3 :date "2019-12-26,2019-12-28"} "This website (could be) a CRDT")🔚
 
-While considering potential applications of ✳=(link "https://respatialized.net/relay.html" "relay")🔚 software, I recalled the notion of a ✳=(em "conflict-free replicated data type")🔚, a data structure that provides a probably correct solution to the problem of imposing a total order on a sequence of edits to a file that arrive out of order, editing different subsets of text, with unreliable timestamps. This data type would be what you reach for if you were designing a collaborative text editor with online and offline editing capabilities, because it would save you from making hard choices about which text to discard and which to keep (or worse, making the user deal with any errors caused by your software and imposing those choices on them).
+While considering potential applications of ✳=(link "/relay.html" "relay")🔚 software, I recalled the notion of a ✳=(em "conflict-free replicated data type")🔚, a data structure that provides a probably correct solution to the problem of imposing a total order on a sequence of edits to a file that arrive out of order, editing different subsets of text, with unreliable timestamps. This data type would be what you reach for if you were designing a collaborative text editor with online and offline editing capabilities, because it would save you from making hard choices about which text to discard and which to keep (or worse, making the user deal with any errors caused by your software and imposing those choices on them).
 
 I started reading about the concept, glossing over the mathematical details in favor of an interest in its potential as an expressive medium for thought. Some ideas that fell out of this:
 
 ✳=(header {:level :h5} "Making the library metaphor in 'code library' concrete")🔚
 
-✳= [:aside [:p {:class "f5"} (em "heavily inspired by Rich Hickey's talk " (link "https://youtube.com/watch?v=oyLBGkS5ICk" "Spec-ulation"))]] 🔚
+✳= [:aside "heavily inspired by Rich Hickey's talk " (link "https://youtube.com/watch?v=oyLBGkS5ICk" "Spec-ulation")] 🔚
 
 Right now you have to take home the whole library when you write some code that uses one page of one book.
 
-Statically typed languages that rely on complex class hierarchies, especially because the compiler may make multiple passes across the codebase for definitions in different files ("... all you wanted was the banana." - Joe Armstrong) force you to ship all this supporting material to use one part of it.
+Statically typed languages that rely on complex class hierarchies, especially because the compiler may make multiple passes across the codebase for definitions in different files ( ✳=[:q "... all you wanted was the banana."]🔚 - Joe Armstrong) force you to ship all this supporting material to use one part of it.
 
-✳= [:aside [:p {:class "f5"} (em "aside: I don't intend this as an intrinsic dig at statically typed, compiled languages per se. Smart compilers can do dead code elimination, but usually this technique is put to the purpose of reducing ") " executable " (em "size rather than reducing") " dependency " (em "size. It'd be very interesting to see a compiler targeting library code that minimizes the volume of the library code pulled in by the code which declares it as a dependency." (link "https://www.unisonweb.org/docs/tour" "Unison") " has done some interesting work in this direction because of its ability to serialize algebraic data types and send them over the network to perform remote computation.")]] 🔚
+✳= [:aside  "I don't intend this as an intrinsic dig at statically typed, compiled languages per se. Smart compilers can do dead code elimination, but usually this technique is put to the purpose of reducing " (em " executable ") "size rather than reducing" (em " dependency ") "size. It'd be very interesting to see a compiler targeting library code that minimizes the volume of the library code pulled in by the code which declares it as a dependency. " (link "https://www.unisonweb.org/docs/tour" "Unison") " has done some interesting work in this direction because of its ability to serialize algebraic data types and send them over the network to perform remote computation."] 🔚
 
 So if instead of classes defined across files or nested relationships between algebraic data types defined at compile time, we had functions operating on simple, immutable values defined in self-contained s-expressions, plus some annotations:
 
@@ -211,7 +225,7 @@ So if instead of classes defined across files or nested relationships between al
 
 Rather than a scope defined by a global namespace of evaluated expressions, these explicit references define exactly what a function needs to be lifted out of its lending library and used independently of the codebase it came from.
 
-✳=(em "to make an analogy to Unison above, using " (in-code "core.spec") " plus these dependency annotations means that the functions would be addressed by")🔚 contract ✳=(em "rather than by")🔚 content. ✳=(em "I think that Unison's emphasis on making functions immutable is a good one, but annotating the contract rather than the internals may do a better job of preserving intent for a dynamically typed language.")🔚
+✳= [:aside  "to make an analogy to Unison above, using " (in-code "spec") " plus these dependency annotations means that the functions would be addressed by " [:em "contract"] " rather than by " [:em "content."] " I think that Unison's emphasis on making functions immutable is a good one, but annotating the contract rather than the internals may do a better job of preserving intent for a dynamically typed language."]🔚
 
 S-expressions would slot naturally into the delimited data structures required by a CRDT, making this serialization easy (other programming languages may have a harder time). This opens up another application:
 
@@ -244,7 +258,7 @@ Storing code in a CRDT has the potential to explore new parts of the misty space
 
 ✳=(aside "Oh, and by the way, the formal term for the structure that emerges from a properly implemented CRDT is a " (link "http://archagon.net/blog/2018/03/24/data-laced-with-history/" "monotonic semilattice") ". Which, according to Christopher Alexander in the essay I quote above, is exactly the form required to capture the interdependent complexity of a city.")🔚
 
-✳=(header {:level :h3 :date "2019-12-28"} "Extensible Textual Notation, part 3")🔚
+✳=(header {:level :h3 :date "2019-12-28"} "Extensible textual notation, part 3")🔚
 
 ✳=(header {:level :h5} "Structure from text")🔚
 
@@ -289,23 +303,25 @@ Speaking of which:
 
 ✳=(header {:level :h5} "Text from structure")🔚
 
-When thinking about where to store this data, I was led to James Smothers' ✳=(link "https://github.com/smothers/cause" (in-code "cause"))🔚, a very well-documented Clojure implementation of a causal tree, a type of CRDT. It places the notion of a ✳=(in-code "CausalBase")🔚 front and center, which sounds great, except it doesn't quite have the power implied by the "database" referred to by its name - which is generally okay in Clojure because the language already has pretty powerful facilities for quick operations on collections of maps. 
+When thinking about where to store this data, I was led to Chris Smothers' ✳=(link "https://github.com/smothers/cause" (in-code "cause"))🔚, a very well-documented Clojure implementation of a causal tree, a type of CRDT. It places the notion of a ✳=(in-code "CausalBase")🔚 front and center, which sounds great, except it doesn't quite have the power implied by the "database" referred to by its name - which is generally okay in Clojure because the language already has pretty powerful facilities for quick operations on collections of maps.
 
 But what if someone went further than that, combining a CRDT with a data model and query engine like in DataScript? Turns out in describing that I'm describing ✳=(link "https://github.com/replikativ/datahike" (in-code "datahike"))🔚, a Datalog implementation atop the ✳=(in-code "hitchiker-tree")🔚 CRDT. 
 
 With existing text snapshotted as facts and recorded in a CRDT, queries could be run against that data to associate formerly disparate pieces of data into new forms, and the composites those queries create could themselves be recorded and annotated as new facts about the collection. The query that retrieves those facts could be stored as data itself, with the new structure that the query identifies added as an annotation to it. Use these queries and the expressive power they create to give a new life to ✳=(in-code "structur")🔚 and ✳=(in-code "alpha")🔚, the venerable software extensions to ✳=(in-code "Kedit")🔚 written by Howard J. Strauss to aid ✳=(link "https://www.newyorker.com/magazine/2013/01/14/structure" "John McPhee in his writing process.")🔚
 
-✳= (blockquote
-    {:author "John McPhee"
-     :url "https://www.newyorker.com/magazine/2013/01/14/structure"}
-    [:p "He listened to the whole process from pocket notebooks to coded slices of paper, then mentioned a text editor called Kedit, citing its exceptional capabilities in sorting. Kedit (pronounced 'kay-edit'), a product of the Mansfield Software Group, is the only text editor I have ever used. I have never used a word processor. Kedit did not paginate, italicize, approve of spelling, or screw around with headers, WYSIWYGs, thesauruses, dictionaries, footnotes, or Sanskrit fonts. Instead, Howard wrote programs to run with Kedit in imitation of the way I had gone about things for two and a half decades."]
-[:p "He wrote Structur. He wrote Alpha. He wrote mini-macros galore. Structur lacked an “e” because, in those days, in the Kedit directory eight letters was the maximum he could use in naming a file. In one form or another, some of these things have come along since, but this was 1984 and the future stopped there. Howard, who died in 2005, was the polar opposite of Bill Gates—in outlook as well as income. Howard thought the computer should be adapted to the individual and not the other way around. One size fits one. The programs he wrote for me were molded like clay to my requirements—an appealing approach to anything called an editor."]
+✳= [:figure
+  [:blockquote {:style (style {:font-size "0.85em"
+                               :line-height "1.35em"
+                               :font-weight "500"})}
+     [:p "He listened to the whole process from pocket notebooks to coded slices of paper, then mentioned a text editor called Kedit, citing its exceptional capabilities in sorting. Kedit (pronounced 'kay-edit'), a product of the Mansfield Software Group, is the only text editor I have ever used. I have never used a word processor. Kedit did not paginate, italicize, approve of spelling, or screw around with headers, WYSIWYGs, thesauruses, dictionaries, footnotes, or Sanskrit fonts. Instead, Howard wrote programs to run with Kedit in imitation of the way I had gone about things for two and a half decades."]
+     [:p "He wrote Structur. He wrote Alpha. He wrote mini-macros galore. Structur lacked an “e” because, in those days, in the Kedit directory eight letters was the maximum he could use in naming a file. In one form or another, some of these things have come along since, but this was 1984 and the future stopped there. Howard, who died in 2005, was the polar opposite of Bill Gates—in outlook as well as income. Howard thought the computer should be adapted to the individual and not the other way around. One size fits one. The programs he wrote for me were molded like clay to my requirements—an appealing approach to anything called an editor."]
 
-[:p "Structur exploded my notes. It read the codes by which each note was given a destination or destinations (including the dustbin). It created and named as many new Kedit files as there were codes, and, of course, it preserved intact the original set. In my first I.B.M. computer, Structur took about four minutes to sift and separate fifty thousand words. My first computer cost five thousand dollars. I called it a five-thousand-dollar pair of scissors."]
+     [:p "Structur exploded my notes. It read the codes by which each note was given a destination or destinations (including the dustbin). It created and named as many new Kedit files as there were codes, and, of course, it preserved intact the original set. In my first I.B.M. computer, Structur took about four minutes to sift and separate fifty thousand words. My first computer cost five thousand dollars. I called it a five-thousand-dollar pair of scissors."]
 
-[:p "I wrote my way sequentially from Kedit file to Kedit file from the beginning to the end of the piece. Some of those files created by Structur could be quite long. So each one in turn needed sorting on its own, and sometimes fell into largish parts that needed even more sorting. In such phases, Structur would have been counterproductive. It would have multiplied the number of named files, choked the directory, and sent the writer back to the picnic table, and perhaps under it. So Howard wrote Alpha. Alpha implodes the notes it works on. It doesn’t create anything new. It reads codes and then churns a file internally, organizing it in segments in the order in which they are meant to contribute to the writing."]
+     [:p "I wrote my way sequentially from Kedit file to Kedit file from the beginning to the end of the piece. Some of those files created by Structur could be quite long. So each one in turn needed sorting on its own, and sometimes fell into largish parts that needed even more sorting. In such phases, Structur would have been counterproductive. It would have multiplied the number of named files, choked the directory, and sent the writer back to the picnic table, and perhaps under it. So Howard wrote Alpha. Alpha implodes the notes it works on. It doesn’t create anything new. It reads codes and then churns a file internally, organizing it in segments in the order in which they are meant to contribute to the writing."]
 
-[:p "Alpha is the principal, workhorse program I run with Kedit. Used again and again on an ever-concentrating quantity of notes, it works like nesting utensils. It sorts the whole business at the outset, and then, as I go along, it sorts chapter material and subchapter material, and it not infrequently arranges the components of a single paragraph. It has completely served many pieces on its own."])🔚
+     [:p "Alpha is the principal, workhorse program I run with Kedit. Used again and again on an ever-concentrating quantity of notes, it works like nesting utensils. It sorts the whole business at the outset, and then, as I go along, it sorts chapter material and subchapter material, and it not infrequently arranges the components of a single paragraph. It has completely served many pieces on its own."]]
+  [:figcaption [:a {:href "https://www.newyorker.com/magazine/2013/01/14/structure"} "John McPhee"]]]🔚
 
 ✳=(link "https://docs.racket-lang.org/pollen/" "The book is a program")🔚. Tools for writing digital books should be at least as powerful as the tools created for conventional books decades ago. CRDTs provide a reliable and immutable foundation to the discrete chunks of knowledge that McPhee has used for his entire career. A query engine provides the toolkit to devise new ways of composing them together as powerful as ✳=(in-code "structur")🔚 and ✳=(in-code "alpha")🔚, but with the added benefit of an entire programming language so that the text (or the collection of notes used to produce it) is no longer a closed system but can instead pull in data from the rest of the world. 
 
@@ -331,13 +347,13 @@ Every system built atop Markdown will invariably have some ad-hoc and kludgy met
 
 Just be aware of what you're giving up as an author in pursuit of that, and what you may be imposing on yourself later on down the line if you want to overcome these constraints.
 
-And yes, there's no small irony in the fact that the ✳=(link "https://gitlab.com/respatialized/respatialized.gitlab.io/blob/master/content/not-a-tree.md" "source code for this post")🔚 is currently written in Markdown. It is indeed fast and easy to get started writing with it, but I'd largely attribute that to path dependence, and the fact that my particular parser leaves the ✳=(in-code "div")🔚 tags I've littered throughout this post intact, which is an accident of choosing to use ✳=(in-code "perun")🔚 and thereby ✳=(in-code "flexmark-java")🔚 rather than the virtues of the format itself. I have every intention of changing the authoring tool I use into something semantically richer, but I had to get my resistance to the format on paper first.
+And yes, there's no small irony in the fact that the ✳=(link "https://github.com/respatialized/respatialized.github.io/blob/75691228fc403a05e9184cbb7d2a930eb40ffbf4/content/not-a-tree.md" "source code for this post")🔚 is currently written in Markdown. It is indeed fast and easy to get started writing with it, but I'd largely attribute that to path dependence, and the fact that my particular parser leaves the ✳=(in-code "div")🔚 tags I've littered throughout this post intact, which is an accident of choosing to use ✳=(in-code "perun")🔚 and thereby ✳=(in-code "flexmark-java")🔚 rather than the virtues of the format itself. I have every intention of changing the authoring tool I use into something semantically richer, but I had to get my resistance to the format on paper first.
 
-✳=(header {:level :h3 :date "2019-12-29"} "Extensible Textual Notation, part 4")🔚
+✳=(header {:level :h3 :date "2019-12-29"} "Extensible textual notation, part 4")🔚
 
 ✳= [:section {:columns 5}
       [:div {:span 2} (image "media/thinking-about-things.jpg" "laptop sticker reading 'thinking about things'" "mw20")]
-      [:div {:span 3} (blockquote "I read relentlessly. I don’t do any programming not directed at making the computer do something useful, so I don’t do any exercises. I try to spend more time thinking about the problem than I do typing it in." (link "http://web.archive.org/web/20160918041754/http://codequarterly.com/2011/rich-hickey/" "Rich Hickey"))]] 🔚
+  [:div {:span 3} (blockquote "I read relentlessly. I don’t do any programming not directed at making the computer do something useful, so I don’t do any exercises. I try to spend more time thinking about the problem than I do typing it in." [:br] (link "http://web.archive.org/web/20160918041754/http://codequarterly.com/2011/rich-hickey/" "Rich Hickey"))]] 🔚
 
 ✳= [:aside "inspiration for what the medium should make possible, and for my prose-first approach to thinking about it: Bret Victor's laptop sticker and Rich Hickey's mindset; the antithesis of the \"shut up and show me the code\" brogrammer ethos"] 🔚
 
@@ -349,7 +365,7 @@ Here's another on using the ✳=(in-code "dat://")🔚 protocol for ✳=(link "h
 
 Here's what would be a useful starting point for programmatic prose parsing: including a quotation in a piece of prose writing that gets parsed as a separate component and then added to a global list of quotations maintained by the text parser, with a link back to its original positional context within the piece of writing that quoted it.
 
-✳=(header {:level :h3 :date "2019-12-30"} "Extensible Textual Notation, part 5")🔚
+✳=(header {:level :h3 :date "2019-12-30"} "Extensible textual notation, part 5")🔚
 
 ✳=(header {:level :h5} "A concrete starting point")🔚
 
@@ -381,7 +397,7 @@ I don't want an outlining tool that helps me produce writing. I want a ✳=(em "
 
 ✳= (aside "that and the founder is building the core product around the demands of the LessWrong crowd and goes on [1/178] twitter rants about stuff he reads on SlateStarCodex. the app feels like the product of that kind of approach: unfocused and built around pseudoproblems.") 🔚
 
-✳=(header {:level :h3 :date "2019-12-31"} "Extensible Textual Notation, part 6")🔚
+✳=(header {:level :h3 :date "2019-12-31"} "Extensible textual notation, part 6")🔚
 
 Yesterday I got too caught up reading the documentation for libraries. Today I'm disabling my wifi and striking out into the wilderness with only the standard library (and my reference book) to help me.
 
@@ -389,7 +405,7 @@ First discovery: I probably don't need to use ✳=(in-code "specter")🔚 when �
 
 One thing that occurred to me when thinking about pulling quotes out of plaintext: while an individual paragraph should be the basic semantic unit of my own writing, the basic semantic unit of a quotation or reference should be a sequence of ✳=(em "one or more")🔚 paragraphs. This preserves more of the structure of the origin and aids in its display in other contexts. For storage purposes, though, it should merely be (for now) a sequence of strings. Worrying about the internal structure of the quote itself (lists, etc) can come later when the specs get more refined.
 
-✳=(header {:level :h3 :date "2020-01-05"} "Extensible Textual Notation, part 7")🔚
+✳=(header {:level :h3 :date "2020-01-05"} "Extensible textual notation, part 7")🔚
 
 With a markdown->hiccup parser in hand, I took on a warm-up exercise to map out the problem space and get comfortable with parsing the data I've already dumped in to these markdown files, I defined some contracts for the data formats I want to pull from the textual information using  ✳=(in-code "clojure.spec")🔚, which will serve as constraints on the expected behavior of other parsers I write to replace Markdown. It's pretty bare-bones so far, with stuff like the following:
 
@@ -421,13 +437,13 @@ These plus some functions to transform parsed ✳=(in-code "hiccup")🔚 data st
 
 But that's only the starting point. The real purpose here is to replace ✳=(in-code "markdown")🔚 with a notation format that represents ✳=(em "text as data")🔚 and lets the user easily convey other types of structured data within the text itself. To that end, I have to come up with a different format for notating the documents, a very brief example of this I sketched out above.
 
-There is plenty of prior art for this: I generated the first version of this blog using ✳=(in-code "pollen")🔚. I wanted to learn about the way ✳=(in-code "scribble")🔚, on which ✳=(in-code "pollen")🔚 is built parses plaintext into Racket data structures for manipulation, but the library is quite complex (the documentation is fantastic, but it focuses mostly on the API rather than how the parsers and readers are implemnted interally). It also reimplements much of what I intend to use ✳=(in-code "hiccup")🔚 to do.
+There is plenty of prior art for this: I generated the first version of this blog using ✳=(in-code "pollen")🔚. I wanted to learn about the way ✳=(in-code "scribble")🔚, on which ✳=(in-code "pollen")🔚 is built parses plaintext into Racket data structures for manipulation, but the library is quite complex (the documentation is fantastic, but it focuses mostly on the API rather than how the parsers and readers are implemented interally). It also reimplements much of what I intend to use ✳=(in-code "hiccup")🔚 to do.
 
 Luckily, I have been spared the experience of suffering through the entire ✳=(in-code "scribble")🔚 codebase by Bogdan Opanchuk's ✳=(link "https://github.com/fjarri/clojure-scribble" "Clojure implementation")🔚. I could simply use it directly, but I'm not interested in taking more shortcuts and adding more libraries to this project, especially when I know I'll have to add my own syntax to the notation and the parser rules to support them. I also won't really understand the way these parsers work unless I go forth and implement one myself. Fortunately, the project uses ✳=(in-code "marginalia")🔚 to give a guided tour through the internals of the code. This library may not be as comprehensive as the original implementation of ✳=(in-code "scribble")🔚, but Clojure's expressivity makes it far easier to understand the global structure of this smaller implementation and thus learn from it. 
 
 Rather than a ✳=(link "https://spec.commonmark.org/" "plaintext spec that monotonically grows in complexity")🔚 due to the workarounds to handle the corner cases generated by ambiguous syntax, I'm hoping to define as much of the expected structure using ✳=(in-code "clojure.spec")🔚, which strikes the right balance between the rigidity of a BNF grammar and the ambiguity of a plaintext spec, plus the additional leverage that comes with defining a spec as code: the ability to ✳=(link "https://clojure.org/guides/spec#_custom_generators" "generate arbitary adversarial examples")🔚 to ensure that corner cases are found quicker and dealt with in a more systematic fashion.
 
-✳=(header {:level :h3 :date "2020-01-11"} "Extensible Textual Notation, part 8")🔚
+✳=(header {:level :h3 :date "2020-01-11"} "Extensible textual notation, part 8")🔚
 
 One motivation for this concept was an incredibly useful design exercise when I was building a backend system at work: creating a ✳=(link "https://www.evanmiller.org/feature-matrix.html" "feature matrix")🔚 for the various sub-components to understand their interactions with one another and how those translate into both library code and user-facing features. (read Evan Miller's whole essay; it's a quick read and a succinct, lucid statement of a very powerful idea). In order to produce one, I had to step outside of my trusty text editor and flip over to Google Sheets to create a NxN grid, fill it up with the pair-wise interactions between the components, and then use an unholy spreadsheet formula to transpose those comma-delimited features into a discrete list with separate references to each column in the body of the matrix:
 
@@ -449,27 +465,27 @@ Sometimes it feels like our mental model of tooling for software still comes fro
 
 For one possible foundation for a different approach to managing the history of code, see Unison's concept of ✳=(link "https://www.unisonweb.org/docs/tour" "content-addressed code.")🔚 Content-addressing and tracking the history of functions as individual units means that they can break out of their original repos while maintaining their lineage. Instead of snapshots of whole libraries, functions could migrate from one library to another, picking up unique changes as they propagate their descendants into that new project's context. Code would have a ✳=(em "genealogy")🔚 rather than ✳=(em "dependencies")🔚. Similarly, I think there's a lot of potential power in storing arbitrary structured data in the same data structure as the code itself. We haven't really taken the conceptual leap towards developing applications around that model because we default to git for any new project and thus rely on its implicit view of the world. Hopefully that can change.
 
-✳=(header {:level :h3 :date "2020-01-11"} "Extensible Textual Notation, part 9")🔚
+✳=(header {:level :h3 :date "2020-01-11"} "Extensible textual notation, part 9")🔚
 
 Turns out I was more right about needing to implement my own ✳=(in-code "scribble")🔚-like syntax than I knew, because while taking the clojure implementation out for a spin, I discovered that it relies heavily on an ✳=(link "https://github.com/jwymanm/chiara" "unmaintained set of reader macros")🔚 that are incompatible with recent versions of Clojure because ✳=(in-code "clojure.spec")🔚 now enforces compile-time syntax of macros (like ✳=(in-code "defn")🔚).
 
 I'm going to have to write my own text->EDN parser that replicates what ✳=(in-code "scribble")🔚 relies on reader macros to do. I'm fortunately ✳=(em "not")🔚 trying to alter in any fundamental way how Clojure data is transformed into its AST; I'm just doing some preprocessing on plaintext so it's the right shape when it hits the clojure reader. Into the wilderness.
 
-✳=(header {:level :h3 :date "2020-01-21"} "Extensible Textual Notation, part 10")🔚
+✳=(header {:level :h3 :date "2020-01-21"} "Extensible textual notation, part 10")🔚
 
-While I have a decent enough concept of the ✳=(em "source")🔚 of the data generated through writing in plaintext, I don't yet have a good concept of the ✳=(em "target")🔚 of that data. I intend to use `datahike` as a persistent storage format, but it's daunting to think about where to start.
+While I have a decent enough concept of the ✳=(em "source")🔚 of the data generated through writing in plaintext, I don't yet have a good concept of the ✳=(em "target")🔚 of that data. I intend to use ✳=[:code "datahike"]🔚 as a persistent storage format, but it's daunting to think about where to start.
 
 Here's a good bootstrapping exercise for understanding the format and how it works: a quotes page in Perun. It will read a ✳=(in-code "quotes.edn")🔚 file, dump the data parsed out from that quotes file into a ✳=(in-code "datahike")🔚 db, and then use that data to generate the ✳=(in-code "hiccup")🔚 content for the page. Once that's in place, I'll have a better idea of the schema I need to yank quotes out of the posts where they're quoted and add them to this DB.
 
 One important benefit of using functions rather than markup to define quotes is the ability to ✳=(em "preserve context")🔚 by including the references back to the piece of writing containing the quotes. This was one of the great promises of project Xanadu, the ability to see in tandem the multiple layers of context surrounding a link to a passage from another page. I cannot create a system as fully dynamic as Xanadu, but I can use an intermediate evaluation step as text is read from its input format to capture the structure created by the text and its references.
 
-✳=(header {:level :h3 :date "2020-03-07"} "Extensible Textual Notation, part 11")🔚
+✳=(header {:level :h3 :date "2020-03-07"} "Extensible textual notation, part 11")🔚
 
 After a couple of half-hearted attempts to replicate the lozenge syntax of ✳=(in-code "pollen")🔚 using a Clojure ✳=(in-code "ANTLR")🔚 parser, I discovered the very new but very fully-featured ✳=(link "https://github.com/vivid-inc/ash-ra-template" (in-code "ash-ra-template"))🔚 library. 
 
 While I recognize that building my own parser is a good programming challenge, I also need to ask myself whether I need to undertake it before doing the work that I want to do in a medium that actually supports it. Right now, I'd prefer the latter.
 
-✳=(header {:level :h3 :date "2020-03-23"} "Extensible Textual Notation, part 12")🔚
+✳=(header {:level :h3 :date "2020-03-23"} "Extensible textual notation, part 12")🔚
 
 The text has extended itself beyond the limitations of Markdown. I now have the power of a real programming language at my disposal in my own writing, and I used it to replace every single backtick and bracket that Markdown required. In so doing, I more fluidly composed the structures provided by HTML by using tools better designed to manipulate them directly instead of burying them under a pre-selected menu of abstractions. I understand HTML better as a result - its structure was not hidden from me. By using a dynamic, computational medium for writing, I can perform Jenny Odell calls "context creation" - I can fully express the context of this page's own creation, false starts, half-baked parsers, and all.
 
@@ -477,9 +493,9 @@ I just wish it hadn't taken until a ✳=(link "https://en.wikipedia.org/wiki/201
 
 ✳=(header {:level :h3 :date "2020-03-29"}  "Paragraph detection within " (in-code "ash-ra-template"))🔚
 
-Overall, I'm quite pleased with how well ✳=(in-code "ash-ra-template")🔚 is working to directly create HTML using the power of Clojure and hiccup only when I need it. Now that I know how to make my own rendering library ✳=(link "https://github.com/vivid-inc/ash-ra-template/issues/2" (str "available to " (in-code "ash-ra-template")))🔚, I'm seamlessly replacing Markdown's defaults with functions that I have total control over. But there's one thing missing from the experience of using markdown or other plaintext formats - paragraph detection. If I want paragraphs now, I have to insert ✳=(in-code "[:p \"content\"]")🔚 blocks, which effectively means I'm ✳=(em "just")🔚 writing in hiccup data structures and not plaintext, defeating the purpose of using a templating engine at all.
+Overall, I'm quite pleased with how well ✳=(in-code "ash-ra-template")🔚 is working to directly create HTML using the power of Clojure and hiccup only when I need it. Now that I know how to make my own rendering library ✳= [:a {:href "https://github.com/vivid-inc/ash-ra-template/issues/2"} "available to " (in-code "ash-ra-template")]🔚, I'm seamlessly replacing Markdown's defaults with functions that I have total control over. But there's one thing missing from the experience of using markdown or other plaintext formats - paragraph detection. If I want paragraphs now, I have to insert ✳=(in-code "[:p \"content\"]")🔚 blocks, which effectively means I'm ✳=(em "just")🔚 writing in hiccup data structures and not plaintext, defeating the purpose of using a templating engine at all.
 
-Luckily, the documentation for ✳=(link "https://docs.racket-lang.org/pollen/third-tutorial.html" (in-code "pollen"))🔚 suggests a path forward: post-processing the text after template evaluation to infer paragraph and linebreaks. The documentation for the ✳=(link "https://docs.racket-lang.org/pollen/Decode.html#%28def._%28%28lib._pollen%2Fdecode..rkt%29._decode-paragraphs%29%29" (str (in-code "detect-paragraphs") " function"))🔚 also has some useful test cases for paragraph inference on the basis of pre-existing blocks.
+Luckily, the documentation for ✳=(link "https://docs.racket-lang.org/pollen/third-tutorial.html" (in-code "pollen"))🔚 suggests a path forward: post-processing the text after template evaluation to infer paragraph and linebreaks. The documentation for the ✳=(link "https://docs.racket-lang.org/pollen/Decode.html#%28def._%28%28lib._pollen%2Fdecode..rkt%29._decode-paragraphs%29%29" (in-code "detect-paragraphs") " function")🔚 also has some useful test cases for paragraph inference on the basis of pre-existing blocks.
 
 Tokenizing the text into paragraphs after evaluation also potentially allows for the recording of the text as facts in a database (see above). I'm not there yet, but I'm about to merge into master and leave Markdown behind for good. 
 
@@ -487,7 +503,7 @@ Tokenizing the text into paragraphs after evaluation also potentially allows for
 
 I made good progress generating content with ✳=(in-code "ash-ra-template")🔚 - until I wanted to dynamically render an image as part of the build process. I ran into two walls imposed by the closed environment of ✳=(in-code "ShimDandy")🔚: lack of access to the local filesystem, and the Java classes necessary to render images using ✳=(in-code "clojure2d")🔚 are not available in that context either.
 
-Fortunately, I recently discovered ✳=(link "https://github.com/weavejester/comb" (in-code "comb"))🔚, a library much like ✳=(in-code "ash-ra-template")🔚 by the author of ✳=(in-code "hiccup")🔚, which is pretty much ✳=(em "exactly")🔚 what I was thinking about building above, and its parser is exceptionally simple. It lets me seamlessly embed generative artwork into my pages as easily as I can use my templating functions to emphasize text or add headers. You can see an example ✳=(link "holotype.html" "here.")🔚
+Fortunately, I recently discovered ✳=(link "https://github.com/weavejester/comb" (in-code "comb"))🔚, a library much like ✳=(in-code "ash-ra-template")🔚 by the author of ✳=(in-code "hiccup")🔚, which is pretty much ✳=(em "exactly")🔚 what I was thinking about building above, and its parser is exceptionally simple. It lets me seamlessly embed generative artwork into my pages as easily as I can use my templating functions to emphasize text or add headers. You can see an example ✳= [:a {:href "/holotype.html"} "here."] 🔚
 
 In addition to that, the fact that the templates are evaluated in the same context as the rest of my code adds the following benefits:
 ✳=[:ul [:li "I can define a map of metadata attributes at the top of the post that is available to the rendering function, so I can set page-level attributes from within each post itself - no kludges like " (link "https://github.com/hashobject/perun/blob/ca090ca77a3aac18b4ff0ac330febb88c26cab84/src/io/perun/yaml.clj" "YAML front matter") " - I handle my posts' data in pure Clojure."] [:li "I no longer need to install my rendering code to my local maven repo to call it from the templates, which lets me" "rebuild all the pages from the REPL, and rebuild the pages " (em "much") " faster"]]🔚
@@ -499,7 +515,8 @@ It even uses the same delimiters, which made it trivial to port all my existing 
 
 I wrote this entry using an assemblage of tools intended to give me real-time feedback on the HTML and CSS generated by my templating functions.
 
-Local development is furnished by ✳=(in-code (link "https://github.com/kachayev/nasus" "nasus"))🔚. Using this simple and lightweight HTTP server, I can just launch ✳=(in-code "clojure -A:serve")🔚 to fire up a web server on localhost to preview what page changes look like.
+Local development is furnished by ✳=(in-code (link "https://github.com/kachayev/nasus" "nasus"))🔚. Using this simple and lightweight HTTP server, I can launch ✳=(in-code "clojure -A:serve")🔚 to fire up a web server on localhost to preview what page changes look like as soon as the render loop finishes.
+
 
 Originally, I performed batch builds of all files or individual files by passing the names of files to render to ✳=(in-code "respatialized.build/-main")🔚, then refreshed my web browser to get the update via ✳=(in-code "nasus")🔚. But I felt that the latency and context switch of manually rendering files broke my focus. I hope to keep my focus on what I write, not on actively monitoring the contents. I wanted a create-eval-render-loop.
 
@@ -510,7 +527,6 @@ Invoking the shell command ✳=(in-code "clojure -M -m respatialized.build")🔚
 Restarting this event loop is a little slow, owing mostly due to Clojure rebuilding the classpath on startup. But there's a way around that. When I needed to redefine some of the library code like ✳= (in-code "respatialized.render/header") 🔚 on the fly, it wasn't a problem. ✳= (in-code "respatialized.build/-main") 🔚 also runs trivially in a REPL. All I had to do was switch to that namespace, call ✳=(in-code "(future (-main))")🔚, and I was off. I could extend, rewrite, or add functions from ✳= (in-code "respatialized.render") 🔚, re-refer the namespace, and use new definitions without restarting the loop.
 
 I have to use it with caution; I accidentally started a recursive succession of  multiple file watchers by accident because I forgot to wrap "✳= (in-code "(future (-main))") 🔚" in a string. A more defined approach to managing application components could avoid that, but I was surprised by the fecundity of my own creation, even as it slowed my text editor to a crawl.
-
 
 ✳=(header {:level :h3 :date "2021-04-05"} "Growing a website generator")🔚
 
@@ -544,6 +560,6 @@ None of the validation logic that now exists would work without the efforts of V
 
 I have simplified the code that generates this website to the point where I can successfully extract it into its own static site generation library, called ✳=(link "https://github.com/fabricate-site/fabricate" "fabricate")🔚. This ✳=(link "https://github.com/respatialized/respatialized.github.io" "source repo")🔚 now consumes that code instead of defining its generation process itself. The ✳=(in-code (link "https://www.dictionary.com/browse/holotype" "holotype"))🔚 has become a prototype.
 
-Using the ✳=(link "https://fabricate-site.github.io/fabricate/finite-schema-machines.html" "organizing concept")🔚 of finite-state machines, I have developed an extensible method of defining the steps necessary to create a collection of HTML pages.
+Using the ✳=(link "https://fabricate.site/finite-schema-machines.html" "organizing concept")🔚 of finite-state machines, I have developed an extensible method of defining the steps necessary to create a collection of HTML pages.
 
-You can read more about the intent and point of view informing Fabricate ✳=(link "https://fabricate-site.github.io/fabricate/" "here")🔚. I hope it brings the power and flexibility of Pollen's publishing system to the Clojure ecosystem. I also hope it means that I can write about things apart from the website generation process on ✳=(em "this")🔚 site.
+You can read more about the intent and point of view informing Fabricate ✳=(link "https://fabricate.site/fabricate/" "here")🔚. I hope it brings the power and flexibility of Pollen's publishing system to the Clojure ecosystem. I also hope it means that I can write about things apart from the website generation process on ✳=(em "this")🔚 site.
