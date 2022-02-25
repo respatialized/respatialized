@@ -7,7 +7,7 @@
 ✳(def metadata {:title "Outline for 'Have You Tried Rubbing A Database On It?'" :page-style (css [:article {:hyphens "auto"}]) })🔚
 
 ✳=[:h3 (:title metadata)]🔚
-✳=[:aside [:em "For the purposes of my application to the conference, this page should be considered the draft script to what I will present, not the visual component of presentation itself. I won't be presenting a wall of text for the video."]]🔚
+✳=[:aside [:em "For the purposes of my application to the conference, this page should be considered the draft script to what I will present, not the visual component of presentation itself. I won't be presenting a wall of text for the video. I will have my REPL running as I record and flip to it as necessary to demonstrate my point."]]🔚
 ✳//[:section {:class "point"}
 
 ✳=[:h4 "What this talk is"]🔚
@@ -90,7 +90,9 @@ I realized later on that you can put a finite state machine ✳=[:em "in"]🔚  
 ✳=[:h4 "How does this not turn into an unmanageable mess?"]🔚
 With practice.
 
-But ✳=[:code "malli"]🔚 helps too. Asami doesn't enforce a schema, so ✳=[:code "malli"]🔚 data schemas can put a fence around certain types of state modifications and also give end users a guide to the signature of the functions they need to use to play nicely in Fabricate's yard.
+But ✳=[:code "malli"]🔚 helps too. ✳=[:code "malli"]🔚 is a data validation and parsing library for Clojure that allows you to specify validation schemas using a syntax similar to ✳=[:code "hiccup"]🔚, allowing its users to treat specifications as data. Like ✳=[:code "spec"]🔚, which inspired it, it overlaps in some of its capabilities with a dependent type system, but can be deployed dynamically at compile, dev, or runtime.
+
+Asami doesn't enforce a schema, so ✳=[:code "malli"]🔚 data schemas can put a fence around certain types of state modifications and also give end users a guide to the signature of the functions they need to use to play nicely in Fabricate's yard.
 
 ]//🔚
 
