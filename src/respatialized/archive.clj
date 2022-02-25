@@ -108,20 +108,21 @@
                            site.fabricate.page/namespace
                            site.fabricate.page/metadata]
                     :as page-map}]
-  (->> evaluated-content
-       page-parser
-       (clojure.walk/postwalk #(if (and (map? %)
-                                        (every? #{:tag :attrs :contents}
-                                                (keys %)))
-                                 (parsed->asami %) %))
-       (#(assoc
-          %
-          :db/ident filename
-          :respatialized.writing/title title))
-       (merge (select-keys page-map [:site.fabricate.file/filename
-                                     :site.fabricate.page/title
-                                     :site.fabricate.page/namespace
-                                     :site.fabricate.page/metadata]))))
+  (let [parsed (page-parser evaluated-content)]
+    (when (not= ::m/invalid parsed)
+      (->> parsed
+           (clojure.walk/postwalk #(if (and (map? %)
+                                            (every? #{:tag :attrs :contents}
+                                                    (keys %)))
+                                     (parsed->asami %) %))
+           (#(assoc
+              %
+              :db/ident filename
+              :respatialized.writing/title title))
+           (merge (select-keys page-map [:site.fabricate.file/filename
+                                         :site.fabricate.page/title
+                                         #_:site.fabricate.page/namespace
+                                         :site.fabricate.page/metadata]))))))
 
 (defn replacement-annotation [kw]
   (->> kw str (drop 1) (#(concat % (list \'))) (apply str) keyword))
@@ -152,9 +153,12 @@
                   (d/db db) filename)
              (catch Exception e nil))
         asami-post (page->asami page-data)]
-    (if (empty?
-         existing-post)
+    (cond
+      (nil? asami-post) (do (println "skipping recording") nil)
+      (empty?
+       existing-post)
       (d/transact db {:tx-data [asami-post]})
+      :else
       (d/transact
        db
        {:tx-data
