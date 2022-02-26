@@ -1,0 +1,43 @@
+✳(ns respatialized.writing.links-perma-refs
+(:require [garden.core :refer [css style]]
+[hiccup2.core :refer [html]]
+[hiccup.util :refer [escape-html]]))🔚
+
+
+✳(def metadata {:title "Links, Permanent References, and Content-Addressable Text" :page-style (css [:article {:hyphens "auto"}] [:h1 {:line-height "1.15em"}]) })🔚
+
+✳=[:h1 (:title metadata)]🔚
+✳=[:time "2022-02-26"]🔚
+
+I've been thinking about how links bind pages together. Linking is a powerful and capable technology that serves many purposes - ✳=[:a {:href "https://subconscious.substack.com/p/all-you-need-is-links?utm_source=url"} "\"all you need is links.\""]🔚
+But links have their shortcomings. Careless authors misplace them.  Software rots them. Servers die and erase them. Botnets and URL speculators replace them with spam. Failed companies devour them.
+
+Gordon Brander offers some thoughts in that post on how to balance the need to link to granular pieces of a text with the fact that such identifiers are naturally challenging to keep up-to-date, eventually landing on text fragment URLs as the method most resistant to changes in the document. I agree with him that this is the only robust solution for linking to ✳=[:em "external"]🔚 documents; but for ✳=[:em "internal"]🔚 links, on pages written by a single author with the help of a static website generator, more applications are possible.
+
+Many solutions to the problem of brittle links have been proposed; I only want to examine what makes sense in the context of Fabricate.
+
+Some definitions of the term binding I pilfered from ✳=[:a {:href "https://www.websters1913.com/words/Bind"} "Webster's 1913:"] 🔚
+
+✳=[:dl
+[:dt "bind"]
+[:dd "To confine by any ligature"]
+[:dd "To contract; to grow hard or stiff; to cohere or stick together in a mass"]
+[:dd "To extert a binding or restraining influence"]
+[:dd "A ligature or tie for grouping notes"]
+]🔚
+
+Links between things bind them together; ✳=[:a {:href "https://plato.stanford.edu/entries/lambda-calculus/#VarBouFre"} "binding a name ties it to an object."]🔚 The natural sense of 'binding' has enough breadth to cover the implication that the act of binding together sometimes makes things brittle or more difficult to change. Binding through links can be used to ✳=[:a {:href "http://www.iwritewordsgood.com/apl/patterns/apl208.htm"} "gradually stiffen"]🔚 the web of ideas on a single site with many pages.
+
+I can think of a few design criteria that fall out of the idea of links-as-bindings:
+
+1. An identifier chosen by the author is always more important than one merely derived from the content.
+
+2. That said, forcing authors to manually add and maintain identifiers for every section, subsection, or paragraph of text will ruin the writing experience.
+
+3. Consequently, derived identifiers can and should be used alongside author-chosen identifiers, as they can make each other more robust. A good author-chosen ID should reliably link to the same piece of content, even if small changes are made to it.
+
+Bindings should impose some constraints, but they must be able to bend without breaking.
+
+✳=[:h5 [:code "tf-idf"] " based hashing" ]🔚
+
+By ranking terms and their importance to a document, one could come up with a hashing scheme that allows a paragraph's auto-identifier to change only if its most important terms change; this would allow paragraphs to be identified by their core ideas in a loose and flexible way. Sometimes the idea would change through the editing process, and sometimes it wouldn't.
