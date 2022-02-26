@@ -14,7 +14,10 @@
    [malli.transform :as mt]
    [clojure.java.shell :as sh]
    [malli.util :as mu])
-  (:import [java.security MessageDigest]))
+  (:import [java.security MessageDigest]
+           [java.util.concurrent Executors]))
+
+(def exec (Executors/newSingleThreadExecutor))
 
 ;; the approach that makes the most sense right now:
 ;; schema-on-read at the DB level, with malli schemas
@@ -157,12 +160,14 @@
       (nil? asami-post) (do (println "skipping recording") nil)
       (empty?
        existing-post)
-      (d/transact db {:tx-data [asami-post]})
+      (d/transact-async db {:tx-data [asami-post]
+                            :executor exec})
       :else
-      (d/transact
+      (d/transact-async
        db
        {:tx-data
-        [(merge (into {} (map (fn [[k v]] [(replacement-annotation k) v]) asami-post)))]}))))
+        [(merge (into {} (map (fn [[k v]] [(replacement-annotation k) v]) asami-post)))]
+        :executor exec}))))
 
 (comment
 
@@ -277,7 +282,8 @@
                                        :respatialized.writing/title title
                                        :filename filename))))))
                       (filter some?))]
-    (d/transact test-db articles))
+    (d/transact-async test-db {:tx-data  articles
+                               :executor exec}))
 
   (d/q '[:find ?c :tg/contains ?q
          :where [?e :html/tag :blockquote]
