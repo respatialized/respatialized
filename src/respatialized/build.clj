@@ -107,12 +107,22 @@
                     initital-state)
       (println "done"))
 
+  (do (fsm/complete operations
+                    "content/holotype4.html.fab"
+                    initital-state)
+      (println "done"))
+
   )
 
 (comment
 
   (-> write/state
       (send (constantly initital-state))
+      (#(do (set-error-handler!
+             %
+             (fn [ag ^Throwable ex]
+               (.printStackTrace ex)
+               ag)) %))
       (send-off write/draft!)
       (send-off
        (fn [{:keys [site.fabricate/settings]
@@ -133,6 +143,8 @@
                    (io/file output-dir)))))))
 
   (send-off write/state write/stop!)
+
+  (agent-error write/state)
 
   (get-in @write/state
           [:site.fabricate/pages
