@@ -19,11 +19,14 @@
 
 ✳=(header (:title metadata))🔚
 
-✳=(blockquote
-  {:author "Christopher Alexander"
-   :source "A City Is Not A Tree"
-   :url "https://www.patternlanguage.com/archive/cityisnotatree.html"}
-  "It must be emphasized, lest the orderly mind shrink in horror from anything that is not clearly articulated and categorized in tree form, that the idea of overlap, ambiguity, multiplicity of aspect and the semilattice are not less orderly than the rigid tree, but more so. They represent a thicker, tougher, more subtle and more complex view of structure." )🔚
+✳=
+[:figure
+[:blockquote {"data-include-quote" true}
+
+"It must be emphasized, lest the orderly mind shrink in horror from anything that is not clearly articulated and categorized in tree form, that the idea of overlap, ambiguity, multiplicity of aspect and the semilattice are not less orderly than the rigid tree, but more so. They represent a thicker, tougher, more subtle and more complex view of structure." ]
+[:figcaption "Christopher Alexander, "
+[:a {:href "https://www.patternlanguage.com/archive/cityisnotatree.html"}
+"A City Is Not A Tree"]]]🔚
 ✳= [:aside "essential reading."] 🔚
 
 ✳=(header {:level :h3 :date "2019-03-10"} "Preliminaries")🔚

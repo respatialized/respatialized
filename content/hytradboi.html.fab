@@ -1,8 +1,10 @@
 ✳(ns respatialized.writing.hytradboi
-(:require [garden.core :refer [css style]]
-[hiccup2.core :refer [html]]
-[hiccup.util :refer [escape-html]]
-  [site.fabricate.prototype.read.grammar :refer [delimiters]]))🔚
+  (:require [garden.core :refer [css style]]
+            [respatialized.archive :as archive]
+            [asami.core :as d]
+            [hiccup2.core :refer [html]]
+            [hiccup.util :refer [escape-html]]
+            [site.fabricate.prototype.read.grammar :refer [delimiters]]))🔚
 
 ✳(def metadata {:title "Outline for 'Have You Tried Rubbing A Database On It?'" :page-style (css [:article {:hyphens "auto"}]) })🔚
 
@@ -115,17 +117,25 @@ My website's content, after being parsed into Clojure/Hiccup data structures, ge
 
 ]//🔚
 
-
-✳//[:section {:class "point"}
-✳=[:h4 "The FSM" ]🔚
-Here is a diagram of the state machine Fabricate uses, generated for this HTML page by Fabricate from Fabricate's own source code. Most documentation is bad because most documentation tools lack the capability of programmatic access to the contents of the source code they're describing (like mkdocs) or when they do have that access, it is bluntly and uniformly applied without any ability to organize the contents thematically (like javadocs).
-
-Fabricate overcomes this limitation by combining self-reference with narrative. At every level. (see "This Website Is Not A Tree")
-]//🔚
-
 ✳//[:section {:class "point"}
 ✳=[:h4 "Leveraging the database" ]🔚
-My website has a quotes page (it's not as good as Bret Victor's). What's interesting about it is that it's generated programmatically from all the other pages on my site by annotating quotes with a specific HTML attribute.
+I can use this capability to build out a quotes page (it's not as good as Bret Victor's). What's interesting about it is that it's generated programmatically from all the other pages on my site by annotating quotes with a specific HTML attribute.
+
+
+✳+= (archive/query->table
+    '[:find
+      ?title ?q
+      :where
+      [?p :respatialized.writing/title ?title]
+      [?p ?a* ?e]
+      [?e :html.attribute.data/include true]
+      (or [?e :html/tag :blockquote]
+          [?e :html/tag :q])
+      [?e ?a2* ?q]
+      [(string? ?q)]]
+    (d/db archive/test-db)
+    {:col-renames {'?title "Title" '?fp "input file path" '?q "Quote contents"}})🔚
+
 
 ]//🔚
 
@@ -144,6 +154,31 @@ You can do whatever you want because - to quote Matthew Butterick - ✳=[:q [:em
 
 ✳//[:section {:class "point"}
 ✳=[:h4 "Demo" ]🔚
-I'm going to modify my quotes page to include ✳=[:em "all"]🔚  quotes, not just those with the  ✳=[:em "display"]🔚 attribute.
+I'm going to modify the query to include ✳=[:em "all"]🔚  quotes, not just those with the  ✳=[:code "include"]🔚 attribute.
+
+
+✳+=
+[:div {:style (style {:height "12em" :overflow "auto"})}
+(archive/query->table
+    '[:find
+         ?title ?q
+         :where
+         [?p :respatialized.writing/title ?title]
+         [?p ?a* ?e]
+         (or [?e :html/tag :blockquote]
+             [?e :html/tag :q])
+         [?e ?a2* ?q]
+         [(string? ?q)]]
+    (d/db archive/test-db)
+    {:col-renames {'?title "Title" '?fp "input file path" '?q "Quote contents"}})]🔚
+
+]//🔚
+
+✳//[:section {:class "point"}
+✳=[:h4 "Conclusion" ]🔚
+
+I already got some more ideas for refining the queries I use: I could identify quotes I repeat across pages; I could condense the sub-elements of each quote into a single string for search purposes, or I could query the contents of a page and return them in a random order for an exercise in aleatoric writing.
+
+I hope you have found this talk interesting, and that it has given you other ideas about how you might use a database as a tool for writing documents, not just for storing them.
 
 ]//🔚
