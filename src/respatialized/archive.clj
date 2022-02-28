@@ -157,7 +157,7 @@
              (catch Exception e nil))
         asami-post (page->asami page-data)]
     (cond
-      (nil? asami-post) (do (println "skipping recording") nil)
+      (nil? asami-post) (do (println "skipping recording") (future nil))
       (empty?
        existing-post)
       (d/transact-async db {:tx-data [asami-post]
