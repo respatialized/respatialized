@@ -196,16 +196,19 @@
     {:padding ".1em", :border-radius ".3em",
      :white-space "normal"}]
    [:.token :.comment :.token :.prolog :.token :.doctype :.token :.cdata {:color "slategray"}]
-   [:.token :.punctuation {:color "#999"}]
    [:.token :.namespace {:opacity ".7"}]
    [:.token :.property :.token :.tag :.token :.boolean :.token :.number :.token :.constant :.token :.symbol :.token :.deleted {:color "#905"}]
    [:.token :.selector :.token :.attr-name :.token :.string :.token :.char :.token :.builtin :.token :.inserted {:color "#690"}]
    [:.token :.operator :.token :.entity :.token :.url :.language-css " " :.token :.string :.style " " :.token :.string {:color "#9a6e3a", :background "hsla(0,0%,100%,.5)"}]
    [:.token :.atrule :.token :.attr-value :.token :.keyword {:color "#07a"}]
    [:.token :.function :.token :.class-name {:color "#DD4A68"}]
-   [:.token :.regex :.token :.important :.token :.variable {:color "#e90"}]
+   [:.token :.regex :.token #_ :.important :.token :.variable {:color "#66220e" }]
+   [:.operator {:color "#66220e"}]
+   [:.token [:.operator {:color "#66220e"}]]
+   #_[:.token :.punctuation {:color "#222"}]
+   [:.token [:.punctuation {:color "#222"}]]
    [:.token :.important :.token :.bold {:font-weight "bold"}]
-   [:.token :.italic {:font-style "italic"}]])
+   #_[:.token :.italic {:font-style "italic"}]])
 
 (def highlight-rules
   (list

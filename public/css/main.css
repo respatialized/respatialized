@@ -149,10 +149,6 @@ pre, [class*="language-"] {
   color: slategray;
 }
 
-.token, .punctuation {
-  color: #999;
-}
-
 .token, .namespace {
   opacity: .7;
 }
@@ -178,16 +174,24 @@ pre, [class*="language-"] {
   color: #DD4A68;
 }
 
-.token, .regex, .token, .important, .token, .variable {
-  color: #e90;
+.token, .regex, .token, .token, .variable {
+  color: #66220e;
+}
+
+.operator {
+  color: #66220e;
+}
+
+.token .operator {
+  color: #66220e;
+}
+
+.token .punctuation {
+  color: #222;
 }
 
 .token, .important, .token, .bold {
   font-weight: bold;
-}
-
-.token, .italic {
-  font-style: italic;
 }
 
 @import "https://fonts.googleapis.com/css2?family=Inter:wght@600;900&display=swap";
