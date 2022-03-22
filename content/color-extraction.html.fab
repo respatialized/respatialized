@@ -1,0 +1,86 @@
+✳(ns respatialized.colors.extraction
+(:require [tech.v3.tensor]
+[clojure.data.json :as json]
+[garden.core :as garden]
+[applied-science.darkstar :as darkstar])) 🔚
+
+✳(def metadata {:title "Color Extraction Through Curve Fitting"})🔚
+
+✳=[:h1 (:title metadata)]🔚
+
+I would like to extract colors from an image. In so doing, I would like to meet two requirements:
+✳= [:dl [:dt "Recognizability"] [:dd "The colors should be representative of the \"dominant\" colors in the image."]
+  [:dt "Contrast"] [:dd "The levels of contrast in the palette extracted should respect accessibility guidelines for appropriate levels of contrast."]] 🔚
+
+This can be thought of as a constraint-based optimization problem: how can I fit a perceptual curve to the colors in an image?
+
+✳=[:h2 "Example images"]🔚
+
+Some public domain artwork will serve as a good starting point.
+
+✳(def example-images [{:title "Carpente" :year 1944 :artist "Reijer Stolk" :img/url "https://live.staticflickr.com/65535/51913654989_7490d04a5a_4k.jpg"
+:source "https://www.flickr.com/photos/vintage_illustration/51913654989/in/album-72177720297063629/"}
+{:title "New York from the 34th Street Ferry" :year 1914 :artist "Rachael Robinson Elmer" :img/url "https://media.nga.gov/iiif/e848d2b4-72bb-4abc-8812-4aa2ab291d42/full/full/0/default.jpg" :source "https://www.nga.gov/collection/art-object-page.147966.html"}] )🔚
+
+✳= (apply conj [:div]
+     (for [{:keys [title artist img/url source year]} example-images]
+       [:figure [:img {:src url}] [:figcaption [:a {:href source} title] " by " artist ", " year]]))🔚
+
+✳=[:h2 "Contrast guidelines"]🔚
+
+The US General Services Administration has a short ✳=[:a {:href "https://accessibility.digital.gov/visual-design/color-and-contrast/"} "explainer site"]🔚 on color contrast for accessibility purposes:
+
+✳=[:blockquote "Make sure the contrast between the text and background is greater than or equal to 4.5:1 for small text and 3:1 for large text."]🔚
+
+This requirement is relaxed for non-essential elements:
+
+✳=[:blockquote "Color contrast ratio requirements apply to text and graphics that are essential for understanding the content or functionality. You don’t need to meet color contrast requirements for logos or incidental graphic elements."]🔚
+
+This produces the basis for the perceptual curve. The lightest color can be thought of as one extreme of the curve, and the darkest can be thought of as the opposite extreme. The necessary contrast between textual elements and their backgrounds can be achieved by taking colors from the extremes of the curve.
+
+Here's an example:
+
+✳=(let [plot-edn
+      {:width 300 :height 200
+       :title "Contrast Ratios Between Colors"
+       :data {:values [{"color" 0 "ratio" 4.5} {"color" 1 "ratio" 3}
+                       {"color" 2 "ratio" 2.5} {"color" 3 "ratio" 2.0}
+                       {"color" 4 "ratio" 1.5} {"color" 5 "ratio" 1.0}
+                       {"color" 6 "ratio" 0.5} {"color" 7 "ratio" 0.0}]}
+       :layer [{:mark {:type :rule :color "gray"}
+                :encoding {:y {:datum 3.0 :type :quantitative}}}
+               {:mark {:type :bar
+                       :color "black"}
+                :encoding {:x {:field "color" :type :ordinal}
+                           :y {:field "ratio" :type :quantitative}}}]}]
+    (-> plot-edn
+          json/write-str
+          darkstar/vega-lite-spec->svg)
+    #_[:img {:src "./media/color-curve.svg"}]
+
+    )  🔚
+
+This is a pretty basic curve; others are possible. What's important to note is that it sets the minimum bounds: any textual element needs to have a contrast ratio of at least 3 when compared with the darkest or lightest color.
+
+✳=[:h2 "Measuring constrast between colors"]🔚
+
+The easiest way to get started is just to use an eyedropper to manually pick out some colors and find the contrast ratios between them.
+✳(def carpente-manual-colors ["#332523" "#ffc81c" "#7e2322" "#ca3169" "#cb342f" "#727a30" "#e46c2d" "#f4f0eb" "#f5f1ec" ])🔚
+
+✳=(apply conj [:div {:style (garden/style {:display "flex" })}]
+(for [color carpente-manual-colors]
+[:div {:style (garden/style {:flex "0 1 3em" :background-color color :height "2em"})}]))🔚
+
+The ✳=[:a {:href "https://www.accessibility-developer-guide.com/knowledge/colours-and-contrast/how-to-calculate/"} "Accessibility Developer Guide"]🔚, following the recommendations of the W3C, provides a definition of "relative luminance", which can be calculated using any RGB hex code.
+
+Returning to the plot above with those demo colors, we can recolor it so that the bars visually depict the contrast ratios instead of measuring them in a purely quantitative manner.
+
+For a "light theme" the basis color for defining contrast ratios would be the off-white color of ✳=(let [c (last carpente-manual-colors)] [:span c [:span {:style (garden/style {:color c} )} "◤"]])🔚, whereas for a "dark theme" it would be the near-black color of ✳=(let [c (first carpente-manual-colors)] [:span c [:span {:style (garden/style {:color c} )} "◤"]])🔚.
+
+
+
+✳=[:h2 "Measuring the representativeness of a color"]🔚
+
+✳=[:h2 "Defining the objective function"]🔚
+
+I will need to optimize over both of these constraints simultaneously.
