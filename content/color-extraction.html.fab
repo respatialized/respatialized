@@ -71,13 +71,46 @@ The easiest way to get started is just to use an eyedropper to manually pick out
 (for [color carpente-manual-colors]
 [:div {:style (garden/style {:flex "0 1 3em" :background-color color :height "2em"})}]))🔚
 
-The ✳=[:a {:href "https://www.accessibility-developer-guide.com/knowledge/colours-and-contrast/how-to-calculate/"} "Accessibility Developer Guide"]🔚, following the recommendations of the W3C, provides a definition of "relative luminance", which can be calculated using any RGB hex code.
 
-Returning to the plot above with those demo colors, we can recolor it so that the bars visually depict the contrast ratios instead of measuring them in a purely quantitative manner.
+We need two fomulas to measure the visual contrast between two colors. The ✳=[:a {:href "https://www.accessibility-developer-guide.com/knowledge/colours-and-contrast/how-to-calculate/"} "Accessibility Developer Guide"]🔚 provides an example of how to compare two color using their relative luminance. It links to the W3C, which defines "relative luminance" for the SRGB color space. It can be calculated using any RGB hex code.
 
-For a "light theme" the basis color for defining contrast ratios would be the off-white color of ✳=(let [c (last carpente-manual-colors)] [:span c [:span {:style (garden/style {:color c} )} "◤"]])🔚, whereas for a "dark theme" it would be the near-black color of ✳=(let [c (first carpente-manual-colors)] [:span c [:span {:style (garden/style {:color c} )} "◤"]])🔚.
+✳=[:dl [:dt [:b "Relative luminance"]]
+   [:dd [:b "L"] " = 0.2126 * R + 0.7152 * G + 0.0722 * B"
+    [:dl [:dt [:b "R"]] [:dd "if RsRGB <= 0.03928 then R = RsRGB/12.92 else R = ((RsRGB+0.055)/1.055) ^ 2.4"]
+     [:dt [:b "G"]] [:dd "if RsRGB <= 0.03928 then G = GsRGB/12.92 else G = ((GsRGB+0.055)/1.055) ^ 2.4"]
+     [:dt [:b "B"]] [:dd "if RsRGB <= 0.03928 then B = BsRGB/12.92 else B = ((BsRGB+0.055)/1.055) ^ 2.4"]]]
+ [:dt [:b "Contrast Ratio"]] [:dd [:b "C"] " = (L1 + 0.05) / (L2 + 0.05)"
+                         [:dl [:dt "L1"] [:dd "The lighter of the two colors"]
+                          [:dt "L2"] [:dd "The darker of the two colors"]]]]🔚
+
+✳=[:h5 "Implementations in Clojure"]🔚
+
+✳+(defn hex->rl [hex-color]
+   (let [hex (if #(.startsWith hex-color "#") (subs hex-color 1) hex-color)
+          [R G B] (map
+                   (fn [hex-chars]
+                     (-> (apply str hex-chars)
+                         (Integer/parseInt 16)
+                         (/ 255.0)
+                         (#(if (<= % 0.03928) (/ % 12.92)
+                               (Math/pow (/ (+ % 0.055) 1.055) 2.4)))))
+                   (partition 2 hex))]
+     (+ (* 0.2126 R) (* 0.7152 G) (* 0.0722 B))))🔚
+
+✳+(defn rls->cr [colors]
+   (let [L1 (apply max colors)
+         L2 (apply min colors)]
+     (/ (+ L1 0.05) (+ L2 0.05))))🔚
 
 
+
+For a "light theme" the basis color for defining contrast ratios would be the off-white color of ✳=(let [c (last carpente-manual-colors)] [:span c [:span {:style (garden/style {:color c} )} "◤"]])🔚, whereas for a "dark theme" it would be the near-black color of ✳=(let [c (first carpente-manual-colors)] [:span c [:span {:style (garden/style {:color c} )} "◤"]])🔚. The contrast ratio of those colors is:
+
+✳+=(rls->cr [(hex->rl (last carpente-manual-colors))
+              (hex->rl (first carpente-manual-colors)) ])🔚
+
+
+Returning to the plot above with those demo colors, we can recolor it so that the bars visually depict the contrast ratios instead of measuring them in a purely quantitative manner, and we can do so with actual example colors instead of abstractly defined ratios.
 
 ✳=[:h2 "Measuring the representativeness of a color"]🔚
 
