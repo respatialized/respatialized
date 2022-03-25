@@ -53,7 +53,7 @@
              (println "writing page content to" output-file)
              (spit output-file rendered-content)
              (println "Recording page data in database")
-             @(archive/record-post! page-data archive/db)
+             (archive/record-post! page-data archive/db)
              page-data))))
 
 (def initital-state
@@ -127,22 +127,29 @@
       (send-off
        (fn [{:keys [site.fabricate/settings]
              :as application-state-map}]
-         (println "watching output dir for changes")
-         (let [output-dir (:site.fabricate.file/output-dir settings)
-               out-dir-trailing (if (not (.endsWith output-dir "/"))
-                                  (str output-dir "/") output-dir)]
-           (assoc application-state-map
-                  :site.fabricate.file.output/watcher
-                  (watch-dir
-                   (fn [{:keys [file count action]}]
-                     (if (#{:create :modify} action)
-                       (do
-                         (println "syncing")
-                         (let [r (clojure.java.shell/sh "sync-respatialized.sh")]
-                           (println (or (:out r) (:err r)))))))
-                   (io/file output-dir)))))))
+         application-state-map
+         #_(println "watching output dir for changes")
+         #_(let [output-dir (:site.fabricate.file/output-dir settings)
+                 out-dir-trailing (if (not (.endsWith output-dir "/"))
+                                    (str output-dir "/") output-dir)]
+             (assoc application-state-map
+                    :site.fabricate.file.output/watcher
+                    (watch-dir
+                     (fn [{:keys [file count action]}]
+                       (if (#{:create :modify} action)
+                         (do
+                           (println "syncing")
+                           (let [r (clojure.java.shell/sh "sync-respatialized.sh")]
+                             (println (or (:out r) (:err r)))))))
+                     (io/file output-dir)))))))
 
-  (send-off write/state write/stop!)
+  (->  write/state
+       (send-off write/stop!)
+       #_(send-off (fn [{:keys [site.fabricate.file.output/watcher]
+                       :as application-state-map}]
+                   (juxt.dirwatch/close-watcher watcher))))
+
+  (restart-agent write/state initital-state)
 
   (agent-error write/state)
 

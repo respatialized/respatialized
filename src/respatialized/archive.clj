@@ -38,7 +38,9 @@
 (comment
   (d/create-database db-uri)
 
-  (d/delete-database db-uri))
+  (d/delete-database db-uri)
+
+  )
 
 (def db (d/connect db-uri))
 
@@ -221,6 +223,18 @@
 
 (comment
 
+  (d/q '[:find ?e ?a
+         :where
+         [?e ?a true]]
+       test-db)
+
+  (d/q '[:find ?e ?a
+         :where
+         [?e ?a true]]
+       test-db)
+
+  @(d/transact test-db [{"some-attr" "some-value"}])
+
   (query->table '[:find ?title ?fp
                   :where
                   [?e :file/path ?fp]
@@ -238,15 +252,18 @@
   (def test-db (d/connect "asami:mem://test-db"))
 
   ;; load existing data into in-memory db
-  (d/import-data
-   test-db
-   (d/export-data db))
+  (do
+    @(d/import-data
+      test-db
+      (d/export-data db))
+    nil
+    )
 
   (d/delete-database "asami:mem://test-db")
 
-  (d/q '[:find ?a  #_?v
+  (d/q '[:find ?a  ?v
          :where
-         [?e :file/path "./content/database-driven-applications.html.fab"]
+         [?e :site.fabricate.page/title "This Website Is Not A Tree"]
          [?e ?a ?v]]
        (d/db test-db))
 

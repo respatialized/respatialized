@@ -82,9 +82,9 @@ I'll leave aside my arguments against Markdown (ok, here's one: I wanted to do s
 
 ✳//[:section {:class "point"}
 ✳=[:h4 "A way out" ]🔚
-I wanted to avoid this, so I decided to be as explicit as possible about the fact that state needs a database to live in. Fabricate, as a library, doesn't contain a database yet. I wrote its core data model and event loop using a FSM because that supported extension, ✳=[:em "at runtime"]🔚, to include a DB. This way I could experiment, using my own website's code, without prematurely settling on a a model that freezes the database's role in the application.
+I wanted to avoid this, so I decided to be as explicit as possible about the fact that state needs a database to live in. Fabricate, as a library, doesn't contain a database yet. I wrote its core data model and event loop using a ✳=[:a {:href "https://www.fabricate.site/finite-schema-machines.html"} "finite-state machine"]🔚 because that supported extension, ✳=[:em "at runtime"]🔚, to include a DB. This way I could experiment, using my own website's code, without prematurely settling on a a model that freezes the database's role in the application.
 
-I realized later on that you can put a finite state machine ✳=[:em "in"]🔚  your database and change the behavior of your program via a database query! That intuitively sounded like a much better way of enforcing consistency guarantees on configuration changes than plaintext "configuration as code" approaches like YAML, so I decided to pursue it further.
+I realized later on that you can put a finite state machine ✳=[:em "in"]🔚  the database and change the behavior of the program via a database query! That intuitively sounded like a much better way of enforcing consistency guarantees on configuration changes than plaintext "configuration as code" approaches like YAML, so I decided to pursue it further.
 
 ]//🔚
 
@@ -160,17 +160,17 @@ I'm going to modify the query to include ✳=[:em "all"]🔚  quotes, not just t
 ✳+=
 [:div {:style (style {:height "12em" :overflow "auto"})}
 (archive/query->table
-    '[:find
-         ?title ?q
-         :where
-         [?p :respatialized.writing/title ?title]
-         [?p ?a* ?e]
-         (or [?e :html/tag :blockquote]
-             [?e :html/tag :q])
-         [?e ?a2* ?q]
-         [(string? ?q)]]
+ '[:find
+   ?title ?q
+   :where
+   [?p :respatialized.writing/title ?title]
+   [?p ?a* ?e]
+   (or [?e :html/tag :blockquote]
+       [?e :html/tag :q])
+   [?e ?a2* ?q]
+   [(string? ?q)]]
     (d/db archive/test-db)
-    {:col-renames {'?title "Title" '?fp "input file path" '?q "Quote contents"}})]🔚
+ {:col-renames {'?title "Title" '?fp "input file path" '?q "Quote contents"}})]🔚
 
 ]//🔚
 
