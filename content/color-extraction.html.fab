@@ -1,8 +1,13 @@
 ✳(ns respatialized.colors.extraction
-(:require [tech.v3.tensor]
-[clojure.data.json :as json]
-[garden.core :as garden]
-[applied-science.darkstar :as darkstar])) 🔚
+  (:require [tech.v3.tensor :as tensor]
+            [tech.v3.datatype :as dtype]
+            [tech.v3.datatype.functional :as dtype-fn]
+            [tech.v3.libs.buffered-image :as dtype-img]
+            [clojure.data.json :as json]
+            [clojure.java.io :as io]
+            [respatialized.colors :as colors]
+            [garden.core :as garden]
+            [applied-science.darkstar :as darkstar])) 🔚
 
 ✳(def metadata {:title "Color Extraction Through Curve Fitting"})🔚
 
@@ -54,11 +59,8 @@ Here's an example:
                 :encoding {:x {:field "color" :type :ordinal}
                            :y {:field "ratio" :type :quantitative}}}]}]
     (-> plot-edn
-          json/write-str
-          darkstar/vega-lite-spec->svg)
-    #_[:img {:src "./media/color-curve.svg"}]
-
-    )  🔚
+        json/write-str
+        darkstar/vega-lite-spec->svg))  🔚
 
 This is a pretty basic curve; others are possible. What's important to note is that it sets the minimum bounds: any textual element needs to have a contrast ratio of at least 3 when compared with the darkest or lightest color.
 
@@ -111,6 +113,56 @@ For a "light theme" the basis color for defining contrast ratios would be the of
 
 
 Returning to the plot above with those demo colors, we can recolor it so that the bars visually depict the contrast ratios instead of measuring them in a purely quantitative manner, and we can do so with actual example colors instead of abstractly defined ratios.
+
+✳(defn plot-edn->svg [p]
+   (-> p json/write-str darkstar/vega-lite-spec->svg))🔚
+
+✳=(let [base-color (last carpente-manual-colors)
+        contrasts
+        (->> carpente-manual-colors
+             butlast
+             (map (fn [c] {:color c
+                           :contrast (rls->cr [(hex->rl base-color)
+                                               (hex->rl c)])}))
+             (into []))]
+  (plot-edn->svg
+   {:width 400 :height 300
+    :data {:values contrasts}
+    :layer [{:mark :rule
+             :data {:values [{:contrast 3.0} {:contrast 4.5}]}
+             :encoding {:y {:field :contrast :type :quantitative}}}
+            {:mark :bar
+             :encoding {:x {:field :color :type :nominal}
+                        :y {:field :contrast :type :quantitative}
+                        :color {:field :color :type :nominal :scale nil}}}]})
+    )🔚
+
+✳=[:h2 "Measuring color density within an image"]🔚
+
+To contextualize the color space of an image, histograms can be a useful tool; it is useful to see the space the optimization will run in.
+
+The image will be represented as a tensor using the capabilities of ✳=[:code "dtype-next"]🔚; a 2d image in the RGB colorspace is a 3-dimensional tensor [X, Y, RGB].
+
+✳(def carpente-img
+  (-> example-images
+      first
+      :img/url
+      io/input-stream
+      dtype-img/load)) 🔚
+
+✳(def carpente-tens
+  (dtype-img/as-ubyte-tensor carpente-img)) 🔚
+
+✳=[:code (str (:shape (.dimensions carpente-tens)))]🔚
+
+The conversion from RGB to HSV needs to be mapped over the X and Y dimensions; the RGB (or Z) dimension for each pixel value is modified as a group, as the conversion to HSV requires all 3 colors.
+
+✳(def carptente-hsv-tens (colors/rgb-img->hsv carpente-tens)) 🔚
+
+✳(defn img->color-hist [img])🔚
+
+✳=[:h4 "Ideas"]🔚
+We can bin the colors by relative luminance and then compute pairwise contrast ratios, or get the most common colors for a given RL threshold, or any number of other data-driven ways of slicing up the image. "Clamping" the colors to the histogram bins makes the visualization process a bit more robust to small variations in color.
 
 ✳=[:h2 "Measuring the representativeness of a color"]🔚
 
