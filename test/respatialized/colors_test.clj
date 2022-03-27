@@ -5,6 +5,14 @@
             [clojure.test.check.clojure-test :as tc]
             [clojure.test :as t]))
 
+(comment
+  (require '[clojure2d.color :as clj2d-color])
+
+  (rgb->hsv [200 100 50])
+
+  )
+
+
 
 (tc/defspec valid-return-values 500
   (prop/for-all
