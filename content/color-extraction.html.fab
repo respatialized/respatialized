@@ -5,10 +5,11 @@
             [tech.v3.libs.buffered-image :as dtype-img]
             [clojure.data.json :as json]
             [clojure.java.io :as io]
-[respatialized.colors :as colors]
-[clojure2d.color :as clj2d-color]
+            [respatialized.colors :as colors]
+            [clojure2d.color :as clj2d-color]
+            [clojure2d.core :as clj2d]
             [garden.core :as garden]
-[applied-science.darkstar :as darkstar])
+            [applied-science.darkstar :as darkstar])
 (:import [javax.imageio ImageIO])) 🔚
 
 ✳(def metadata {:title "Color Extraction Through Curve Fitting"})🔚
@@ -158,6 +159,7 @@ We can see the shape of the tensor by getting its dimensions after reading it in
 
 The conversion from RGB to HSV needs to be mapped over the X and Y dimensions; the RGB (or Z) dimension for each pixel value is modified as a group, as the conversion to HSV requires all 3 colors.
 
+
 Here are the manual colors converted to HSV + RGB representations:
 
 ✳=(apply
@@ -185,8 +187,8 @@ Here are the manual colors converted to HSV + RGB representations:
                 [:th "R"] [:th "G"] [:th "B"]
                 [:th "H"] [:th "S"] [:th "V"] ]]
          (->> (map vector
-                   (take 12 (shuffle (range 3300)))
-                   (take 12 (shuffle (range 3300))))
+                   (take 15 (shuffle (range 3300)))
+                   (take 15 (shuffle (range 3300))))
               (map (fn [[x y]] [x y
                                 (carpente-bgr-tens y x)
                                 (carpente-hsv-tens y x)]))
@@ -203,6 +205,8 @@ Here are the manual colors converted to HSV + RGB representations:
                   [:td r] [:td g] [:td b]
                   [:td h] [:td s] [:td v]
                   ]))))] 🔚
+
+It's not at all clear to me why the colors sampled from the tensor indices don't resemble the colors at the corresponding pixel positions in the image. Where are these blues coming from?
 
 ✳=[:code (str #_ (frequencies (map first (tensor/slice carpente-hsv-tens 2))))]🔚
 

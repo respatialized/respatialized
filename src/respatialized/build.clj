@@ -114,7 +114,7 @@
   (-> write/state
       (send (constantly initital-state))
       (send-off write/draft!)
-      (send-off
+      #_(send-off
        (fn [{:keys [site.fabricate/settings]
              :as application-state-map}]
          (println "watching output dir for changes")

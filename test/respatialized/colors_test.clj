@@ -5,6 +5,11 @@
             [clojure.test.check.clojure-test :as tc]
             [clojure.test :as t]))
 
+;; general idea: use manual coordinates to verify color
+;; extraction and conversion from tensor representations
+(def test-img-url "https://live.staticflickr.com/65535/51913654989_7490d04a5a_4k.jpg")
+(def test-coords [1000 1000])
+
 (comment
   (require '[clojure2d.color :as clj2d-color])
 

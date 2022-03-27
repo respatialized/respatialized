@@ -8,38 +8,67 @@
             [clojure2d.color :as clj2d-color]
             [clojure.java.io :as io]))
 
-(comment
-  (clj2d-color/format-hex (clj2d-color/from-HSV* [132 125 255]) )
 
-  )
+
 
 (defn rgb->hsv [rgb]
   (clj2d-color/to-HSV* (clj2d-color/from-RGB* rgb)))
+
+(defn bgr->hsv [bgr]
+  (clj2d-color/to-HSV* (clj2d-color/from-RGB* (into [] (reverse bgr)))))
+
+(comment
+  (clj2d-color/to-HSV* [255 255 255])
+
+  )
+
 
 
 (defn rgb-img->hsv
   "Converts the image tensor to HSV colorspace"
   [img-tens]
   (let [[x y z] (:shape (.dimensions img-tens))
-        new-img (dtype-img/clone img-tens)
         img' (tensor/reshape img-tens [(* y x) z])
-        new-img' (tensor/reshape new-img [(* y x) z])]
+        new-img (tensor/clone img')]
     (pfor/parallel-for
      ix (* x y)
      (let [hsv (rgb->hsv [(.ndReadLong img' ix 0)
                           (.ndReadLong img' ix 1)
                           (.ndReadLong img' ix 2)])]
        (for [d [1 2 3]]
-         (.ndWriteLong new-img' ix d (int (hsv d))))))
-    (tensor/reshape new-img' [x y z])))
+         (.ndWriteLong new-img ix d (int (hsv d))))))
+    (tensor/reshape new-img [x y z])))
+
+(defn bgr-img->hsv
+  "Converts the image tensor to HSV colorspace"
+  [img-tens]
+  (let [[y x z] (:shape (.dimensions img-tens))
+        img' (tensor/reshape img-tens [(* y x) z])
+        new-img (tensor/clone img')]
+    (pfor/parallel-for
+     ix (* x y)
+     (let [hsv (bgr->hsv [(.ndReadLong img' ix 0)
+                          (.ndReadLong img' ix 1)
+                          (.ndReadLong img' ix 2)])]
+       (for [d [1 2 3]]
+         (.ndWriteLong new-img ix d (int (hsv d))))))
+    (tensor/reshape new-img [y x z])))
 
 (comment
 
+  (.getRGB
+   respatialized.colors.extraction/carpente-img
+   918
+   918 )
+
+  [914 890]
+
+
   (respatialized.colors.extraction/carpente-tens 0 1)
   (-> respatialized.colors.extraction/carpente-tens
-      (tensor/mget 0 1)
-      rgb->hsv
-      tensor/ensure-tensor)
+      (tensor/mget 2592 1403)
+      bgr->hsv
+      )
 
 
   (time (do (rgb-img->hsv respatialized.colors.extraction/carpente-tens) nil))
