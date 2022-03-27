@@ -8,7 +8,8 @@
 [respatialized.colors :as colors]
 [clojure2d.color :as clj2d-color]
             [garden.core :as garden]
-            [applied-science.darkstar :as darkstar])) 🔚
+[applied-science.darkstar :as darkstar])
+(:import [javax.imageio ImageIO])) 🔚
 
 ✳(def metadata {:title "Color Extraction Through Curve Fitting"})🔚
 
@@ -150,28 +151,40 @@ The image will be represented as a tensor using the capabilities of ✳=[:code "
       :img/url
       dtype-img/load)) 🔚
 
-✳(def carpente-tens
-  (dtype-img/as-ubyte-tensor carpente-img)) 🔚
+✳(def carpente-bgr-tens
+  (dtype-img/as-ubyte-tensor carpente-img )) 🔚
 
 We can see the shape of the tensor by getting its dimensions after reading it in: ✳=[:code (str (:shape (.dimensions carpente-tens)))]🔚
 
 The conversion from RGB to HSV needs to be mapped over the X and Y dimensions; the RGB (or Z) dimension for each pixel value is modified as a group, as the conversion to HSV requires all 3 colors.
 
-✳(def carpente-hsv-tens (colors/rgb-img->hsv carpente-tens))  🔚
+Here are the manual colors converted to HSV representations:
+
+✳=(apply
+   conj
+   [:table [:thead [:th "color"] [:th "H"] [:th "S"] [:th "V"] ]]
+   (map (fn [c]
+          (let [[h s v] (clj2d-color/to-HSV* (clj2d-color/color c))]
+            [:tr
+             [:td {:style (garden/style {:background-color c})}]
+             [:td (Math/round h)] [:td (Math/round s)] [:td (Math/round v)]]))
+        carpente-manual-colors))🔚
+
+✳(def carpente-hsv-tens (colors/bgr-img->hsv carpente-bgr-tens))  🔚
 
 ✳= [:div [:b "Some of the HSV pixel results"]
   (apply conj [:table
                [:thead
                 [:th "R"] [:th "G"] [:th "B"]
                 [:th "H"] [:th "S"] [:th "V"] [:th "color"]]]
-         (->> (map (fn [rgb hsv] [(into [] rgb) (into [] hsv)])
-                   (tensor/slice carpente-tens 2)
+         (->> (map (fn [bgr hsv] [(into [] bgr) (into [] hsv)])
+                   (tensor/slice carpente-bgr-tens 2)
                    (tensor/slice carpente-hsv-tens 2))
-              (take 90000)
+              (take 120000)
               shuffle
               distinct
               (take 12)
-              (map (fn [[[r g b] [h s v]]]
+              (map (fn [[[b g r] [h s v]]]
                      [:tr
                       [:td r] [:td g] [:td b]
                       [:td h] [:td s] [:td v]
@@ -182,6 +195,7 @@ The conversion from RGB to HSV needs to be mapped over the X and Y dimensions; t
                           (clj2d-color/format-hex
                            (clj2d-color/from-RGB* [r g b]))})}]]))))] 🔚
 
+✳=[:code (str #_ (frequencies (map first (tensor/slice carpente-hsv-tens 2))))]🔚
 
 
 ✳(defn img->hsv-hists [img] )🔚
