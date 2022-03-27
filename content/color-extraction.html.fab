@@ -5,7 +5,8 @@
             [tech.v3.libs.buffered-image :as dtype-img]
             [clojure.data.json :as json]
             [clojure.java.io :as io]
-            [respatialized.colors :as colors]
+[respatialized.colors :as colors]
+[clojure2d.color :as clj2d-color]
             [garden.core :as garden]
             [applied-science.darkstar :as darkstar])) 🔚
 
@@ -147,19 +148,43 @@ The image will be represented as a tensor using the capabilities of ✳=[:code "
   (-> example-images
       first
       :img/url
-      io/input-stream
       dtype-img/load)) 🔚
 
 ✳(def carpente-tens
   (dtype-img/as-ubyte-tensor carpente-img)) 🔚
 
-✳=[:code (str (:shape (.dimensions carpente-tens)))]🔚
+We can see the shape of the tensor by getting its dimensions after reading it in: ✳=[:code (str (:shape (.dimensions carpente-tens)))]🔚
 
 The conversion from RGB to HSV needs to be mapped over the X and Y dimensions; the RGB (or Z) dimension for each pixel value is modified as a group, as the conversion to HSV requires all 3 colors.
 
-✳(def carptente-hsv-tens (colors/rgb-img->hsv carpente-tens)) 🔚
+✳(def carpente-hsv-tens (colors/rgb-img->hsv carpente-tens))  🔚
 
-✳(defn img->color-hist [img])🔚
+✳= [:div [:b "Some of the HSV pixel results"]
+  (apply conj [:table
+               [:thead
+                [:th "R"] [:th "G"] [:th "B"]
+                [:th "H"] [:th "S"] [:th "V"] [:th "color"]]]
+         (->> (map (fn [rgb hsv] [(into [] rgb) (into [] hsv)])
+                   (tensor/slice carpente-tens 2)
+                   (tensor/slice carpente-hsv-tens 2))
+              (take 90000)
+              shuffle
+              distinct
+              (take 12)
+              (map (fn [[[r g b] [h s v]]]
+                     [:tr
+                      [:td r] [:td g] [:td b]
+                      [:td h] [:td s] [:td v]
+                      [:td
+                       {:style
+                        (garden/style
+                         {:background-color
+                          (clj2d-color/format-hex
+                           (clj2d-color/from-RGB* [r g b]))})}]]))))] 🔚
+
+
+
+✳(defn img->hsv-hists [img] )🔚
 
 ✳=[:h4 "Ideas"]🔚
 We can bin the colors by relative luminance and then compute pairwise contrast ratios, or get the most common colors for a given RL threshold, or any number of other data-driven ways of slicing up the image. "Clamping" the colors to the histogram bins makes the visualization process a bit more robust to small variations in color.
