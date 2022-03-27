@@ -143,7 +143,7 @@ Returning to the plot above with those demo colors, we can recolor it so that th
 
 To contextualize the color space of an image, histograms can be a useful tool; it is useful to see the space the optimization will run in.
 
-The image will be represented as a tensor using the capabilities of ✳=[:code "dtype-next"]🔚; a 2d image in the RGB colorspace is a 3-dimensional tensor [X, Y, RGB].
+The image will be represented as a tensor using the capabilities of ✳=[:code "dtype-next"]🔚; a 2d image in the RGB colorspace is a 3-dimensional tensor [Y, X, RGB].
 
 ✳(def carpente-img
   (-> example-images
@@ -154,20 +154,25 @@ The image will be represented as a tensor using the capabilities of ✳=[:code "
 ✳(def carpente-bgr-tens
   (dtype-img/as-ubyte-tensor carpente-img )) 🔚
 
-We can see the shape of the tensor by getting its dimensions after reading it in: ✳=[:code (str (:shape (.dimensions carpente-tens)))]🔚
+We can see the shape of the tensor by getting its dimensions after reading it in: ✳=[:code (str (:shape (.dimensions carpente-bgr-tens)))]🔚
 
 The conversion from RGB to HSV needs to be mapped over the X and Y dimensions; the RGB (or Z) dimension for each pixel value is modified as a group, as the conversion to HSV requires all 3 colors.
 
-Here are the manual colors converted to HSV representations:
+Here are the manual colors converted to HSV + RGB representations:
 
 ✳=(apply
    conj
-   [:table [:thead [:th "color"] [:th "H"] [:th "S"] [:th "V"] ]]
+   [:table [:thead [:th "color"] [:th "H"] [:th "S"] [:th "V"]
+            [:th ""] [:th "R"] [:th "G"] [:th "B"]]]
    (map (fn [c]
-          (let [[h s v] (clj2d-color/to-HSV* (clj2d-color/color c))]
+          (let [[h s v] (clj2d-color/to-HSV* (clj2d-color/color c))
+                [r g b] (clj2d-color/color c)]
             [:tr
              [:td {:style (garden/style {:background-color c})}]
-             [:td (Math/round h)] [:td (Math/round s)] [:td (Math/round v)]]))
+
+             [:td (Math/round h)] [:td (Math/round s)] [:td (Math/round v)]
+             [:td ""]
+             [:td (Math/round r)] [:td (Math/round g)] [:td (Math/round b)]]))
         carpente-manual-colors))🔚
 
 ✳(def carpente-hsv-tens (colors/bgr-img->hsv carpente-bgr-tens))  🔚
@@ -175,25 +180,29 @@ Here are the manual colors converted to HSV representations:
 ✳= [:div [:b "Some of the HSV pixel results"]
   (apply conj [:table
                [:thead
+                [:th "color"]
+                [:th "X"] [:th "Y"]
                 [:th "R"] [:th "G"] [:th "B"]
-                [:th "H"] [:th "S"] [:th "V"] [:th "color"]]]
-         (->> (map (fn [bgr hsv] [(into [] bgr) (into [] hsv)])
-                   (tensor/slice carpente-bgr-tens 2)
-                   (tensor/slice carpente-hsv-tens 2))
-              (take 120000)
-              shuffle
-              distinct
-              (take 12)
-              (map (fn [[[b g r] [h s v]]]
-                     [:tr
-                      [:td r] [:td g] [:td b]
-                      [:td h] [:td s] [:td v]
-                      [:td
-                       {:style
-                        (garden/style
-                         {:background-color
-                          (clj2d-color/format-hex
-                           (clj2d-color/from-RGB* [r g b]))})}]]))))] 🔚
+                [:th "H"] [:th "S"] [:th "V"] ]]
+         (->> (map vector
+                   (take 12 (shuffle (range 3300)))
+                   (take 12 (shuffle (range 3300))))
+              (map (fn [[x y]] [x y
+                                (carpente-bgr-tens y x)
+                                (carpente-hsv-tens y x)]))
+              (map
+               (fn [[x y [b g r] [h s v]]]
+                 [:tr
+                  [:td
+                   {:style
+                    (garden/style
+                     {:background-color
+                      (clj2d-color/format-hex
+                       (clj2d-color/from-RGB* [r g b]))})}]
+                  [:td x] [:td y]
+                  [:td r] [:td g] [:td b]
+                  [:td h] [:td s] [:td v]
+                  ]))))] 🔚
 
 ✳=[:code (str #_ (frequencies (map first (tensor/slice carpente-hsv-tens 2))))]🔚
 
