@@ -31,11 +31,11 @@
         img' (tensor/reshape img-tens [(* y x) z])
         new-img (tensor/clone img')]
     (pfor/parallel-for
-     ix (* x y)
+     ix (* y x)
      (let [hsv (rgb->hsv [(.ndReadLong img' ix 0)
                           (.ndReadLong img' ix 1)
                           (.ndReadLong img' ix 2)])]
-       (for [d [1 2 3]]
+       (for [d [0 1 2]]
          (.ndWriteLong new-img ix d (int (hsv d))))))
     (tensor/reshape new-img [x y z])))
 
@@ -50,7 +50,7 @@
      (let [hsv (bgr->hsv [(.ndReadLong img' ix 0)
                           (.ndReadLong img' ix 1)
                           (.ndReadLong img' ix 2)])]
-       (for [d [1 2 3]]
+       (for [d [0 1 2]]
          (.ndWriteLong new-img ix d (int (hsv d))))))
     (tensor/reshape new-img [y x z])))
 
