@@ -30,6 +30,11 @@
       (tensor/ensure-tensor)
       (tensor/mget 10 10))
 
+  (-> "./public/media/carpente-reijer-stolk.jpg"
+      (dtype-img/load )
+      (tensor/ensure-tensor)
+      (tensor/mget 10 10))
+
 
   (-> "https://github.com/cnuernber/dtype-next/blob/master/test/data/test.jpg?raw=true"
       (dtype-img/load )

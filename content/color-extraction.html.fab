@@ -147,15 +147,12 @@ To contextualize the color space of an image, histograms can be a useful tool; i
 The image will be represented as a tensor using the capabilities of ✳=[:code "dtype-next"]🔚; a 2d image in the RGB colorspace is a 3-dimensional tensor [Y, X, RGB].
 
 ✳(def carpente-img
-  (-> example-images
-      first
-      :img/url
-      dtype-img/load)) 🔚
+  (dtype-img/load "./public/media/carpente-reijer-stolk.jpg")) 🔚
 
-✳(def carpente-bgr-tens
-  (dtype-img/as-ubyte-tensor carpente-img )) 🔚
+✳(def carpente-tens
+  (tensor/ensure-tensor carpente-img )) 🔚
 
-We can see the shape of the tensor by getting its dimensions after reading it in: ✳=[:code (str (:shape (.dimensions carpente-bgr-tens)))]🔚
+We can see the shape of the tensor by getting its dimensions after reading it in: ✳=[:code (str (:shape (.dimensions carpente-tens)))]🔚
 
 The conversion from RGB to HSV needs to be mapped over the X and Y dimensions; the RGB (or Z) dimension for each pixel value is modified as a group, as the conversion to HSV requires all 3 colors.
 
@@ -177,7 +174,7 @@ Here are the manual colors converted to HSV + RGB representations:
              [:td (Math/round r)] [:td (Math/round g)] [:td (Math/round b)]]))
         carpente-manual-colors))🔚
 
-✳(def carpente-hsv-tens (colors/bgr-img->hsv carpente-bgr-tens))  🔚
+✳(def carpente-hsv-tens (colors/bgr-img->hsv carpente-tens))  🔚
 
 ✳= [:div [:b "Some of the HSV pixel results"]
   (apply conj [:table
@@ -190,7 +187,7 @@ Here are the manual colors converted to HSV + RGB representations:
                    (take 15 (shuffle (range 3300)))
                    (take 15 (shuffle (range 3300))))
               (map (fn [[x y]] [x y
-                                (carpente-bgr-tens y x)
+                                (carpente-tens y x)
                                 (carpente-hsv-tens y x)]))
               (map
                (fn [[x y [b g r] [h s v]]]
