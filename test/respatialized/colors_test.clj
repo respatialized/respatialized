@@ -4,6 +4,7 @@
             [clojure.test.check.properties :as prop]
             [clojure.test.check.clojure-test :as tc]
             [tech.v3.datatype :as dtype]
+            [tech.v3.datatype.functional :as dtype-fn]
             [tech.v3.tensor :as tensor]
             [tech.v3.libs.buffered-image :as dtype-img]
             [clojure2d.core :as clj2d]
@@ -27,11 +28,13 @@
 
 (t/deftest bgr-hsv-bgr
   (t/testing "rgb to hsv roundtrip"
-    (t/is (= test-img-tens
-             (-> test-img-tens
-                 (pixelwise-convert bgr->hsv)
-                 (pixelwise-convert hsv->bgr)
-                 )))))
+
+    (t/is (dtype-fn/eq
+           test-img-tens
+           (-> test-img-tens
+               (pixelwise-convert bgr->hsv)
+               (pixelwise-convert hsv->bgr)
+               )))))
 
 (comment
 
