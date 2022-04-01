@@ -204,9 +204,7 @@ Here are the manual colors converted to HSV + RGB representations:
                   [:td h] [:td s] [:td v]
                   ]))))] 🔚
 
-It's not at all clear to me why the colors sampled from the tensor indices don't resemble the colors at the corresponding pixel positions in the image. Where are these blues coming from?
-
-✳=[:code (str #_ (frequencies (map first (tensor/slice carpente-hsv-tens 2))))]🔚
+✳=[:code (str (frequencies (map first (tensor/slice carpente-hsv-tens 2))))]🔚
 
 
 ✳(defn img->hsv-hists [img] )🔚
