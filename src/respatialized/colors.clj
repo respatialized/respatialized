@@ -17,6 +17,9 @@
 (defn bgr->hsv [bgr]
   (clj2d-color/to-HSV* (clj2d-color/from-RGB* (into [] (reverse bgr)))))
 
+(defn hsv->bgr [hsv]
+  (into [] (reverse (clj2d-color/to-RGB* (clj2d-color/from-HSV* hsv)))))
+
 (comment
   (clj2d-color/to-HSV* [255 255 255])
 
@@ -27,7 +30,7 @@
 (defn rgb-img->hsv
   "Converts the image tensor to HSV colorspace"
   [img-tens]
-  (let [[x y z] (:shape (.dimensions img-tens))
+  (let [[y x z] (:shape (.dimensions img-tens))
         img' (tensor/reshape img-tens [(* y x) z])
         new-img (tensor/clone img')]
     (pfor/parallel-for
@@ -37,7 +40,7 @@
                           (.ndReadLong img' ix 2)])]
        (for [d [0 1 2]]
          (.ndWriteLong new-img ix d (int (hsv d))))))
-    (tensor/reshape new-img [x y z])))
+    (tensor/reshape new-img [y x z])))
 
 (defn bgr-img->hsv
   "Converts the image tensor to HSV colorspace"
@@ -54,7 +57,22 @@
          (.ndWriteLong new-img ix d (int (hsv d))))))
     (tensor/reshape new-img [y x z])))
 
+(defn pixelwise-convert [img-tens convert-fn]
+  (let [[y x z] (:shape (.dimensions img-tens))
+        img' (tensor/reshape img-tens [(* y x) z])
+        new-img (tensor/clone img')]
+    (pfor/parallel-for
+     ix (* x y)
+     (let [c (convert-fn [(.ndReadLong img' ix 0)
+                          (.ndReadLong img' ix 1)
+                          (.ndReadLong img' ix 2)])]
+       (for [d [0 1 2]]
+         (.ndWriteLong new-img ix d (int (c d))))))
+    (tensor/reshape new-img [y x z])))
+
 (comment
+
+  (= test-img)
 
   (.getRGB
    respatialized.colors.extraction/carpente-img

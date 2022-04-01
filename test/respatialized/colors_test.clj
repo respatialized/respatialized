@@ -14,27 +14,33 @@
 ;; general idea: use manual coordinates to verify color
 ;; extraction and conversion from tensor representations
 (def test-img-url "https://live.staticflickr.com/65535/51913654989_7490d04a5a_4k.jpg")
+(def test-img-path "./public/media/carpente-reijer-stolk-sm.jpg")
 (def test-coords [1000 1000])
 
 (def off-white (clj2d-color/color "#f4f0e9") )
 
 (test-img-tens 50 50)
 
-(def test-img-clj2d (clj2d/load-url-image test-img-url))
-(def test-img-dtype (dtype-img/load test-img-url))
+(def test-img-clj2d (clj2d/load-image test-img-path))
+(def test-img-dtype (dtype-img/load test-img-path))
 (def test-img-tens (tensor/ensure-tensor test-img-dtype))
 
+(t/deftest bgr-hsv-bgr
+  (t/testing "rgb to hsv roundtrip"
+    (t/is (= test-img-tens
+             (-> test-img-tens
+                 (pixelwise-convert bgr->hsv)
+                 (pixelwise-convert hsv->bgr)
+                 )))))
+
 (comment
+
+  (= test-img-tens test-img-tens)
+
   (-> "https://github.com/cnuernber/dtype-next/blob/master/test/data/test.jpg?raw=true"
       (dtype-img/load )
       (tensor/ensure-tensor)
       (tensor/mget 10 10))
-
-  (-> "./public/media/carpente-reijer-stolk.jpg"
-      (dtype-img/load )
-      (tensor/ensure-tensor)
-      (tensor/mget 10 10))
-
 
   (-> "https://github.com/cnuernber/dtype-next/blob/master/test/data/test.jpg?raw=true"
       (dtype-img/load )

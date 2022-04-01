@@ -147,7 +147,7 @@ To contextualize the color space of an image, histograms can be a useful tool; i
 The image will be represented as a tensor using the capabilities of ✳=[:code "dtype-next"]🔚; a 2d image in the RGB colorspace is a 3-dimensional tensor [Y, X, RGB].
 
 ✳(def carpente-img
-  (dtype-img/load "./public/media/carpente-reijer-stolk.jpg")) 🔚
+  (dtype-img/load "./public/media/carpente-reijer-stolk-sm.jpg")) 🔚
 
 ✳(def carpente-tens
   (tensor/ensure-tensor carpente-img )) 🔚
@@ -183,9 +183,10 @@ Here are the manual colors converted to HSV + RGB representations:
                 [:th "X"] [:th "Y"]
                 [:th "R"] [:th "G"] [:th "B"]
                 [:th "H"] [:th "S"] [:th "V"] ]]
-         (->> (map vector
-                   (take 15 (shuffle (range 3300)))
-                   (take 15 (shuffle (range 3300))))
+         (->> (let [[y x _] (:shape (.dimensions carpente-tens))]
+                (map vector
+                     (take 15 (shuffle (range x)))
+                     (take 15 (shuffle (range y)))))
               (map (fn [[x y]] [x y
                                 (carpente-tens y x)
                                 (carpente-hsv-tens y x)]))
