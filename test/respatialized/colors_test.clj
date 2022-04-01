@@ -16,7 +16,7 @@
 ;; extraction and conversion from tensor representations
 (def test-img-url "https://live.staticflickr.com/65535/51913654989_7490d04a5a_4k.jpg")
 (def test-img-path "./public/media/carpente-reijer-stolk-sm.jpg")
-(def test-coords [1000 1000])
+(def test-coords [100 100])
 
 (def off-white (clj2d-color/color "#f4f0e9") )
 
@@ -28,13 +28,11 @@
 
 (t/deftest bgr-hsv-bgr
   (t/testing "rgb to hsv roundtrip"
-
     (t/is (dtype-fn/eq
            test-img-tens
            (-> test-img-tens
                (pixelwise-convert bgr->hsv)
-               (pixelwise-convert hsv->bgr)
-               )))))
+               (pixelwise-convert hsv->bgr))))))
 
 (comment
 
@@ -76,12 +74,11 @@
 
   )
 
-(t/deftest image-processing
+#_(t/deftest image-processing
   (t/is
    (= (.getRGB test-img-clj2d (first test-coords) (second test-coords))
       (.getRGB test-img-dtype (first test-coords) (second test-coords))))
 
-  (clj2d-color/color (.getRGB test-img-dtype 10 10))
 
   (let [[x y] test-coords
         [r g b a]

@@ -23,6 +23,8 @@
 (comment
   (clj2d-color/to-HSV* [255 255 255])
 
+  (bgr->hsv [231 239 243])
+
   )
 
 
@@ -38,7 +40,7 @@
      (let [hsv (rgb->hsv [(.ndReadLong img' ix 0)
                           (.ndReadLong img' ix 1)
                           (.ndReadLong img' ix 2)])]
-       (for [d [0 1 2]]
+       (doseq [d [0 1 2]]
          (.ndWriteLong new-img ix d (int (hsv d))))))
     (tensor/reshape new-img [y x z])))
 
@@ -53,7 +55,7 @@
      (let [hsv (bgr->hsv [(.ndReadLong img' ix 0)
                           (.ndReadLong img' ix 1)
                           (.ndReadLong img' ix 2)])]
-       (for [d [0 1 2]]
+       (doseq [d [0 1 2]]
          (.ndWriteLong new-img ix d (int (hsv d))))))
     (tensor/reshape new-img [y x z])))
 
@@ -66,7 +68,7 @@
      (let [c (convert-fn [(.ndReadLong img' ix 0)
                           (.ndReadLong img' ix 1)
                           (.ndReadLong img' ix 2)])]
-       (for [d [0 1 2]]
+       (doseq [d [0 1 2]]
          (.ndWriteLong new-img ix d (int (c d))))))
     (tensor/reshape new-img [y x z])))
 
