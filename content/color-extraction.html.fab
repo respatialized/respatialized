@@ -2,6 +2,9 @@
   (:require [tech.v3.tensor :as tensor]
             [tech.v3.datatype :as dtype]
             [tech.v3.datatype.functional :as dtype-fn]
+            [tech.v3.dataset :as ds]
+            [tech.v3.dataset.tensor :refer [tensor->dataset]]
+            [tablecloth.api :as api]
             [tech.v3.libs.buffered-image :as dtype-img]
             [clojure.data.json :as json]
             [clojure.java.io :as io]
@@ -204,7 +207,63 @@ Here are the manual colors converted to HSV + RGB representations:
                   [:td h] [:td s] [:td v]
                   ]))))] 🔚
 
-✳=[:code (str (frequencies (map first (tensor/slice carpente-hsv-tens 2))))]🔚
+✳(def hsv-dataset
+  (let [[y x z] (dtype/shape carpente-hsv-tens)
+        pixels (tensor/reshape carpente-hsv-tens [(* y x) z])
+        pixels-ds (-> pixels
+                      (tensor->dataset "Carpente HSV colors")
+                      (ds/rename-columns [:hue :saturation :value]))
+        pixels-aggregated
+        (-> pixels-ds
+            (api/update-columns
+             [:hue :saturation :value]
+             #(dtype-fn/* 16 (dtype-fn/round (dtype-fn// % 16))))
+            (api/group-by [:hue :saturation :value])
+            (api/aggregate {:hue #(first (% :hue))
+                            :saturation #(first (% :saturation))
+                            :value #(first (% :value))
+                            :count api/row-count}))]
+    (api/map-columns
+     pixels-aggregated
+     :hex [:hue :saturation :value]
+     (fn [h s v] (clj2d-color/format-hex
+                  (clj2d-color/from-HSV* [h s v]))))
+
+    ))🔚
+
+✳= (let
+       [hist-edn
+        {:data {:values (api/rows hsv-dataset :as-maps)}
+         :width 800 :height 800
+         :title "Density of hue and saturation"
+         :spacing 15
+         :bounds :flush
+         :vconcat [{:mark :bar :width 400
+                    :height 60
+                    :encoding {:x {:bin {:step 16 :base 2}
+                                   :field :hue :axis nil}
+                               :y {:aggregate :count :title ""}}}
+                   {:spacing 15
+                    :bounds :flush
+                    :hconcat
+                    [{:mark :rect
+                      :width 400 :height 400
+                      :encoding {:x {:bin {:step 16 :base 2}
+                                     :field :hue}
+                                 :y {:bin {:step 16 :base 2}
+                                     :field :saturation :step 16}
+                                 :color {:field :hex :scale nil
+                                         :type :nominal}
+                                 :alpha {:aggregate :sum}}}
+                     {:mark :bar :width 60 :height 400
+                      :encoding {:y {:bin {:step 16 :base 2}
+                                     :field :saturation
+                                     :axis nil}
+                                 :x {:aggregate :count :title ""}}}]}]
+         :config {:view {:stroke :transparent}
+                  :text {:font "Default Sans"}}}]
+   (plot-edn->svg hist-edn)
+       ) 🔚
 
 
 ✳(defn img->hsv-hists [img] )🔚

@@ -27,8 +27,7 @@
   thi.ng/geom {:mvn/version "1.0.0-RC4"}
   org.apache.commons/commons-math3 {:mvn/version "3.6.1"}
   generateme/fastmath {:mvn/version "2.1.5"}
-  cnuernber/dtype-next {:mvn/version "7.04"}
-  techascent/tech.ml.dataset {:mvn/version "5.13"}
+  scicloj/tablecloth {:mvn/version "6.076"}
   io.github.adam-james-v/svg-clj {:mvn/version "0.0.11"}
   applied-science/darkstar {:git/url "https://github.com/applied-science/darkstar/"
                             :sha "541a3ff36065c59e92fe6aa61e41a4385ba6f893"}
@@ -41,7 +40,7 @@
   }
  :jvm-opts ["--illegal-access=warn"
             "-Dio.netty.tryReflectionSetAccessible=false"
-            "-Xms4G" "-Xmx8G"]
+            "-Xms4G" "-Xmx12G"]
  :aliases
 
  {:test {:extra-paths ["test"]
