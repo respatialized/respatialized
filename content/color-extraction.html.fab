@@ -253,6 +253,29 @@ Here are the manual colors converted to HSV + RGB representations:
                         :count api/row-count
                         :hex #(first (% :hex))}))))🔚
 
+✳(def hv-dataset
+  (let [[y x z] (dtype/shape carpente-hsv-tens)
+        pixels (tensor/reshape carpente-hsv-tens [(* y x) z])
+        pixels-ds
+        (-> pixels
+            (tensor->dataset "Carpente HSV colors")
+            (ds/rename-columns [:hue :saturation :value])
+            (api/map-columns
+             :hex [:hue :saturation :value]
+             (fn [h s v]
+               (clj2d-color/format-hex
+                (clj2d-color/from-HSV* [h s v])))))]
+    (-> pixels-ds
+        (api/update-columns
+         [:hue :value]
+         #(dtype-fn/* 4 (dtype-fn/round (dtype-fn// % 4))))
+        (api/group-by [:hue :value])
+        (api/aggregate {:hue #(first (% :hue))
+                        :value #(first (% :value))
+                        :count api/row-count
+                        :hex #(first (% :hex))}))))🔚
+
+
 
 ✳= (let
        [hist-edn
@@ -294,6 +317,46 @@ Here are the manual colors converted to HSV + RGB representations:
                   :title {:font "Default Sans"
                           :fontSize 24}}}]
    (plot-edn->svg hist-edn)
+       ) 🔚
+
+✳= (plot-edn->svg
+   {:data {:values (api/rows hv-dataset :as-maps)}
+    :width 800 :height 800
+    :title "Density of hue and value"
+    :spacing 15
+    :bounds :flush
+    :vconcat [{:mark :bar :width 550
+               :height 100
+               :encoding {:x {:bin {:step 4 :base 2}
+                              :field :hue :axis nil}
+                          :y {:aggregate :count :title ""}
+                          :color {:field :hex :scale nil
+                                  :type :nominal}}}
+              {:spacing 15 :bounds :flush
+               :hconcat
+               [{:mark :rect
+                 :width 550 :height 550
+                 :encoding {:x {:bin  {:step 4 :base 2}
+                                :field :hue}
+                            :y {:bin  {:step 4 :base 2}
+                                :field :value}
+                            :color {:field :hex :scale nil
+                                    :type :nominal}
+                            :alpha {:aggregate :sum}}}
+                {:mark :bar :width 100 :height 550
+                 :encoding {:y {:bin {:step 4 :base 2}
+                                :field :value
+                                :axis nil}
+                            :color {:field :hex :scale nil
+                                    :type :nominal}
+                            :x {:aggregate :count :title ""}}}]}]
+    :config {:view {:stroke :transparent}
+             :axis {:labelFont "Default Sans"
+                    :titleFont "Default Sans"
+                    :titleFontSize 16
+                    :labelFontSize 14}
+             :title {:font "Default Sans"
+                     :fontSize 24}}}
        ) 🔚
 
 
