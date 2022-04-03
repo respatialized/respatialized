@@ -11,6 +11,7 @@
             [respatialized.colors :as colors]
             [clojure2d.color :as clj2d-color]
             [clojure2d.core :as clj2d]
+            [fastmath.clustering :as cluster]
             [garden.core :as garden]
             [applied-science.darkstar :as darkstar])
 (:import [javax.imageio ImageIO])) 🔚
@@ -360,12 +361,81 @@ Here are the manual colors converted to HSV + RGB representations:
        ) 🔚
 
 
-✳(defn img->hsv-hists [img] )🔚
-
 ✳=[:h4 "Ideas"]🔚
 We can bin the colors by relative luminance and then compute pairwise contrast ratios, or get the most common colors for a given RL threshold, or any number of other data-driven ways of slicing up the image. "Clamping" the colors to the histogram bins makes the visualization process a bit more robust to small variations in color.
 
 ✳=[:h2 "Measuring the representativeness of a color"]🔚
+
+✳=[:figure
+   [:blockquote
+    "The problem of 1-D k-means clustering is defined as assigning elements of the input 1-D array into k clusters so that the sum of squares of within-cluster distances from each element to its corresponding cluster mean is minimized."]
+ [:figcaption "Haizhou Wang & Mingzhou Song, "
+  [:a {:href "https://journal.r-project.org/archive/2011-2/RJournal_2011-2_Wang+Song.pdf"}
+   [:em "Ckmeans.1d.dp: Optimal k-means Clustering in One Dimension by Dynamic Programming"]]]]🔚
+
+This technique lends itself best to the problem of identifying the representative hues of an image. Fastmath has an implementation of x-means clustering, which uses a Bayesian information criterion to test for convergence.
+
+One clustering method: 2d clustering on hue and saturation, combined with 1d clustering on value for different shades of the representative colors:
+
+✳=
+
+(let [hs-clst (-> (map vector
+                       (api/->array hsv-dataset :hue)
+                       (api/->array hsv-dataset :saturation))
+                  (cluster/x-means 8)
+                  cluster/regroup)
+      v-clst (-> hsv-dataset
+                 (api/->array :value)
+                 (cluster/x-means 8)
+                 cluster/regroup)]
+  (apply conj
+         [:table
+          [:thead [:tr [:th ""]
+                   [:th 1 ] [:th 2 ] [:th 3 ] [:th 4 ]
+                   [:th 5 ] [:th 6 ] [:th 7 ] [:th 8 ]]]]
+         (for [v (sort > (map #(first (:representative %)) v-clst))]
+           (apply conj [:tr [:th (str (Math/round v))]]
+                  (for [[h s] (map :representative hs-clst)]
+                    [:td {:style
+                          (garden/style
+                           {:background-color
+                            (clj2d-color/format-hex
+                             (clj2d-color/from-HSV* [h s v]))})}]
+                    ))))
+
+  )  🔚
+
+Another method: 2d clustering on value and saturation, combined with 1d clustering on hue:
+
+✳=
+
+(let [vs-clst (-> (map vector
+                       (api/->array hsv-dataset :value)
+                       (api/->array hsv-dataset :saturation))
+                  (cluster/x-means 8)
+                  cluster/regroup)
+      h-clst (-> hsv-dataset
+                 (api/->array :value)
+                 (cluster/x-means 8)
+                 cluster/regroup)]
+  (apply conj
+         [:table
+          [:thead [:tr [:th ""]
+                   [:th 1 ] [:th 2 ] [:th 3 ] [:th 4 ]
+                   [:th 5 ] [:th 6 ] [:th 7 ] [:th 8 ]]]]
+         (for [h (sort > (map #(first (:representative %)) h-clst))]
+           (apply conj [:tr [:th (str (Math/round h))]]
+                  (for [[v s] (map :representative vs-clst)]
+                    [:td {:style
+                          (garden/style
+                           {:background-color
+                            (clj2d-color/format-hex
+                             (clj2d-color/from-HSV* [h s v]))})}]
+                    ))))
+
+  )  🔚
+
+
 
 ✳=[:h2 "Defining the objective function"]🔚
 
