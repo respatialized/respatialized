@@ -389,7 +389,7 @@ One clustering method: 2d clustering on hue and saturation, combined with 1d clu
                  (cluster/x-means 8)
                  cluster/regroup)]
   (apply conj
-         [:table
+         [:table {:style (garden/style {:line-height "1em"})}
           [:thead [:tr [:th ""]
                    [:th 1 ] [:th 2 ] [:th 3 ] [:th 4 ]
                    [:th 5 ] [:th 6 ] [:th 7 ] [:th 8 ]]]]
@@ -419,7 +419,7 @@ Another method: 2d clustering on value and saturation, combined with 1d clusteri
                  (cluster/x-means 8)
                  cluster/regroup)]
   (apply conj
-         [:table
+         [:table {:style (garden/style {:line-height "1em"})}
           [:thead [:tr [:th ""]
                    [:th 1 ] [:th 2 ] [:th 3 ] [:th 4 ]
                    [:th 5 ] [:th 6 ] [:th 7 ] [:th 8 ]]]]
@@ -431,10 +431,47 @@ Another method: 2d clustering on value and saturation, combined with 1d clusteri
                            {:background-color
                             (clj2d-color/format-hex
                              (clj2d-color/from-HSV* [h s v]))})}]
-                    ))))
+                    )))))  🔚
 
-  )  🔚
+✳=[:h3 "Clustering as method of reducing the search space"]🔚
 
+The above methods can yield colors that aren't actually present in the image. A larger number of initial clusters gives a larger 'palette' to work from, which can be filtered down to a smaller group based on contrast ratios between the colors.
+
+✳(def hsv-clusters-24
+   (-> (map vector
+            (api/->array hsv-dataset :hue)
+            (api/->array hsv-dataset :saturation)
+            (api/->array hsv-dataset :value))
+       (cluster/x-means 24)
+       cluster/regroup))🔚
+
+A cluster of 24 colors can be compared pairwise in a table to see all the contrast ratios between them:
+
+✳=
+(let [hex-colors
+      (map (fn [c]
+             (-> c
+                 :representative
+                 (clj2d-color/from-HSV*)
+                 (clj2d-color/format-hex)))
+           hsv-clusters-24)]
+  (apply conj
+         [:table {:style (garden/style {:line-height "0.7em"
+                                        :font-size "0.7em"})}
+          [:thead
+           (apply
+            conj [:tr [:td ]]
+            (map (fn [c] [:td {:style (garden/style {:background-color c})}]) hex-colors))]]
+         (for [c1 hex-colors]
+           (apply conj
+                  [:tr [:td {:style (garden/style {:background-color c1})}]]
+                  (for [c2 hex-colors]
+                    [:td
+                     (Math/round
+                             (clj2d-color/delta-c (clj2d-color/color c1)
+                                                  (clj2d-color/color c2)))])))))
+
+🔚
 
 
 ✳=[:h2 "Defining the objective function"]🔚
