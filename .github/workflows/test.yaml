@@ -16,7 +16,7 @@ jobs:
       - name: Set up clojure
         uses: DeLaGuardo/setup-clojure@5.1
         with:
-          cli: 1.10.1.693
+          cli: 1.10.3.1087
       - name: Run site tests
         run: |
           clojure -X:test:runner
