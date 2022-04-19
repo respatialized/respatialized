@@ -438,23 +438,31 @@ Another method: 2d clustering on value and saturation, combined with 1d clusteri
 The above methods can yield colors that aren't actually present in the image. A larger number of initial clusters gives a larger 'palette' to work from, which can be filtered down to a smaller group based on contrast ratios between the colors.
 
 ✳(def hsv-clusters-24
-   (-> (map vector
-            (api/->array hsv-dataset :hue)
-            (api/->array hsv-dataset :saturation)
-            (api/->array hsv-dataset :value))
-       (cluster/x-means 24)
-       cluster/regroup))🔚
+  (let [hsv-data
+        (mapv vector
+              (api/->array hsv-dataset :hue)
+              (api/->array hsv-dataset :saturation)
+              (api/->array hsv-dataset :value))
+        cluster-fns [#(cluster/x-means % 24)
+                    #_ #(cluster/denclue % 4 24)
+                    #_ #(cluster/spectral % 24 4)]]
+    (into {} (for [c-fn cluster-fns]
+               (let [clust (c-fn hsv-data)]
+                 [(:type clust) clust]))))) 🔚
+
 
 A cluster of 24 colors can be compared pairwise in a table to see all the contrast ratios between them:
 
-✳=
-(let [hex-colors
-      (map (fn [c]
-             (-> c
-                 :representative
-                 (clj2d-color/from-HSV*)
-                 (clj2d-color/format-hex)))
-           hsv-clusters-24)]
+✳(defn pairwise-cluster-table [cluster]
+  (let [hex-colors
+        (->>
+         (:representatives cluster)
+         (map #(map (fn [i] (Math/round i)) %))
+         sort
+         (map (fn [c]
+                (-> c
+                    (clj2d-color/from-HSV*)
+                    (clj2d-color/format-hex)))))]
   (apply conj
          [:table {:style (garden/style {:line-height "0.7em"
                                         :font-size "0.7em"})}
@@ -469,9 +477,26 @@ A cluster of 24 colors can be compared pairwise in a table to see all the contra
                     [:td
                      (Math/round
                              (clj2d-color/delta-c (clj2d-color/color c1)
-                                                  (clj2d-color/color c2)))])))))
+                                                  (clj2d-color/color c2)))]))))))🔚
 
-🔚
+✳= (pairwise-cluster-table (:x-means hsv-clusters-24))🔚
+
+Trying again with density clustering:
+
+✳ (def hsv-clusters-denclu-24
+   (-> (map vector
+            (api/->array hsv-dataset :hue)
+            (api/->array hsv-dataset :saturation)
+            (api/->array hsv-dataset :value))
+       (cluster/denclue 4 24)
+       cluster/regroup))🔚
+
+✳= (pairwise-cluster-table (:denclue hsv-clusters-24))🔚
+
+Informal inspection seems to indicate that density clustering and x-means appear to converge on the same colors. It would likely be better to formalize the comparison, as then the choice of clustering method and parameters could be automated through grid search techniques (for example, to find the fastest approximation).
+
+✳=[:h3 "Assignment of weights to color channels"]🔚
+
 
 
 ✳=[:h2 "Defining the objective function"]🔚
