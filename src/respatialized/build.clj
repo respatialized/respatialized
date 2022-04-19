@@ -124,7 +124,7 @@
                (.printStackTrace ex)
                ag)) %))
       (send-off write/draft!)
-      (send-off
+      #_(send-off
        (fn [{:keys [site.fabricate/settings]
              :as application-state-map}]
          application-state-map

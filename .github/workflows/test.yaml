@@ -1,23 +1,22 @@
-name: test
-on: [push]
+name: Test
+on: push
 jobs:
-  main:
-    name: test
-    runs-on: ubuntu-20.04
+  test:
+    name: Test
+    runs-on: ubuntu-18.04
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Cache
-        uses: actions/cache@v1
+      - uses: actions/cache@v1
         with:
           path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/deps.edn') }}
+          key: ${{ runner.os }}-deps-${{ hashFiles('**/deps.edn') }}
           restore-keys: |
-            ${{ runner.os }}-maven-
-      - name: Install Clojure + tools-deps
-        uses: DeLaGuardo/setup-clojure@3.5
+            ${{ runner.os }}-deps-
+      - name: Set up clojure
+        uses: DeLaGuardo/setup-clojure@5.1
         with:
-          cli: 1.10.1.693
-      - name: Run Tests
+          cli: 1.10.3.1087
+      - name: Run site tests
         run: |
-          clojure -X:dev:test:runner
+          clojure -X:test:runner

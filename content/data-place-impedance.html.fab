@@ -1,0 +1,110 @@
+✳(ns respatialized.writing.data-place-impedance)🔚
+
+✳(def metadata {:title "The data-place impedance mismatch"})🔚
+
+✳=[:h1 (:title metadata)]🔚
+
+How many applications (both client and server) repeat the usage pattern of "application in front of data store"?
+
+✳=[:img {:src "https://imgs.xkcd.com/comics/file_transfer.png"}]🔚
+✳=[:aside "Over a decade old and just as relevant."]🔚
+
+
+✳=[:h2 "Where did I put that file again?"]🔚
+
+I'm pretty bad at keeping my files and folders organized. I can't remember the hierarchy of folders; the mismatch between my own system's defaults and what I think of as important always seems to get in the way. I'd much rather find things by describing them, much like I do when I'm asking a person for help finding something ("it's a green water bottle with a large lid..."), thereby relying on ✳=[:em "information"]🔚 rather than place to get what I need.
+
+This is why people use databases, right? Leaving aside for a second that you still have to remember the name of the table to query, you use a DB because it lets you pose questions like "get me all the email addresses of everyone who has contacted me in the last 3 months" instead of "get me rows 2215, 2873, 9919, 38824 ..." or "get me the bytes at spindle locations 131072-262144", even when all three descriptions of the data provide equivalent information.
+
+It's also why free-form text search continues to be a great way of finding information on a digital resource with the help of ctrl-F, a search engine, or ✳=[:code "grep"]🔚 - it lets you get to the location of what you want to find by using your search terms, rather than requiring you to remember the location of that information.
+
+Our applications don't do this. They don't name the data they want; they make a (hopefully authenticated) request to a designated URL with locational information about the data they want in the URL or in the JSON body of the HTTP request.
+
+✳=[:aside "Servers/applications that expose a GraphQL endpoint are one possible exception to the latter half, as GraphQL definitely allows more specification of 'what' than most REST APIs - perhaps one major reason why it became popular. But it still makes you specify a lot of 'where' with the 'what' - because you have to paginate any request with more than 1000 results."]🔚
+
+The idea of content-addressable data is not new, but most attempts to do it have thus far still fallen into the usage pattern of "application in front of data store". So often, it seems, these applications provide a powerful and useful database to their developers to use as they see fit while leaving their users with a limited, location-based way of getting information into and out of the data store.
+
+I can give several examples across a number of different use cases:
+
+✳=[:h2 "US Census bureau website"]🔚
+
+If I want to download some data from the American Community Survey for a specific set of census blocks, I have to know the code for that variable. I find that code by diving through menus on their website, and then I have to select it in their download interface.
+
+How many other people have already downloaded all of the census data at some point or another? Could I get it from them, while still having guarantees that the data is in the form originally published by the Census bureau?
+
+✳=[:h2 "AWS S3"]🔚
+
+Even in the boundless space of the cloud, you're addressing data by place: a bucket name, a folder within that bucket, and whatever subfolders you use to organize that folder.
+
+✳=[:aside "It doesn't seem to take that many lines of code to " [:a {:href "https://gist.github.com/STRd6/5962620"} "implement"] " a content-addressable store atop S3 with the help of existing libraries, though."]🔚
+
+✳=[:h2 "Delta lake"]🔚
+
+Delta Lake lets you use a much more powerful query model to access data contained within it: Spark SQL. But you still need to point your query at a specific table and a specific Spark cluster if you actually want to get a result.
+
+✳=[:aside "Given the volume of data people store within Delta Lake, the need to think explicitly about managing the compute power necessary to retrieve that data is probably unavoidable. But for the 99% of applications that aren't Big Data™, do we need to follow a similar usage pattern?"]🔚
+
+✳=[:h2 "Perkeep"]🔚
+
+Perkeep wants to be your "personal file storage system for life." It requires you to run an application to get those nice content-addressible properties, thereby making the server running Perkeep the bottleneck for computing file hashes, returning the results of searches, and physically transferring the bytes you want to grab.
+
+You can search in the UI, but programmatic access to your data via its API is done only ✳=[:a {:href "https://perkeep.org/doc/protocol/"} "blob by blob,"]🔚 limiting the ability of other applications to use Perkeep to discover and find information they may care about.
+
+✳=[:h2 "Getting around these limitations"]🔚
+
+I don't intend to disparage these projects by pointing out these shortcomings. It's a hard problem! And ultimately I think it's due to the fact that we may be asking too much of HTTP.
+
+I think all these applications combine the concerns of "what information people want to see" with "who is to provide that information"? This is about as inefficient and unscalable as asking people to provide all of the physical hops through the internet to get to the domain or IP address they want to access.
+
+Luckily, there has been a lot of work in developing a concept similar to packet switching, but for data: Named Data Networking. This would push all the ad-hoc solutions into the common layer of a protocol for accessing information on the network.
+
+✳=[:aside "The solution, as it turns out, is not a blockchain. Phew."]🔚
+
+✳=[:h2 "An overview of Named Data Networking"]🔚
+
+✳=[:figure [:blockquote "Users and applications operate in terms of content, making it increasingly limiting and difficult to conform to IP’s requirement to communicate by discovering and specifying location. To carry the Internet into the future, a conceptually simple yet transformational architectural shift is required, from today’s focus on where — addresses and hosts — to what — the content that users and applications care about."] [:figcaption [:a {:href "https://named-data.net/project/"} "NDN Project Overview"]]]🔚
+
+As the project participants frequently point out, the overwhelming majority of internet bandwidth is what they term "content-centric" (e.g. Netflix, Instagram) - requiring users and application developers alike to remember where to go to get the content they want. This means that most applications that rely on data generated by multiple users invariably become standard client-server type applications, where the app is just a display layer over data retrieval logic, which is specified and executed in a server application running atop a database and/or other persistence medium.
+
+If applications could name the data they want directly, they could potentially find it without making API calls to a trusted server, enabling radically different types of applications.
+
+✳=[:h2 "Census Data Revisited"]🔚
+
+Instead of sending a HTTP POST request to the census bureau's API with my auth token like:
+
+✳=[:pre [:code "(curl/post \"https://api.census.gov/data/2020/...\")"]]🔚
+
+It could be something like:
+
+✳=[:pre [:code "(named-data/get \"ndn://gov.census/63656E737573206C6F7320616E67656C65732064656D6F67726170686963\")"]]🔚
+
+Whereby the ✳=[:em "name"]🔚 of the data is specified in the request, and then the network figures out where to go to get it, which may or may not be a URL or resource belonging to the Census Bureau itself. The cryptographic infrastructure built atop NDN would verify that the data is the same regardless of who's providing it. I wouldn't have to provide any information about myself to fetch the data, and I wouldn't need to trust the nodes I'm pulling the data from:
+
+✳=[:figure [:blockquote "every NDN Data packet explicitly carries
+the data name in addition to the requested content, together
+with a signature that cryptographically binds the name to the
+content at the time of data creation; the content may also be
+encrypted whenever needed. Second, while the same URL may
+retrieve different content, NDN Data packets are immutable:
+each name uniquely identifies an NDN Data packet; when
+a producer changes the content of a data packet, it needs to
+generate a new packet with a new name to distinguish the
+different versions of the content."] [:figcaption [:a {:href "https://www.cs.princeton.edu/courses/archive/fall18/cos561/papers/NDN18.pdf"} "A Brief Introduction to Named Data Networking"]]]🔚
+
+Even better than sending a ✳=[:code "get"]🔚 request would be to have a query model that maps from variables in the dataset like "demographic info for Los Angeles County" to named data chunks, similar to the way ✳=[:a {:href "https://en.wikipedia.org/wiki/Column-oriented_DBMS"} "column stores"]🔚 are optimized for grabbing subsets of data within a much larger storage medium.
+
+A scheme for data discovery, replication, and processing for much larger datasets (those used in climatology and high-energy physics) is described in ✳=[:a {:href "https://dl.acm.org/doi/pdf/10.1145/2832099.2832100"} "Managing Scientific Data with Named Data Networking"]🔚. A solution developed for data like this could have lots of ancillary benefits for making comparatively smaller data like that of the US Census more discoverable.
+
+✳=[:blockquote "Liberating such systems from (re-)implementing common
+functionality leads to simplified systems that focus on implementing domain specific differences rather than the similarities. As the number of datasets increases, however, discovery in NDN becomes inefficient. The solution is to build a searchable, replicated data name catalog that substantially speeds up discovery. As it turns out, the advantages of NDN
+are essential in simplifying the implementation of such a catalog."]🔚
+
+The system they describe uses a hierarchical namespacing scheme for data provenance and discovery similar to the one I guessed at in my ✳=[:code "ndn://gov.census/63656E..."]🔚 hypothetical.
+
+✳=[:h2 "What Named Data Networking doesn't do"]🔚
+
+It won't prevent me from losing the URL to some data resource and needing to find it again. I still need to remember that name, and just because a name is semantically meaningful to an application and the router that connects that application with the data it needs, it doesn't mean it's semantically meaningful to ✳=[:em "me"]🔚.
+
+It also doesn't mean there's a solid query model and discovery protocol in place on top of the named data. As the paper above points out, NDN makes building that easier, but you still have to do it to make the information accessible to people besides yourself.
+
+And, as they point out, nothing will save you from the task of organization: ✳=[:q "our catalog design can support the needs of any community that is able to define and use consistent naming schemes."]🔚 So perhaps I still need to be better at sorting and storing my files after all.

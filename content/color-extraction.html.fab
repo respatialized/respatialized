@@ -1,8 +1,20 @@
 ✳(ns respatialized.colors.extraction
-(:require [tech.v3.tensor]
-[clojure.data.json :as json]
-[garden.core :as garden]
-[applied-science.darkstar :as darkstar])) 🔚
+  (:require [tech.v3.tensor :as tensor]
+            [tech.v3.datatype :as dtype]
+            [tech.v3.datatype.functional :as dtype-fn]
+            [tech.v3.dataset :as ds]
+            [tech.v3.dataset.tensor :refer [tensor->dataset]]
+            [tablecloth.api :as api]
+            [tech.v3.libs.buffered-image :as dtype-img]
+            [clojure.data.json :as json]
+            [clojure.java.io :as io]
+            [respatialized.colors :as colors]
+            [clojure2d.color :as clj2d-color]
+            [clojure2d.core :as clj2d]
+            [fastmath.clustering :as cluster]
+            [garden.core :as garden]
+            [applied-science.darkstar :as darkstar])
+(:import [javax.imageio ImageIO])) 🔚
 
 ✳(def metadata {:title "Color Extraction Through Curve Fitting"})🔚
 
@@ -54,11 +66,8 @@ Here's an example:
                 :encoding {:x {:field "color" :type :ordinal}
                            :y {:field "ratio" :type :quantitative}}}]}]
     (-> plot-edn
-          json/write-str
-          darkstar/vega-lite-spec->svg)
-    #_[:img {:src "./media/color-curve.svg"}]
-
-    )  🔚
+        json/write-str
+        darkstar/vega-lite-spec->svg))  🔚
 
 This is a pretty basic curve; others are possible. What's important to note is that it sets the minimum bounds: any textual element needs to have a contrast ratio of at least 3 when compared with the darkest or lightest color.
 
@@ -112,7 +121,383 @@ For a "light theme" the basis color for defining contrast ratios would be the of
 
 Returning to the plot above with those demo colors, we can recolor it so that the bars visually depict the contrast ratios instead of measuring them in a purely quantitative manner, and we can do so with actual example colors instead of abstractly defined ratios.
 
+✳(defn plot-edn->svg [p]
+   (-> p json/write-str darkstar/vega-lite-spec->svg))🔚
+
+✳=(let [base-color (last carpente-manual-colors)
+        contrasts
+        (->> carpente-manual-colors
+             butlast
+             (map (fn [c] {:color c
+                           :contrast (rls->cr [(hex->rl base-color)
+                                               (hex->rl c)])}))
+             (into []))]
+  (plot-edn->svg
+   {:width 400 :height 300
+    :data {:values contrasts}
+    :layer [{:mark :rule
+             :data {:values [{:contrast 3.0} {:contrast 4.5}]}
+             :encoding {:y {:field :contrast :type :quantitative}}}
+            {:mark :bar
+             :encoding {:x {:field :color :type :nominal}
+                        :y {:field :contrast :type :quantitative}
+                        :color {:field :color :type :nominal :scale nil}}}]})
+    )🔚
+
+✳=[:h2 "Measuring color density within an image"]🔚
+
+To contextualize the color space of an image, histograms can be a useful tool; it is useful to see the space the optimization will run in.
+
+The image will be represented as a tensor using the capabilities of ✳=[:code "dtype-next"]🔚; a 2d image in the RGB colorspace is a 3-dimensional tensor [Y, X, RGB].
+
+✳(def carpente-img
+  (dtype-img/load "./public/media/carpente-reijer-stolk-sm.jpg")) 🔚
+
+✳(def carpente-tens
+  (tensor/ensure-tensor carpente-img )) 🔚
+
+We can see the shape of the tensor by getting its dimensions after reading it in: ✳=[:code (str (:shape (.dimensions carpente-tens)))]🔚
+
+The conversion from RGB to HSV needs to be mapped over the X and Y dimensions; the RGB (or Z) dimension for each pixel value is modified as a group, as the conversion to HSV requires all 3 colors.
+
+
+Here are the manual colors converted to HSV + RGB representations:
+
+✳=(apply
+   conj
+   [:table [:thead [:th "color"] [:th "H"] [:th "S"] [:th "V"]
+            [:th ""] [:th "R"] [:th "G"] [:th "B"]]]
+   (map (fn [c]
+          (let [[h s v] (clj2d-color/to-HSV* (clj2d-color/color c))
+                [r g b] (clj2d-color/color c)]
+            [:tr
+             [:td {:style (garden/style {:background-color c})}]
+
+             [:td (Math/round h)] [:td (Math/round s)] [:td (Math/round v)]
+             [:td ""]
+             [:td (Math/round r)] [:td (Math/round g)] [:td (Math/round b)]]))
+        carpente-manual-colors))🔚
+
+✳(def carpente-hsv-tens (colors/bgr-img->hsv carpente-tens))  🔚
+
+✳= [:div [:b "Some of the HSV pixel results"]
+  (apply conj [:table
+               [:thead
+                [:th "color"]
+                [:th "X"] [:th "Y"]
+                [:th "R"] [:th "G"] [:th "B"]
+                [:th "H"] [:th "S"] [:th "V"] ]]
+         (->> (let [[y x _] (:shape (.dimensions carpente-tens))]
+                (map vector
+                     (take 15 (shuffle (range x)))
+                     (take 15 (shuffle (range y)))))
+              (map (fn [[x y]] [x y
+                                (carpente-tens y x)
+                                (carpente-hsv-tens y x)]))
+              (map
+               (fn [[x y [b g r] [h s v]]]
+                 [:tr
+                  [:td
+                   {:style
+                    (garden/style
+                     {:background-color
+                      (clj2d-color/format-hex
+                       (clj2d-color/from-RGB* [r g b]))})}]
+                  [:td x] [:td y]
+                  [:td r] [:td g] [:td b]
+                  [:td h] [:td s] [:td v]
+                  ]))))] 🔚
+
+✳(def hsv-dataset
+  (let [[y x z] (dtype/shape carpente-hsv-tens)
+        pixels (tensor/reshape carpente-hsv-tens [(* y x) z])
+        pixels-ds (-> pixels
+                      (tensor->dataset "Carpente HSV colors")
+                      (ds/rename-columns [:hue :saturation :value]))
+        pixels-aggregated
+        (-> pixels-ds
+            (api/update-columns
+             [:hue :saturation :value]
+             #(dtype-fn/* 4 (dtype-fn/round (dtype-fn// % 4))))
+            (api/group-by [:hue :saturation :value])
+            (api/aggregate {:hue #(first (% :hue))
+                            :saturation #(first (% :saturation))
+                            :value #(first (% :value))
+                            :count api/row-count}))]
+    (api/map-columns
+     pixels-aggregated
+     :hex [:hue :saturation :value]
+     (fn [h s v] (clj2d-color/format-hex
+                  (clj2d-color/from-HSV* [h s v]))))
+
+    ))🔚
+
+✳(def hs-dataset
+  (let [[y x z] (dtype/shape carpente-hsv-tens)
+        pixels (tensor/reshape carpente-hsv-tens [(* y x) z])
+        pixels-ds
+        (-> pixels
+            (tensor->dataset "Carpente HSV colors")
+            (ds/rename-columns [:hue :saturation :value])
+            (api/map-columns
+             :hex [:hue :saturation :value]
+             (fn [h s v]
+               (clj2d-color/format-hex
+                (clj2d-color/from-HSV* [h s v])))))]
+    (-> pixels-ds
+        (api/update-columns
+         [:hue :saturation]
+         #(dtype-fn/* 4 (dtype-fn/round (dtype-fn// % 4))))
+        (api/group-by [:hue :saturation])
+        (api/aggregate {:hue #(first (% :hue))
+                        :saturation #(first (% :saturation))
+                        :count api/row-count
+                        :hex #(first (% :hex))}))))🔚
+
+✳(def hv-dataset
+  (let [[y x z] (dtype/shape carpente-hsv-tens)
+        pixels (tensor/reshape carpente-hsv-tens [(* y x) z])
+        pixels-ds
+        (-> pixels
+            (tensor->dataset "Carpente HSV colors")
+            (ds/rename-columns [:hue :saturation :value])
+            (api/map-columns
+             :hex [:hue :saturation :value]
+             (fn [h s v]
+               (clj2d-color/format-hex
+                (clj2d-color/from-HSV* [h s v])))))]
+    (-> pixels-ds
+        (api/update-columns
+         [:hue :value]
+         #(dtype-fn/* 4 (dtype-fn/round (dtype-fn// % 4))))
+        (api/group-by [:hue :value])
+        (api/aggregate {:hue #(first (% :hue))
+                        :value #(first (% :value))
+                        :count api/row-count
+                        :hex #(first (% :hex))}))))🔚
+
+
+
+✳= (let
+       [hist-edn
+        {:data {:values (api/rows hs-dataset :as-maps)}
+         :width 800 :height 800
+         :title "Density of hue and saturation"
+         :spacing 15
+         :bounds :flush
+         :vconcat [{:mark :bar :width 550
+                    :height 100
+                    :encoding {:x {:bin {:step 4 :base 2}
+                                   :field :hue :axis nil}
+                               :y {:aggregate :count :title ""}
+                               :color {:field :hex :scale nil
+                                       :type :nominal}}}
+                   {:spacing 15 :bounds :flush
+                    :hconcat
+                    [{:mark :rect
+                      :width 550 :height 550
+                      :encoding {:x {:bin  {:step 4 :base 2}
+                                     :field :hue}
+                                 :y {:bin   {:step 4 :base 2}
+                                     :field :saturation}
+                                 :color {:field :hex :scale nil
+                                         :type :nominal}
+                                 :alpha {:aggregate :sum}}}
+                     {:mark :bar :width 100 :height 550
+                      :encoding {:y {:bin {:step 4 :base 2}
+                                     :field :saturation
+                                     :axis nil}
+                                 :color {:field :hex :scale nil
+                                         :type :nominal}
+                                 :x {:aggregate :count :title ""}}}]}]
+         :config {:view {:stroke :transparent}
+                  :axis {:labelFont "Default Sans"
+                         :titleFont "Default Sans"
+                         :titleFontSize 16
+                         :labelFontSize 14}
+                  :title {:font "Default Sans"
+                          :fontSize 24}}}]
+   (plot-edn->svg hist-edn)
+       ) 🔚
+
+✳= (plot-edn->svg
+   {:data {:values (api/rows hv-dataset :as-maps)}
+    :width 800 :height 800
+    :title "Density of hue and value"
+    :spacing 15
+    :bounds :flush
+    :vconcat [{:mark :bar :width 550
+               :height 100
+               :encoding {:x {:bin {:step 4 :base 2}
+                              :field :hue :axis nil}
+                          :y {:aggregate :count :title ""}
+                          :color {:field :hex :scale nil
+                                  :type :nominal}}}
+              {:spacing 15 :bounds :flush
+               :hconcat
+               [{:mark :rect
+                 :width 550 :height 550
+                 :encoding {:x {:bin  {:step 4 :base 2}
+                                :field :hue}
+                            :y {:bin  {:step 4 :base 2}
+                                :field :value}
+                            :color {:field :hex :scale nil
+                                    :type :nominal}
+                            :alpha {:aggregate :sum}}}
+                {:mark :bar :width 100 :height 550
+                 :encoding {:y {:bin {:step 4 :base 2}
+                                :field :value
+                                :axis nil}
+                            :color {:field :hex :scale nil
+                                    :type :nominal}
+                            :x {:aggregate :count :title ""}}}]}]
+    :config {:view {:stroke :transparent}
+             :axis {:labelFont "Default Sans"
+                    :titleFont "Default Sans"
+                    :titleFontSize 16
+                    :labelFontSize 14}
+             :title {:font "Default Sans"
+                     :fontSize 24}}}
+       ) 🔚
+
+
+✳=[:h4 "Ideas"]🔚
+We can bin the colors by relative luminance and then compute pairwise contrast ratios, or get the most common colors for a given RL threshold, or any number of other data-driven ways of slicing up the image. "Clamping" the colors to the histogram bins makes the visualization process a bit more robust to small variations in color.
+
 ✳=[:h2 "Measuring the representativeness of a color"]🔚
+
+✳=[:figure
+   [:blockquote
+    "The problem of 1-D k-means clustering is defined as assigning elements of the input 1-D array into k clusters so that the sum of squares of within-cluster distances from each element to its corresponding cluster mean is minimized."]
+ [:figcaption "Haizhou Wang & Mingzhou Song, "
+  [:a {:href "https://journal.r-project.org/archive/2011-2/RJournal_2011-2_Wang+Song.pdf"}
+   [:em "Ckmeans.1d.dp: Optimal k-means Clustering in One Dimension by Dynamic Programming"]]]]🔚
+
+This technique lends itself best to the problem of identifying the representative hues of an image. Fastmath has an implementation of x-means clustering, which uses a Bayesian information criterion to test for convergence.
+
+One clustering method: 2d clustering on hue and saturation, combined with 1d clustering on value for different shades of the representative colors:
+
+✳=
+
+(let [hs-clst (-> (map vector
+                       (api/->array hsv-dataset :hue)
+                       (api/->array hsv-dataset :saturation))
+                  (cluster/x-means 8)
+                  cluster/regroup)
+      v-clst (-> hsv-dataset
+                 (api/->array :value)
+                 (cluster/x-means 8)
+                 cluster/regroup)]
+  (apply conj
+         [:table {:style (garden/style {:line-height "1em"})}
+          [:thead [:tr [:th ""]
+                   [:th 1 ] [:th 2 ] [:th 3 ] [:th 4 ]
+                   [:th 5 ] [:th 6 ] [:th 7 ] [:th 8 ]]]]
+         (for [v (sort > (map #(first (:representative %)) v-clst))]
+           (apply conj [:tr [:th (str (Math/round v))]]
+                  (for [[h s] (map :representative hs-clst)]
+                    [:td {:style
+                          (garden/style
+                           {:background-color
+                            (clj2d-color/format-hex
+                             (clj2d-color/from-HSV* [h s v]))})}]
+                    ))))
+
+  )  🔚
+
+Another method: 2d clustering on value and saturation, combined with 1d clustering on hue:
+
+✳=
+
+(let [vs-clst (-> (map vector
+                       (api/->array hsv-dataset :value)
+                       (api/->array hsv-dataset :saturation))
+                  (cluster/x-means 8)
+                  cluster/regroup)
+      h-clst (-> hsv-dataset
+                 (api/->array :value)
+                 (cluster/x-means 8)
+                 cluster/regroup)]
+  (apply conj
+         [:table {:style (garden/style {:line-height "1em"})}
+          [:thead [:tr [:th ""]
+                   [:th 1 ] [:th 2 ] [:th 3 ] [:th 4 ]
+                   [:th 5 ] [:th 6 ] [:th 7 ] [:th 8 ]]]]
+         (for [h (sort > (map #(first (:representative %)) h-clst))]
+           (apply conj [:tr [:th (str (Math/round h))]]
+                  (for [[v s] (map :representative vs-clst)]
+                    [:td {:style
+                          (garden/style
+                           {:background-color
+                            (clj2d-color/format-hex
+                             (clj2d-color/from-HSV* [h s v]))})}]
+                    )))))  🔚
+
+✳=[:h3 "Clustering as method of reducing the search space"]🔚
+
+The above methods can yield colors that aren't actually present in the image. A larger number of initial clusters gives a larger 'palette' to work from, which can be filtered down to a smaller group based on contrast ratios between the colors.
+
+✳(def hsv-clusters-24
+  (let [hsv-data
+        (mapv vector
+              (api/->array hsv-dataset :hue)
+              (api/->array hsv-dataset :saturation)
+              (api/->array hsv-dataset :value))
+        cluster-fns [#(cluster/x-means % 24)
+                    #_ #(cluster/denclue % 4 24)
+                    #_ #(cluster/spectral % 24 4)]]
+    (into {} (for [c-fn cluster-fns]
+               (let [clust (c-fn hsv-data)]
+                 [(:type clust) clust]))))) 🔚
+
+
+A cluster of 24 colors can be compared pairwise in a table to see all the contrast ratios between them:
+
+✳(defn pairwise-cluster-table [cluster]
+  (let [hex-colors
+        (->>
+         (:representatives cluster)
+         (map #(map (fn [i] (Math/round i)) %))
+         sort
+         (map (fn [c]
+                (-> c
+                    (clj2d-color/from-HSV*)
+                    (clj2d-color/format-hex)))))]
+  (apply conj
+         [:table {:style (garden/style {:line-height "0.7em"
+                                        :font-size "0.7em"})}
+          [:thead
+           (apply
+            conj [:tr [:td ]]
+            (map (fn [c] [:td {:style (garden/style {:background-color c})}]) hex-colors))]]
+         (for [c1 hex-colors]
+           (apply conj
+                  [:tr [:td {:style (garden/style {:background-color c1})}]]
+                  (for [c2 hex-colors]
+                    [:td
+                     (Math/round
+                             (clj2d-color/delta-c (clj2d-color/color c1)
+                                                  (clj2d-color/color c2)))]))))))🔚
+
+✳= (pairwise-cluster-table (:x-means hsv-clusters-24))🔚
+
+Trying again with density clustering:
+
+✳ (def hsv-clusters-denclu-24
+   (-> (map vector
+            (api/->array hsv-dataset :hue)
+            (api/->array hsv-dataset :saturation)
+            (api/->array hsv-dataset :value))
+       (cluster/denclue 4 24)
+       cluster/regroup))🔚
+
+✳= (pairwise-cluster-table (:denclue hsv-clusters-24))🔚
+
+Informal inspection seems to indicate that density clustering and x-means appear to converge on the same colors. It would likely be better to formalize the comparison, as then the choice of clustering method and parameters could be automated through grid search techniques (for example, to find the fastest approximation).
+
+✳=[:h3 "Assignment of weights to color channels"]🔚
+
+
 
 ✳=[:h2 "Defining the objective function"]🔚
 

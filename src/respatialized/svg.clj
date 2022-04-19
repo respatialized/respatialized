@@ -11,10 +11,11 @@
             [thi.ng.geom.svg.core :as g-svg]
             [thi.ng.geom.matrix :as matrix]
             [clojure.string :as str]
+            [clojure.java.io :as io]
             [clojure.data.xml :as xml]))
 
 (def glyph-svg
-  (-> (str (System/getProperty "user.home") "/Pictures/Inkscape/glyph-01-tri.svg")
+  (-> (io/resource "respatialized/glyph-01-tri.svg")
       slurp
       (xml/parse-str  :namespace-aware false)))
 

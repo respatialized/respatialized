@@ -1,0 +1,8 @@
+✳(ns respatialized.docs.error
+    (:require [garden.core :as garden]))🔚
+
+
+✳(def metadata {:title "Error"})🔚
+
+
+✳=[:h1 {:style (garden/style {:font-size "5em" :line-height "1em" :font-weight "Light"})} "This" [:br] "is not" [:br] "a space"]🔚
