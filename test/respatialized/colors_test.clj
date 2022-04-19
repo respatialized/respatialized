@@ -20,8 +20,6 @@
 
 (def off-white (clj2d-color/color "#f4f0e9") )
 
-(test-img-tens 50 50)
-
 (def test-img-clj2d (clj2d/load-image test-img-path))
 (def test-img-dtype (dtype-img/load test-img-path))
 (def test-img-tens (tensor/ensure-tensor test-img-dtype))
