@@ -1,0 +1,28 @@
+✳(ns respatialized.sketches.grain-studies
+(:require
+ [respatialized.svg :as svg]
+ [clojure.java.io :as io]
+ [thi.ng.math.core :as math]
+ [thi.ng.math.noise :as noise]
+ [thi.ng.geom.core :as g]
+ [thi.ng.geom.circle :as c]
+ [thi.ng.geom.bezier :as b]
+[thi.ng.geom.utils :as utils]
+ [clojure.string :as str]
+ [garden.core :refer [css style]]
+ [svg-clj.path :as path]
+ [svg-clj.utils :as svg-utils]
+ [thi.ng.geom.svg.adapter :as svg-adapter]
+ [thi.ng.geom.polygon :as poly]
+ [thi.ng.geom.matrix :as matrix]
+ [thi.ng.geom.rect :as rect])) 🔚
+
+✳(def colors {:red "#F06047" :yellow "#FFC264" :blue "#369BBC"
+                :black "#0D111B" :white "#E1EFEF" }) 🔚
+
+✳(def metadata {:title "Sketchbook | Grain + Grid Studies"
+:page-style (css [:body {:background-color (:white colors)
+:color (:black colors)}])
+                }) 🔚
+
+✳=[:h1 (:title metadata)]🔚
