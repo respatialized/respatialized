@@ -1,13 +1,8 @@
-name: Publish
-# This workflow is triggered on pushes to master.
-on:
-  push:
-    branches:
-      - publish
-
+name: Test
+on: push
 jobs:
-  publish:
-    name: Publish
+  test:
+    name: Test
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout
@@ -15,19 +10,13 @@ jobs:
       - uses: actions/cache@v1
         with:
           path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          key: ${{ runner.os }}-deps-${{ hashFiles('**/deps.edn') }}
           restore-keys: |
-            ${{ runner.os }}-maven-
-      - name: Install clojure tools-deps
-        uses: DeLaGuardo/setup-clojure@3.5
+            ${{ runner.os }}-deps-
+      - name: Set up clojure
+        uses: DeLaGuardo/setup-clojure@5.1
         with:
           cli: 1.10.1.693
-      - name: Render
+      - name: Run site tests
         run: |
-          clojure -M -m respatialized.build
-      - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./public
-          publish_branch: master
+          clojure -X:test:runner
