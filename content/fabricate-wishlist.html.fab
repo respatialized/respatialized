@@ -1,0 +1,47 @@
+✳=(ns respatialized.writing.fabricate-wishlist)🔚
+
+✳(def metadata {:title "Fabricate: wishlist"
+:written #inst "2022-04-04"})🔚
+
+✳=[:h1 (:title metadata)]🔚
+
+This page contains a running list of the "nice to haves" I've hoped for while using Fabricate to generate pages.
+
+✳=[:h4 "Intelligent linking to internal pages"]🔚
+
+Links between pages should be more "durable" and should be tested for validity.
+
+
+✳=[:h4 "Pulling metadata from external pages"]🔚
+
+When linking to an external page, the link can be enriched by pulling  ✳=[:a {:href "https://ogp.me/"} "opengraph"]🔚 information from that page at render time.
+
+✳=[:h4 "Datetime utils"]🔚
+
+There should be easier ways of associating metadata like time with parts of a page.
+
+
+✳=[:h4 "Test suite for image alt text + other metadata"]🔚
+
+Accessibility testing can be done continuously.
+
+✳=[:h4 "Memoization of page namespaces"]🔚
+
+Similar to the way Clerk uses ✳=[:code "tools.analyzer"]🔚 to only re-evaluate what it it needs to, page rendering can be sped up if vars haven't changed since the last evaluation.
+
+
+✳=[:h4 "Auto-formatting of " [:code "style"] " attributes"]🔚
+
+It seems like an antipattern to keep using ✳=[:code "(garden/style {:background-color \"#FFFFFF\"})"]🔚 all over the place instead of keeping that information with the element as data.
+
+✳=[:h4 "An " [:code "image"] " function"]🔚
+
+Including an image should automatically trigger optimizations like conversion to an efficent resolution and file format. When a database is added, images can be stored there in a CMS-like fashion.
+
+✳=[:h4 "A default pretty-printer/formatter for basic Clojure forms"]🔚
+
+Example code should be data and handled intelligently.
+
+✳=[:h4 "Timing of page evaluation"]🔚
+
+Similar to the way Clerk prints re-evaluation time.
