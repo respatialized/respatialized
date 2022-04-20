@@ -67,7 +67,7 @@
        :html/contents [{:html/text "“They were predators on the South,” John said."}]}
       {:html/tag :p
        :html/contents [{:html/text "“Yes, and they will become predators on us too, if we let them.”"}]}]}
-    {:html/tag :figcaptio
+    {:html/tag :figcaption
      :html.attribute/itemprop "quote-source"
      :html/contents
      [{:html/text "Kim Stanley Robinson, "}
@@ -206,12 +206,13 @@
                                 (conj h (conj t [:div "one final updated div"])))))]
           @(record-post! changed-post conn)
           (t/is (= (:site.fabricate.page/title random-post)
-                   (d/q `[:find ?title .
+                   (d/q '[:find ?title .
+                          :in $ ?page-title
                           :where
                           [?p :respatialized.writing/title ?title]
-                          [?p :site.fabricate.page/title ~(:site.fabricate.page/title random-post)]
+                          [?p :site.fabricate.page/title ?page-title]
                           [?p ?a+ ?d]
                           [?d :html/tag :div]
                           [?d :html/contents ?dc]
                           [?dc :tg/contains "one final updated div"]]
-                        (d/db conn)))))))))
+                        (d/db conn) (:site.fabricate.page/title random-post)))))))))
