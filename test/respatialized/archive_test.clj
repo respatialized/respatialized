@@ -81,34 +81,10 @@
    quotation-hiccup
    (mt/transformer {:name :asami})))
 
-#_(t/deftest conversion
-    (t/testing "Bidirectional conversion"
-
-      (t/is (any? (parsed-element->asami
-                   {:tag :p,
-                    :attrs nil,
-                    :contents
-                    [[:atomic-element [:text "paragraph with"]]
-                     [:node
-                      [:em
-                       {:tag :em,
-                        :attrs nil,
-                        :contents [[:atomic-element [:text "emphasized text"]]]}]]]})))
-
-      (t/is (= :p
-               (-> [:p "paragraph with" [:em "emphasized text"]]
-                   html/parse-element-flat
-                   parsed->asami
-                   :html/tag)))
-
-      (t/is (= quotation-asami
-               (m/decode
-                example-html-decoder
-                quotation-hiccup
-                (mt/transformer {:name :asami}))))
-
-      (t/is (= quotation-hiccup
-               #_(asami->hiccup quotation-asami)))))
+(t/deftest conversion
+  (let [elem
+        [:p [:span {:id "038a38efd9"} "text"] "more text"]]
+    (t/is (= elem (-> elem element-parser element-unparser)))))
 
 (def example-post
   {:site.fabricate.page/evaluated-content [:html [:head] [:body]]
@@ -216,3 +192,27 @@
                           [?d :html/contents ?dc]
                           [?dc :tg/contains "one final updated div"]]
                         (d/db conn) (:site.fabricate.page/title random-post)))))))))
+
+(comment
+  (do
+    (d/create-database test-db-uri)
+    (def conn (d/connect test-db-uri)))
+
+  (d/transact
+   conn
+   {:tx-data {:respatialized.tests/test-content
+              [:main [:article "some text"]]}}
+   )
+
+
+
+  ((::html/span html/element-parsers)  [:span "text"])
+
+  (element-parser [:span "text"])
+
+  (m/unparse html/html {:html/tag :span
+                        :html/contents "text"})
+
+
+  (d/delete-database test-db-uri)
+  )

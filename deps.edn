@@ -16,7 +16,9 @@
 
   ;; data munging
   org.clojure/data.xml {:mvn/version "0.2.0-alpha6"}
-  metosin/malli {:mvn/version "0.8.0"}
+  metosin/malli #_{:mvn/version "0.8.4"}
+  {:git/url "https://github.com/metosin/malli"
+   :sha "6751b1d767f6189cde56f39c9e79e950b7264aca"}
   borkdude/sci {:mvn/version "0.2.6"}
   com.gfredericks/test.chuck {:mvn/version "0.2.10"}
   org.flatland/ordered {:mvn/version "1.5.9"}

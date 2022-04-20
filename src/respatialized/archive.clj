@@ -105,6 +105,7 @@
     "element"]))
 
 (def element-parser (m/parser html/element))
+(def element-unparser (m/unparser html/element))
 (def page-parser (m/parser html/html))
 
 (defn page->asami [{:keys [site.fabricate.page/evaluated-content
