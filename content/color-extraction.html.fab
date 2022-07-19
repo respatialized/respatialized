@@ -151,7 +151,11 @@ To contextualize the color space of an image, histograms can be a useful tool; i
 The image will be represented as a tensor using the capabilities of ✳=[:code "dtype-next"]🔚; a 2d image in the RGB colorspace is a 3-dimensional tensor [Y, X, RGB].
 
 ✳(def carpente-img
-  (dtype-img/load "./public/media/carpente-reijer-stolk-sm.jpg")) 🔚
+  (let [img-url (if (.exists (io/file "./public/media/carpente-reijer-stolk-sm.jpg"))
+                  "./public/media/carpente-reijer-stolk-sm.jpg"
+                  "https://live.staticflickr.com/65535/51913654989_faeff0c2af_w_d.jpg")]
+    (println "carpente img path:" img-url)
+    (dtype-img/load img-url))) 🔚
 
 ✳(def carpente-tens
   (tensor/ensure-tensor carpente-img )) 🔚
