@@ -26,13 +26,6 @@
                scripts)]
     (if page-style (conj page-header [:style page-style]) page-header)))
 
-(defn nil-or-empty? [v]
-  (if (seqable? v) (empty? v)
-      (nil? v)))
-
-(defn conj-non-nil [s & args]
-  (reduce conj s (filter #(not (nil-or-empty? %)) args)))
-
 (defn header
   "Create a structured header given the option map and child elements."
   [{:keys [date level class]
@@ -41,7 +34,7 @@
   (let [c (if (not (map? opts)) (conj contents opts) contents)
         h (apply conj [level] c)
         d (if date [:time {:datetime date} date])]
-    (conj-non-nil
+    (page/conj-non-nil
      [:header]
      (if class {:class class} nil) h d)))
 
