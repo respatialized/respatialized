@@ -139,7 +139,7 @@
                        (if (#{:create :modify} action)
                          (do
                            (println "syncing")
-                           (let [r (clojure.java.shell/sh "sync-respatialized.sh")]
+                           (let [r (clojure.java.shell/sh "netlify" "deploy" "--dir=public/")]
                              (println (or (:out r) (:err r)))))))
                      (io/file output-dir)))))))
 

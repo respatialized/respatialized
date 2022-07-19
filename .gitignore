@@ -3,3 +3,6 @@ public/**/*.html
 public/*.rss
 /.cache/
 /public/fonts/
+
+# Local Netlify folder
+.netlify
