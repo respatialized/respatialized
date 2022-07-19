@@ -69,12 +69,14 @@
     (doseq [p pages]
       (t/testing (str "page " p)
         (println "reading page " p)
-        (let [{:keys [title evaluated-content]
+        (let [{:keys [site.fabricate.page/title site.fabricate.page/evaluated-content]
                :or {title p}
                :as finished} (fsm/complete eval-ops p initital-state)
               errors (->> evaluated-content
                           (tree-seq vector? identity)
                           (filter eval-error?))]
+          (t/is (some? evaluated-content)
+                "Post should evaluate correctly")
           (t/is (or (= 0 (count errors))
                     (= (count errors) (allowed-failures p)))
                 (str "Post " title " had " (count errors) " evaluation errors")))))))
