@@ -1,6 +1,7 @@
 public/*.html
 public/**/*.html
 public/*.rss
+public/
 /.cache/
 /public/fonts/
 
