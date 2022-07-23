@@ -30,7 +30,10 @@
   org.apache.commons/commons-math3 {:mvn/version "3.6.1"}
   generateme/fastmath {:mvn/version "2.1.5"}
   scicloj/tablecloth {:mvn/version "6.076"}
-  io.github.adam-james-v/svg-clj {:mvn/version "0.0.11"}
+  io.github.adam-james-v/svg-clj
+  {#_ #_:mvn/version "0.0.11"
+   :git/url "https://github.com/adam-james-v/svg-clj"
+   :sha "74fff5c02b69c965654dcc6943e437357133a5d4"}
   applied-science/darkstar {:git/url "https://github.com/applied-science/darkstar/"
                             :sha "541a3ff36065c59e92fe6aa61e41a4385ba6f893"}
 
