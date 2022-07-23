@@ -1,0 +1,30 @@
+✳(ns respatialized.sketches.20220723
+(:require
+ [respatialized.svg :as svg]
+ [clojure.java.io :as io]
+ [thi.ng.math.core :as math]
+ [thi.ng.math.noise :as noise]
+ [thi.ng.geom.core :as g]
+ [thi.ng.geom.circle :as c]
+ [thi.ng.geom.bezier :as b]
+[thi.ng.geom.utils :as utils]
+[thi.ng.geom.spatialtree :as stree]
+ [clojure.string :as str]
+ [garden.core :refer [css]]
+ [svg-clj.path :as path]
+ [svg-clj.utils :as svg-utils]
+ [thi.ng.geom.svg.adapter :as svg-adapter]
+ [thi.ng.geom.polygon :as poly]
+ [thi.ng.geom.matrix :as matrix]
+ [thi.ng.geom.rect :as rect])) 🔚
+
+✳(def metadata {:title "Sketchbook | 20220723"
+:page-style respatialized.writing.design.database/page-css}) 🔚
+
+✳=[:h3 (:title metadata)]🔚
+
+✳(def svg-sketch
+(svg-utils/svg-str->hiccup
+   (slurp "resources/respatialized/2022-07-23.svg"))) 🔚
+
+✳=svg-sketch🔚
