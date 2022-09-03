@@ -1,0 +1,89 @@
+
+✳(ns respatialized.statistical-rethinking.chapter2
+    (:require [tablecloth.api :as api]
+              [fastmath.stats :as stats]
+              [fastmath.random :as random]
+              [clojure.data.json :as json]
+              [applied-science.darkstar :as darkstar] ))🔚
+
+✳(def metadata {:title "Statistical Rethinking, Chapter 2"})🔚
+
+✳=[:div [:h1 (:title metadata)]
+    [:h4 "Small Worlds and Large Worlds"]
+[:hr]]🔚
+
+✳=[:h2 "Concepts"]🔚
+Chapter 2 introduces the distinction between the world of a model and the world in which that model is deployed. This can be thought of many ways, including the distinction between observed data and unobserved data, or perhaps more broadly, the difference between the data through which we observe the world and the real-world thing that we think is measured or represented by the data.
+
+✳=[:h2 "Globe Trials"]🔚
+✳+(def globe-samples [:W :L :W :W :W :L :W :L :W])🔚
+✳+(def globe-grid (range 0 1 0.01))🔚
+✳+(def globe-dist (random/distribution :uniform-real {:min 0 :max 1}))🔚
+✳+(defn globe-prior-1 [samples] (map #(random/probability globe-dist %) samples))🔚
+✳(defn edn->vl [edn-spec]
+   (darkstar/vega-lite-spec->svg (json/write-str edn-spec)))🔚
+
+✳=(let [vs (map (fn [v] {:p v :density
+                          (random/probability globe-dist v)}) globe-grid)]
+     [:figure [:figcaption [:strong "Plot of uniform prior"]]
+      (edn->vl
+       {:data {:values vs}
+        :mark :line
+        :encoding {:x {:field :p :type :quantitative}
+                   :y {:field :density :type :quantitative}}})])🔚
+
+
+✳=[:pre (random/pdf (random/distribution :binomial {:trials 9 :p 0.5}) 6)]🔚
+
+✳=(let [vs (map #(let [binom-dist
+                     (random/distribution :binomial {:trials 9 :p %})] {:p % :density (random/pdf binom-dist 6)}) globe-grid)]
+  [:figure [:figcaption [:strong "Posterior after 9 trials"]]
+      (edn->vl
+       {:data {:values vs}
+        :mark :line
+        :encoding {:x {:field :p :type :quantitative}
+                   :y {:field :density :type :quantitative}}})])🔚
+
+✳=[:h2 "2.6 - Practice"]🔚
+✳(def exercises
+    [{:id "2E1"
+      :question [:div "Which of the expressions below correspond to the statement: "
+                 [:em "the probability of rain on Monday?"]
+                 [:ol [:li "Pr(rain)"]
+                  [:li "Pr(rain|Monday)"]
+                  [:li "Pr(Monday|rain)"]
+                  [:li "Pr(rain,Monday)/Pr(Monday)"]]]
+      :answer/mine "(2) and (4); they are equivalent."
+      :answer/official nil}
+     {:id "2E2"
+      :question [:div "Which of the following statements correspond to the expression: Pr(Monday|rain)"
+                 [:ol [:li "The probability of rain on Monday."]
+                  [:li "The probability of rain, given that it is Monday."]
+                  [:li "The probability that it is Monday, given that it is raining."]
+                  [:li "The probability that it is Monday and that it is raining."]]]
+      :answer/mine "(3)."
+      :answer/official nil}
+     {:id "2E3"
+      :question [:div "Which of the expressions below correspond to the statement: "
+                 [:em "the probability that it is Monday, given that it is raining?"]
+                 [:ol
+                  [:li "Pr(Monday|rain)"]
+                  [:li "Pr(rain|Monday)"]
+                  [:li "Pr(rain|Monday) Pr(Monday)"]
+                  [:li "Pr(rain|Monday) Pr(Monday) / Pr(rain)"]
+                  [:li "Pr(Monday|rain) Pr(rain) / Pr(Monday)"]]]
+      :answer/mine "(1)."
+      :answer/official nil}
+     {:id "2E4"
+      :question [:div "The Bayesian statistician Bruno de Finetti (1906-1985) began his 1973 book on probability theory with the declaration: " [:quote "PROBABILITY DOES NOT EXIST."] " The capitals appeared in the original, so I imagine de Finetti wanted us to shout this statement. What he meant is that probability is a device for describing uncertainty from the perspective of an observer with limited knowledge; it has no objective reality. Discuss the globe tossing example from the chapter, in light of this statement. What does it mean to say \"the probability of water is 0.7\"?"]
+      :answer/mine "In my interpretation, the statement \"the probability of water is 0.7\" means that, across multiple repeated tosses and catches of the globe, we would expect our index finger to be atop water 70% of the time, with our observed data tending to approach this ratio with further successive tosses. It means that any given individual toss has a significantly better than even chance of turning up water; water is the 'expected value' for an individual toss."}
+     (let [s1 "W, W, W" s2 "W, W, W, L" s3 "L, W, W, L, W, W, W"]
+       {:id "2M1"
+        :question [:div "Recall the globe tossing model from the chapter. Compute and plot the grid approximate posterior distribution for each of the following sets of observations. In each case, assume a uniform prior for " [:em "p"] "." [:ol [:li s1] [:li s2 ] [:li s3]]]})])🔚
+✳(defn display-answer [{:keys [id question answer/mine answer/official]}]
+  [:figure [:figcaption "Question " id]
+   question
+   (if mine [:details [:summary "My answer"] mine])
+   (if official [:details [:summary "Official answer"] official])])🔚
+
+✳= (apply conj [:div] (for [e exercises] (display-answer e)))🔚
