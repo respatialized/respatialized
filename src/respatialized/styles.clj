@@ -1,5 +1,8 @@
 (ns respatialized.styles
   (:require [hiccup.page :as hp]
+            [garden.core :as garden]
+            [garden.selectors :as select]
+            [garden.stylesheet :as stylesheet]
             [clojure.string :as str]))
 
 (def page "bg-moon-gray ml3 basier")
@@ -21,3 +24,66 @@
 (def table-row "")
 
 (def img-default "w-50")
+
+(def stat-rethinking-bg "#483737")
+(def stat-rethinking-fg "#EEE")
+(def stat-rethinking-neutral "#BBB")
+
+;; const markColor = '#30a2da';
+;; const axisColor = '#cbcbcb';
+;; const guideLabelColor = '#999';
+;; const guideTitleColor = '#333';
+;; const backgroundColor = '#f0f0f0';
+;; const blackTitle = '#333';
+
+(def stat-rethinking-vl
+  "EDN definition for vega-lite style for stat rethinking"
+  {:arc {:fill stat-rethinking-fg}
+   :area {:fill stat-rethinking-fg}
+   :line {:stroke stat-rethinking-fg :strokeWidth 3}
+   :axisXQuantitative {:tickCount 12 :domainDash [4 2]}
+   :axisYQuantitative {:tickCount 6 :titleAngle 0 :titleAlign "left"
+                       :titleBaseline "bottom"
+                       :domainDash [4 2]
+                       :orient "right"}
+   :axis {:domainColor stat-rethinking-fg
+          :domainDash [4 2]
+          :grid true :gridColor stat-rethinking-fg
+          :gridDash [4 2]
+          :tickBand "extent" :tickDash [4 2]
+          :gridWidth 1 :labelColor stat-rethinking-fg
+          :tickColor stat-rethinking-fg
+          :labelFont "'Red Hat Mono', monospace" :labelFontSize "10"
+          :titleFont #_"'Syne', 'sans-serif'" "'Gelasio', serif"
+          :labelFontStyle "bold" :titleColor stat-rethinking-fg
+          :titleFontSize 18}
+   :background stat-rethinking-bg
+   :view { :strokeWidth 0}})
+
+(def stat-rethinking-garden
+  "Garden CSS style for statistical rethinking"
+  (list
+   (stylesheet/at-import
+    "https://fonts.googleapis.com/css2?family=Gelasio:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;500;600;700;800&display=swap")
+   [:body :article
+    {:background-color stat-rethinking-bg
+     :font-family "'Gelasio', serif"
+     :color stat-rethinking-fg }]
+   [:h1 :h2 :h3 :h4 :h5 :h6 {:font-family "'Syne', sans-serif" :text-transform "uppercase"}]
+   [:h1 {:font-weight 800 :font-size "4em"
+         :line-height "1.1"}]
+   [:pre {:color stat-rethinking-fg}]
+   [(select/attr-starts-with :class "language-") {:color stat-rethinking-fg}]
+   [:figcaption {:font-weight 500 :font-family "'Syne', sans-serif" :text-transform "uppercase"
+                 :font-size "1.15em" :border-bottom "1px"}]
+   [:h2 {:font-weight 700}]
+   [:h3 {:font-weight 700}]
+   [:h4 {:font-weight 600}]
+   [:h5 {:font-weight 400}]
+   [:h6 {:font-weight 300}]))
+
+(def stat-rethinking-css (garden/css stat-rethinking-garden))
+(comment
+  stat-rethinking-css
+
+  )

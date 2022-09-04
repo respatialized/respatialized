@@ -1,12 +1,14 @@
 
 ✳(ns respatialized.statistical-rethinking.chapter2
-    (:require [tablecloth.api :as api]
+    (:require #_[tablecloth.api :as api]
               [fastmath.stats :as stats]
               [fastmath.random :as random]
               [clojure.data.json :as json]
-              [applied-science.darkstar :as darkstar] ))🔚
+              [applied-science.darkstar :as darkstar]
+              [respatialized.styles :as styles])) 🔚
 
-✳(def metadata {:title "Statistical Rethinking, Chapter 2"})🔚
+✳(def metadata {:title "Statistical Rethinking, Chapter 2"
+               :page-style styles/stat-rethinking-css})🔚
 
 ✳=[:div [:h1 (:title metadata)]
     [:h4 "Small Worlds and Large Worlds"]
@@ -27,10 +29,12 @@ Chapter 2 introduces the distinction between the world of a model and the world 
                           (random/probability globe-dist v)}) globe-grid)]
      [:figure [:figcaption [:strong "Plot of uniform prior"]]
       (edn->vl
-       {:data {:values vs}
+       {:config styles/stat-rethinking-vl
+        :data {:values vs}
+        :width 300 :height 300
         :mark :line
         :encoding {:x {:field :p :type :quantitative}
-                   :y {:field :density :type :quantitative}}})])🔚
+                   :y {:field :density :type :quantitative}}})]) 🔚
 
 
 ✳=[:pre (random/pdf (random/distribution :binomial {:trials 9 :p 0.5}) 6)]🔚
@@ -40,6 +44,8 @@ Chapter 2 introduces the distinction between the world of a model and the world 
   [:figure [:figcaption [:strong "Posterior after 9 trials"]]
       (edn->vl
        {:data {:values vs}
+        :config styles/stat-rethinking-vl
+        :width 300 :height 300
         :mark :line
         :encoding {:x {:field :p :type :quantitative}
                    :y {:field :density :type :quantitative}}})])🔚
