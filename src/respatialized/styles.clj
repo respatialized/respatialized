@@ -28,6 +28,7 @@
 (def stat-rethinking-bg "#483737")
 (def stat-rethinking-fg "#EEE")
 (def stat-rethinking-neutral "#BBB")
+(def stat-rethinking-dash [4 2])
 
 ;; const markColor = '#30a2da';
 ;; const axisColor = '#cbcbcb';
@@ -41,20 +42,20 @@
   {:arc {:fill stat-rethinking-fg}
    :area {:fill stat-rethinking-fg}
    :line {:stroke stat-rethinking-fg :strokeWidth 3}
-   :axisXQuantitative {:tickCount 12 :domainDash [4 2]}
+   :axisXQuantitative {:tickCount 12 :domainDash stat-rethinking-dash}
    :axisYQuantitative {:tickCount 6 :titleAngle 0 :titleAlign "left"
                        :titleBaseline "bottom"
-                       :domainDash [4 2]
+                       :domainDash stat-rethinking-dash
                        :orient "right"}
    :axis {:domainColor stat-rethinking-fg
-          :domainDash [4 2]
+          :domainDash stat-rethinking-dash
           :grid true :gridColor stat-rethinking-fg
-          :gridDash [4 2]
-          :tickBand "extent" :tickDash [4 2]
+          :gridDash stat-rethinking-dash
+          :tickBand "extent" :tickDash stat-rethinking-dash
           :gridWidth 1 :labelColor stat-rethinking-fg
           :tickColor stat-rethinking-fg
           :labelFont "'Red Hat Mono', monospace" :labelFontSize "10"
-          :titleFont #_"'Syne', 'sans-serif'" "'Gelasio', serif"
+          :titleFont #_ "'Gelasio', serif" "'Red Hat Mono', monospace"
           :labelFontStyle "bold" :titleColor stat-rethinking-fg
           :titleFontSize 18}
    :background stat-rethinking-bg
