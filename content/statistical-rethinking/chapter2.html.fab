@@ -48,15 +48,16 @@ Chapter 2 introduces the distinction between the world of a model and the world 
 
 ✳=(let [trials [:W :L :W :W :W :L :W :L :W]
         subtrials (mapv #(take % trials) (range 1 (inc (count trials))))]
-(apply conj [:div]
-  (map (fn [t] [:figure [:figcaption (clojure.string/join " " (map name t))]
-  (edn->vl {:data {:values (trials->grid-pdf t #(= :W %) globe-grid)}
-            :config styles/stat-rethinking-vl
-            :width 100 :height 100
-            :mark :line
-            :encoding {:x {:field :p :type :quantitative}
-                       :y {:field :density :type :quantitative}}})])
-subtrials)) )🔚
+  (apply list
+         (map (fn [t] [:figure {:style "grid-column: span 1; grid-column-start: auto; display: inline-block;"} [:figcaption {:style "display: inline-block;"} (clojure.string/join " " (map name t))]
+                       (edn->vl {:data {:values (trials->grid-pdf t #(= :W %) globe-grid)}
+                                 :config styles/stat-rethinking-vl
+                                 :width 100 :height 100
+                                 :mark :line
+                                 :encoding {:x {:field :p :type :quantitative}
+                                            :y {:field :density :type :quantitative}}})])
+              subtrials)))🔚
+
 
 ✳=[:h2 "2.6 - Practice"]🔚
 ✳(def exercises
