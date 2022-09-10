@@ -10,9 +10,10 @@
 ✳(def metadata {:title "Statistical Rethinking, Chapter 2"
                :page-style styles/stat-rethinking-css})🔚
 
-✳=[:div [:h1 (:title metadata)]
-    [:h4 "Small Worlds and Large Worlds"]
-[:hr]]🔚
+✳=[:div
+   [:h1 "Small Worlds & Large Worlds"]
+   [:h4 (:title metadata)]
+   [:hr]]🔚
 
 ✳=[:h2 "Concepts"]🔚
 Chapter 2 introduces the distinction between the world of a model and the world in which that model is deployed. This can be thought of many ways, including the distinction between observed data and unobserved data, or perhaps more broadly, the difference between the data through which we observe the world and the real-world thing that we think is measured or represented by the data.
@@ -31,7 +32,7 @@ Chapter 2 introduces the distinction between the world of a model and the world 
       (edn->vl
        {:config styles/stat-rethinking-vl
         :data {:values vs}
-        :width 300 :height 300
+        :width 260 :height 260
         :mark :line
         :encoding {:x {:field :p :type :quantitative}
                    :y {:field :density :type :quantitative}}})]) 🔚
@@ -44,18 +45,18 @@ Chapter 2 introduces the distinction between the world of a model and the world 
          successes (count (filter success-pred? trials))]
      (mapv (fn get-pdf [v]
              (let [binom-dist (random/distribution :binomial {:trials n :p v})]
-               {:p v :density (random/pdf binom-dist successes)})) grid-values)))🔚
+               {:p v :d (random/pdf binom-dist successes)})) grid-values)))🔚
 
 ✳=(let [trials [:W :L :W :W :W :L :W :L :W]
         subtrials (mapv #(take % trials) (range 1 (inc (count trials))))]
   (apply list
-         (map (fn [t] [:figure {:style "grid-column: span 1; grid-column-start: auto; display: inline-block;"} [:figcaption {:style "display: inline-block;"} (clojure.string/join " " (map name t))]
+         (map (fn [t] [:figure {:style "grid-column: span 1; grid-column-start: auto; display: inline-block;"} [:figcaption {:style "font-size: 0.65em;"} (clojure.string/join " " (map name t))]
                        (edn->vl {:data {:values (trials->grid-pdf t #(= :W %) globe-grid)}
                                  :config styles/stat-rethinking-vl
                                  :width 100 :height 100
                                  :mark :line
                                  :encoding {:x {:field :p :type :quantitative}
-                                            :y {:field :density :type :quantitative}}})])
+                                            :y {:field :d :type :quantitative}}})])
               subtrials)))🔚
 
 
