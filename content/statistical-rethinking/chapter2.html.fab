@@ -4,6 +4,7 @@
               [fastmath.stats :as stats]
               [fastmath.random :as random]
               [clojure.data.json :as json]
+              [clojure.string :as str]
               [applied-science.darkstar :as darkstar]
               [respatialized.styles :as styles])) 🔚
 
@@ -37,8 +38,7 @@ Chapter 2 introduces the distinction between the world of a model and the world 
         :encoding {:x {:field :p :type :quantitative}
                    :y {:field :density :type :quantitative}}})]) 🔚
 
-
-✳=[:pre (random/pdf (random/distribution :binomial {:trials 9 :p 0.5}) 6)]🔚
+This representation is of our "naive" prior - that all proportions of land and water on the globe's surface are equally likely.
 
 ✳+(defn trials->grid-pdf [trials success-pred? grid-values]
    (let [n (count trials)
@@ -47,10 +47,12 @@ Chapter 2 introduces the distinction between the world of a model and the world 
              (let [binom-dist (random/distribution :binomial {:trials n :p v})]
                {:p v :d (random/pdf binom-dist successes)})) grid-values)))🔚
 
+This function allows for iteration over subsets of the trials observed:
+
 ✳=(let [trials [:W :L :W :W :W :L :W :L :W]
         subtrials (mapv #(take % trials) (range 1 (inc (count trials))))]
   (apply list
-         (map (fn [t] [:figure {:style "grid-column: span 1; grid-column-start: auto; display: inline-block;"} [:figcaption {:style "font-size: 0.65em;"} (clojure.string/join " " (map name t))]
+         (map (fn [t] [:figure {:style "grid-column: span 1; grid-column-start: auto; display: inline-block;"} [:figcaption {:style "font-size: 0.65em;"} (str/join " " (map name t))]
                        (edn->vl {:data {:values (trials->grid-pdf t #(= :W %) globe-grid)}
                                  :config styles/stat-rethinking-vl
                                  :width 100 :height 100
@@ -93,9 +95,24 @@ Chapter 2 introduces the distinction between the world of a model and the world 
      {:id "2E4"
       :question [:div "The Bayesian statistician Bruno de Finetti (1906-1985) began his 1973 book on probability theory with the declaration: " [:quote "PROBABILITY DOES NOT EXIST."] " The capitals appeared in the original, so I imagine de Finetti wanted us to shout this statement. What he meant is that probability is a device for describing uncertainty from the perspective of an observer with limited knowledge; it has no objective reality. Discuss the globe tossing example from the chapter, in light of this statement. What does it mean to say \"the probability of water is 0.7\"?"]
       :answer/mine "In my interpretation, the statement \"the probability of water is 0.7\" means that, across multiple repeated tosses and catches of the globe, we would expect our index finger to be atop water 70% of the time, with our observed data tending to approach this ratio with further successive tosses. It means that any given individual toss has a significantly better than even chance of turning up water; water is the 'expected value' for an individual toss."}
-     (let [s1 "W, W, W" s2 "W, W, W, L" s3 "L, W, W, L, W, W, W"]
+     (let [s1 [:W , :W , :W] s2 [:W , :W , :W , :L]
+           s3 [:L, :W, :W, :L, :W, :W, :W]
+           figures
+           (apply list
+                  (map (fn [t]
+                         [:figure {:style "grid-column: span 1; grid-column-start: auto; display: inline-block;"}
+                          [:figcaption {:style "font-size: 0.65em;"} (str/join " " (map name t))]
+                          (edn->vl {:data {:values (trials->grid-pdf t #(= :W %) globe-grid)}
+                                    :config styles/stat-rethinking-vl
+                                    :width 100 :height 100
+                                    :mark :line
+                                    :encoding {:x {:field :p :type :quantitative}
+                                               :y {:field :d :type :quantitative}}})])
+                       [s1 s2 s3]))]
        {:id "2M1"
-        :question [:div "Recall the globe tossing model from the chapter. Compute and plot the grid approximate posterior distribution for each of the following sets of observations. In each case, assume a uniform prior for " [:em "p"] "." [:ol [:li s1] [:li s2 ] [:li s3]]]})])🔚
+        :question [:div "Recall the globe tossing model from the chapter. Compute and plot the grid approximate posterior distribution for each of the following sets of observations. In each case, assume a uniform prior for " [:em "p"] "." [:ol [:li (str/join "" (map name s1))] [:li (str/join (map name s2)) ] [:li (str/join (map name s3))]]]
+        :answer/mine figures
+        })])🔚
 ✳(defn display-answer [{:keys [id question answer/mine answer/official]}]
   [:figure [:figcaption "Question " id]
    question
