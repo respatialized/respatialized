@@ -125,44 +125,32 @@
                ag)) %))
       (send-off write/draft!)
       #_(send-off
-       (fn [{:keys [site.fabricate/settings]
-             :as application-state-map}]
-         application-state-map
-         #_(println "watching output dir for changes")
-         #_(let [output-dir (:site.fabricate.file/output-dir settings)
-                 out-dir-trailing (if (not (.endsWith output-dir "/"))
-                                    (str output-dir "/") output-dir)]
-             (assoc application-state-map
-                    :site.fabricate.file.output/watcher
-                    (watch-dir
-                     (fn [{:keys [file count action]}]
-                       (if (#{:create :modify} action)
-                         (do
-                           (println "syncing")
-                           (let [r (clojure.java.shell/sh "netlify" "deploy" "--dir=public/")]
-                             (println (or (:out r) (:err r)))))))
-                     (io/file output-dir)))))))
+         (fn [{:keys [site.fabricate/settings]
+               :as application-state-map}]
+           application-state-map
+           #_(println "watching output dir for changes")
+           #_(let [output-dir (:site.fabricate.file/output-dir settings)
+                   out-dir-trailing (if (not (.endsWith output-dir "/"))
+                                      (str output-dir "/") output-dir)]
+               (assoc application-state-map
+                      :site.fabricate.file.output/watcher
+                      (watch-dir
+                       (fn [{:keys [file count action]}]
+                         (if (#{:create :modify} action)
+                           (do
+                             (println "syncing")
+                             (let [r (clojure.java.shell/sh "netlify" "deploy" "--dir=public/")]
+                               (println (or (:out r) (:err r)))))))
+                       (io/file output-dir)))))))
 
   (->  write/state
        (send-off write/stop!)
        #_(send-off (fn [{:keys [site.fabricate.file.output/watcher]
-                       :as application-state-map}]
-                   (juxt.dirwatch/close-watcher watcher))))
+                         :as application-state-map}]
+                     (juxt.dirwatch/close-watcher watcher))))
 
   (restart-agent write/state initital-state)
 
   (agent-error write/state)
-
-  (get-in @write/state
-          [:site.fabricate/pages
-           "./content/design-doc-database.html.fab"
-           :site.fabricate.page/evaluated-content])
-
-  (restart-agent write/state initital-state)
-
-
-
-
-
 
   )
