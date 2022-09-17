@@ -61,6 +61,20 @@ This function allows for iteration over subsets of the trials observed:
                                             :y {:field :d :type :quantitative}}})])
               subtrials)))🔚
 
+Notes from discussion on 2022/09/16, according to Daniel: we have two parameters: the proportion of water in the world, and the number of times we have observed water (one is continuous, the other is discrete). The beta distribution is appropriate to the former because it's continuous, and the binomial distribution is appropriate to the latter because it is known and discrete. The binomial distribution is what gives us our likelihood.
+
+A dbinom function of my own would make this clearer.
+x -> dbinom(x, 10, 0.5) - probability
+p -> dbinom(4, 10, p) - likelihood
+
+Probabilistic story:
+random WaterProportion
+random W (0/1) -- whether we saw water in one trial
+
+✳=[:h2 "Grid Approximation"]🔚
+The textbook's accompanying library provides a ✳=[:code "gridap"]🔚 function. This set of solutions is in Clojure, so a novel implementation is necessary.
+
+✳+(defn gridap [? ?? ??? ??? & args?] )🔚
 
 ✳=[:h2 "2.6 - Practice"]🔚
 ✳(def exercises
@@ -91,7 +105,7 @@ This function allows for iteration over subsets of the trials observed:
                   [:li "Pr(rain|Monday) Pr(Monday) / Pr(rain)"]
                   [:li "Pr(Monday|rain) Pr(rain) / Pr(Monday)"]]]
       :answer/mine "(1)."
-      :answer/official nil}
+      :answer/official "(1) and (4)."}
      {:id "2E4"
       :question [:div "The Bayesian statistician Bruno de Finetti (1906-1985) began his 1973 book on probability theory with the declaration: " [:quote "PROBABILITY DOES NOT EXIST."] " The capitals appeared in the original, so I imagine de Finetti wanted us to shout this statement. What he meant is that probability is a device for describing uncertainty from the perspective of an observer with limited knowledge; it has no objective reality. Discuss the globe tossing example from the chapter, in light of this statement. What does it mean to say \"the probability of water is 0.7\"?"]
       :answer/mine "In my interpretation, the statement \"the probability of water is 0.7\" means that, across multiple repeated tosses and catches of the globe, we would expect our index finger to be atop water 70% of the time, with our observed data tending to approach this ratio with further successive tosses. It means that any given individual toss has a significantly better than even chance of turning up water; water is the 'expected value' for an individual toss."}
@@ -113,6 +127,8 @@ This function allows for iteration over subsets of the trials observed:
         :question [:div "Recall the globe tossing model from the chapter. Compute and plot the grid approximate posterior distribution for each of the following sets of observations. In each case, assume a uniform prior for " [:em "p"] "." [:ol [:li (str/join "" (map name s1))] [:li (str/join (map name s2)) ] [:li (str/join (map name s3))]]]
         :answer/mine figures
         })])🔚
+
+
 ✳(defn display-answer [{:keys [id question answer/mine answer/official]}]
   [:figure [:figcaption "Question " id]
    question
