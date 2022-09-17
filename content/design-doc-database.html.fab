@@ -8,6 +8,8 @@
 
 ✳(def page-css
   (css
+  (at-import "https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@50..150,100..900&display=swap")
+  (at-import "https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap")
    [:h1 :h2 :h3 :h4 :h5 :h6
     {:font-family "Anybody"
      :font-weight 900
@@ -18,6 +20,7 @@
          :line-height "1.7rem"}]
    [:blockquote
     {:font-family "Atkinson Hyperlegible"}]
+   [:body {:font-family "'Atkinson Hyperlegible', sans-serif"}]
    [:figcaption {:font-family "Atkinson Hyperlegible"}]
    [:article {:font-family "Atkinson Hyperlegible"}]
    [:a {:color "#F1D1BD"}]

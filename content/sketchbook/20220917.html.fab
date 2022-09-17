@@ -1,0 +1,39 @@
+✳(ns respatialized.sketches.20220917
+(:require
+ [clojure.java.io :as io]
+ [clojure.string :as str]
+ [garden.stylesheet :refer [at-keyframes]]
+ [garden.core :refer [style css]]))  🔚
+
+
+✳(def metadata {:title "Sketchbook | 20220917"
+:page-style
+(str/join "\n"
+          (list respatialized.writing.design.database/page-css
+                (css
+                 [:pre :code {:font-family "'Red Hat Mono', monospace"}]
+                 (at-keyframes :example
+                               [:0% {:left "0px" :width 5}]
+                               [:50% {:width 60}]
+                               [:100% {:left "300px" :width 5}])
+                 [:.basic-animation {:width 5 :height 10 :background-color "#F1D1BD"
+                                     :margin-bottom "2px"
+                                     :position "relative"
+                                     :animation-name :example :animation-duration "1.8s"
+                                     :animation-iteration-count "infinite"
+                                     :animation-direction "alternate"
+                                     :animation-timing-function "ease-in-out"}])))}) 🔚
+
+
+✳=[:h1 (:title metadata)]🔚
+
+Some examples of basic CSS animation.
+
+✳=[:div {:class "basic-animation"}]🔚
+
+Iteration allows for easy parameterization of the CSS animation properties.
+
+✳+=
+(->> (range 0 1.8 0.2)
+     (map (fn [d] [:div {:class "basic-animation" :style (style {:animation-delay (str d "s")})}]))
+     (apply conj [:div {:id "iteration-example"} [:h4 "ITERATION"]])) 🔚
