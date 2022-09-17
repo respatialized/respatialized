@@ -17,7 +17,7 @@
   (:import [java.security MessageDigest]
            [java.util.concurrent Executors]))
 
-(def exec (Executors/newSingleThreadExecutor))
+#_(def exec (Executors/newSingleThreadExecutor))
 
 ;; the approach that makes the most sense right now:
 ;; schema-on-read at the DB level, with malli schemas
@@ -164,13 +164,13 @@
       (empty?
        existing-post)
       (d/transact-async db {:tx-data [asami-post]
-                            :executor exec})
+                            #_ #_ :executor exec})
       :else
       (d/transact-async
        db
        {:tx-data
         [(merge (into {} (map (fn [[k v]] [(replacement-annotation k) v]) asami-post)))]
-        :executor exec}))))
+        #_ #_ :executor exec}))))
 
 (comment
 
@@ -301,7 +301,7 @@
                                        :filename filename))))))
                       (filter some?))]
     (d/transact-async test-db {:tx-data  articles
-                               :executor exec}))
+                               #_ #_ :executor exec}))
 
   (d/q '[:find ?c :tg/contains ?q
          :where [?e :html/tag :blockquote]
