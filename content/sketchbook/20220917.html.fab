@@ -11,6 +11,8 @@
 (str/join "\n"
           (list respatialized.writing.design.database/page-css
                 (css
+                 [:figcaption {:font-family "Anybody, sans-serif" :text-transform "uppercase" :font-weight 700
+                               :color "#F1D1BD" :font-size "1.4em"}]
                  [:pre :code {:font-family "'Red Hat Mono', monospace"}]
                  (at-keyframes :example
                                [:0% {:left "0px" :width 5}]
@@ -36,13 +38,13 @@ Iteration allows for easy parameterization of the CSS animation properties.
 ✳+=
 (->> (range 0 1.8 0.2)
      (map (fn [d] [:div {:class "basic-animation" :style (style {:animation-delay (str d "s")})}]))
-     (apply conj [:div {:id "iteration-example"} [:h4 "ITERATION"]])) 🔚
+     (apply conj [:figure {:id "iteration-example"} [:figcaption "Iteration"]])) 🔚
 
 Inline styles allow for overriding the defaults set by the classes.
 
 ✳+=
 (->> (range 0 -1.8 -0.05)
      (map (fn [d] [:div {:class "basic-animation" :style (style {:margin-bottom "1px" :height 3 :animation-delay (str d "s")})}]))
-     (apply conj [:div {:id "inline-example"} [:h4 "INLINE OVERRIDE"]])) 🔚
+     (apply conj [:figure {:id "inline-example"} [:figcaption "Inline Override"]])) 🔚
 
 If you know Clojure and this type of post is difficult or impossible for you to write using your favorite static site generator, consider using  ✳=[:a {:href "https://fabricate.site"} [:code "fabricate"]]🔚, which makes it simple and straightforward.
