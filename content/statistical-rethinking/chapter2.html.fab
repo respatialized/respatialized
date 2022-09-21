@@ -40,12 +40,32 @@ Chapter 2 introduces the distinction between the world of a model and the world 
 
 This representation is of our "naive" prior - that all proportions of land and water on the globe's surface are equally likely.
 
+✳=[:h2 "Probability vs Likelihood"]🔚
+
+Translating the conceptions from the notation used by base R to Clojure +
+✳=[:code [:a {:href "https://cljdoc.org/d/generateme/fastmath/2.1.8/api/fastmath.random"} "fastmath.random"]]🔚 distributions.
+
+
+✳=[:pre [:ul [:li [:code {:class "language-r"} "x -> dbinom(x, 10, 0.5) - probability"]]
+[:li [:code {:class "language-r"} "p -> dbinom(4, 10, p) - likelihood"]]]
+]🔚
+
+✳+(defn dbinom [x size prob]
+   (let [d (random/distribution :binomial {:trials size :p prob})]
+     (random/pdf d x)))🔚
+
+✳+ (fn [x] (dbinom x 10 0.5)) ; probability 🔚
+✳+ (fn [p] (dbinom 4 10 p)) ; likelihood 🔚
+
+✳=[:h2 "Grid Approximation"]🔚
+
+The textbook's accompanying library provides a ✳=[:code "gridap"]🔚 function. This set of solutions is in Clojure, so a novel implementation is necessary.
+
 ✳+(defn trials->grid-pdf [trials success-pred? grid-values]
    (let [n (count trials)
          successes (count (filter success-pred? trials))]
-     (mapv (fn get-pdf [v]
-             (let [binom-dist (random/distribution :binomial {:trials n :p v})]
-               {:p v :d (random/pdf binom-dist successes)})) grid-values)))🔚
+     (mapv (fn prob [v]
+               {:p v :d (dbinom successes n v) }) grid-values)))🔚
 
 This function allows for iteration over subsets of the trials observed:
 
@@ -63,18 +83,10 @@ This function allows for iteration over subsets of the trials observed:
 
 Notes from discussion on 2022/09/16, according to Daniel: we have two parameters: the proportion of water in the world, and the number of times we have observed water (one is continuous, the other is discrete). The beta distribution is appropriate to the former because it's continuous, and the binomial distribution is appropriate to the latter because it is known and discrete. The binomial distribution is what gives us our likelihood.
 
-A dbinom function of my own would make this clearer.
-x -> dbinom(x, 10, 0.5) - probability
-p -> dbinom(4, 10, p) - likelihood
-
 Probabilistic story:
 random WaterProportion
 random W (0/1) -- whether we saw water in one trial
 
-✳=[:h2 "Grid Approximation"]🔚
-The textbook's accompanying library provides a ✳=[:code "gridap"]🔚 function. This set of solutions is in Clojure, so a novel implementation is necessary.
-
-✳+(defn gridap [? ?? ??? ??? & args?] )🔚
 
 ✳=[:h2 "2.6 - Practice"]🔚
 ✳(def exercises
