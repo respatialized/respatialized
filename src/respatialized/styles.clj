@@ -73,7 +73,11 @@
    [:h1 :h2 :h3 :h4 :h5 :h6 {:font-family "'Syne', sans-serif" :text-transform "uppercase"}]
    [:h1 {:font-weight 800 :font-size "4em"
          :line-height "1.1"}]
-   [:pre {:color stat-rethinking-fg}]
+   [:pre :code {:color stat-rethinking-fg
+                :font-size "1em" :font-family "'League Mono', monospace"}]
+   [:a {:color "#FF4444" :text-decoration "none"}]
+   [(select/a select/after)  {:content "\"▸\"" :position "relative" :vertical-align "super"
+                              :margin-left "0.1em"}]
    [(select/attr-starts-with :class "language-") {:color stat-rethinking-fg}]
    [:figcaption {:font-weight 500 :font-family "'Syne', sans-serif" :text-transform "uppercase"
                  :font-size "1.15em" :border-bottom "1px"}]
