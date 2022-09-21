@@ -78,7 +78,7 @@ This function allows for iteration over subsets of the trials observed:
                                  :width 100 :height 100
                                  :mark :line
                                  :encoding {:x {:field :p :type :quantitative}
-                                            :y {:field :d :type :quantitative}}})])
+                                            :y {:field :d :type :quantitative :scale {:domain [0 1]}}}})])
               subtrials)))🔚
 
 Notes from discussion on 2022/09/16, according to Daniel: we have two parameters: the proportion of water in the world, and the number of times we have observed water (one is continuous, the other is discrete). The beta distribution is appropriate to the former because it's continuous, and the binomial distribution is appropriate to the latter because it is known and discrete. The binomial distribution is what gives us our likelihood.
@@ -133,7 +133,7 @@ random W (0/1) -- whether we saw water in one trial
                                     :width 100 :height 100
                                     :mark :line
                                     :encoding {:x {:field :p :type :quantitative}
-                                               :y {:field :d :type :quantitative}}})])
+                                               :y {:field :d :type :quantitative :scale {:domain [0 1]}}}})])
                        [s1 s2 s3]))]
        {:id "2M1"
         :question [:div "Recall the globe tossing model from the chapter. Compute and plot the grid approximate posterior distribution for each of the following sets of observations. In each case, assume a uniform prior for " [:em "p"] "." [:ol [:li (str/join "" (map name s1))] [:li (str/join (map name s2)) ] [:li (str/join (map name s3))]]]
