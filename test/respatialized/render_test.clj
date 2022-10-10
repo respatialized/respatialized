@@ -2,7 +2,7 @@
   (:require [clojure.test :as t]
             [hiccup.core :refer [html]]
             [respatialized.render :refer :all]
-            [site.fabricate.prototype.read :as read :refer [include-def]]
+            [site.fabricate.prototype.read :as read]
             [site.fabricate.prototype.page :refer :all]))
 
 (t/deftest rendering

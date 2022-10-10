@@ -2,11 +2,11 @@
   (:require [flatland.ordered.map :refer [ordered-map]]
             [respatialized.render :refer :all :exclude [features]]
             [site.fabricate.prototype.page :refer :all ]
-            [site.fabricate.prototype.read :refer [include-def]]
-      [garden.core :as garden :refer [style css]]
-      [garden.stylesheet :refer [at-import]]
-      [garden.selectors :as select]))🔚
-
+            [site.fabricate.prototype.read]
+            [garden.core :as garden :refer [style css]]
+            [garden.stylesheet :refer [at-import]]
+            [garden.selectors :as select]))🔚
+            
 ✳(def page-style
        (css
        (at-import
@@ -144,8 +144,12 @@ As an example of following Marz's lead in building the prototype atop concrete u
 
     [:summary "Table source map"]
     (code {:class "language-clojure"} (with-out-str (clojure.pprint/pprint features)))] 🔚
-✳= [:details [:summary (in-code "respatialized.render/map->table")] (include-def (quote map->table) "./src/respatialized/render.clj")] 🔚
-
+    ✳= [:details [:summary (in-code "respatialized.render/map->table")]
+      (-> 'map->table
+          clojure.repl/source-fn
+          read-string
+          expr->hiccup)] 🔚
+          
 I didn't have that function before I wrote this post. Rather than writing a general-purpose 'table' function from scratch, I allowed the shape of the data that made the most sense at the time of writing to guide the implementation. A lot of this phase will consist of work like that: specific solutions that serve as data points for a new series of abstractions that unify the design.
 
 ✳=(header {:level :h3} "Beautiful")🔚
