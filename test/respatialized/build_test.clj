@@ -62,7 +62,7 @@
 (t/deftest compatibility
   (let [nat-f (io/file "content/not-a-tree.html.fab")]
     (t/is (= "content/not-a-tree.html.fab"
-             (read/->dir-local-path nat-f)))))
+             (str (read/->dir-local-file nat-f))))))
 
 (t/deftest conformance
   (let [pages  (shuffle (write/get-template-files "./content" ".fab"))]
