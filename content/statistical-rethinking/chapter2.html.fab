@@ -54,8 +54,8 @@ Translating the conceptions from the notation used by base R to Clojure +
    (let [d (random/distribution :binomial {:trials size :p prob})]
      (random/pdf d x)))🔚
 
-✳+ (fn [x] (dbinom x 10 0.5)) ; probability 🔚
-✳+ (fn [p] (dbinom 4 10 p)) ; likelihood 🔚
+✳+ (fn probability [x] (dbinom x 10 0.5)) 🔚
+✳+ (fn likelihood [p] (dbinom 4 10 p)) 🔚
 
 ✳=[:h2 "Grid Approximation"]🔚
 
