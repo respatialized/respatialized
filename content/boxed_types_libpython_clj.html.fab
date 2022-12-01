@@ -1,0 +1,114 @@
+
+✳(ns respatialized.writing.boxed-int-libpython-clj)🔚
+✳(def metadata {:title "Working with large integers in libpython-clj"})🔚
+
+
+✳=[:h1 (:title metadata)]🔚
+
+✳= [:h2 "Context"]🔚
+
+✳=[:a {:href "https://github.com/clj-python/libpython-clj"}
+ [:code "libpython-clj"]]🔚 is an enormously useful library for bridging the Python and Clojure (and Java) worlds. Its data-oriented interface to Python classes and objects makes discovering features of Python libraries simple and convenient from a Clojure REPL. This article documents a problem I encountered when using it recently and the solution I put together for it.
+
+
+
+✳+(require
+  '[libpython-clj2.python :as py :refer [py. py.. py.-]]
+  '[libpython-clj2.require :refer [require-python]])🔚
+✳+(require-python '[builtins :as python])🔚
+
+✳= [:h3 "The problem"]🔚
+I was unable to successfully convert very large integer values - those larger than can be represented by a signed 64-bit integer - between Python and Clojure. Here's an example: 
+
+✳= [:h5 "Python -> Clojure: Overflow"]🔚
+✳+= (-> 29389942368720948710978341 str py/as-python python/int py/as-jvm)🔚
+
+✳= [:h5 "Clojure -> Python: Error"]🔚
+✳+= (try (libpython-clj2.python.copy/->py-long 29389942368720948710978341)
+        (catch java.lang.IllegalArgumentException e
+          [:pre [:code {:class "language-clojure"} (select-keys (Throwable->map e) [:cause :via])]])) 🔚
+          
+
+✳= [:h3 "Background"]🔚
+
+
+In version 3 onwards of Python, integer values are arbitrarily sized. On the JVM, integer values larger than 64 bits can be represented by ✳= [:code "clojure.lang.BigInt"] 🔚 or ✳= [:code "java.math.BigInteger"]🔚 objects. However, despite being supported on both platforms, the copy pathway used by ✳=[:code "libpython-clj"]🔚 defaults to converting Python ints to 64-bit integers, resulting in the overflow seen above.
+
+When converting numeric JVM types to Python types, integers get cast to ✳=[:code "Long"]🔚 (e.g. 64-bit - Clojure's default for integers) values, triggering the exception seen above.
+
+
+✳=[:h3 "Creating a workaround"]🔚
+
+The solution suggested to me by ✳=[:a {:href "https://github.com/cnuernber/"} "Chris Nuernberger"]🔚, the author of ✳=[:code "libpython-clj"]🔚, was to create a custom Python class for the integer values I needed to work with - effectively my own ✳=[:a {:href "https://stackoverflow.com/a/1418302"} "boxed integer."]🔚 This would allow me to bypass ✳=[:code "libpython-clj"]🔚's default conversion pathways.
+
+
+✳=[:h5 "Python class definition"]🔚
+✳(def boxed-int-class-str
+  "Python class definition for Boxed integer type to ensure integer values larger than 64 bits can be successfully passed across the Python <> JVM boundary."
+
+  "class BoxedInt(int):
+
+    def __init__(self, num):
+        self.num = num
+
+    def __call__(self, arg):
+        '''Initialize the value. Optionally converts from string.'''
+        if(type(arg) == str):
+            self.num = int(arg)
+        else:
+            self.num = arg
+
+    def __int__(self):
+        return(self.num)
+
+    def __str__(self):
+        return(str(self.num))
+
+    def __repr__(self):
+        return('BoxedInt(' + str(self.num) + ')' )")🔚
+        ✳= [:pre [:code {:class "language-python"} boxed-int-class-str]]🔚
+
+
+Because strings convert to and from Python in an identical manner, they can be used as an escape hatch for conversion for values larger than the natively-supported ✳=[:code ":int64"]🔚 datatype. To make sure that the class behaves in a manner consistent with other integers in Python (e.g. it can be used for selection, slicing, etc), the ✳=[:code "BoxedInt"]🔚 class inherits from the built-in ✳=[:code "int"]🔚 type.
+
+
+Executing this Python code string creates an environment that a reference to the Python class object can be extracted from:
+
+✳+
+(def boxed-py-int
+  (get-in
+   (py/run-simple-string  boxed-int-class-str ) [:globals :BoxedInt])) 🔚
+   
+With this class defined, libpython-clj provides the rest of the elements necesssary for a solution through the multimethods and protocols defined in the ✳[:code "libpython-clj2.python.protocols"]🔚 namespace.
+
+This multimethod dispatches on the Python type of the object, allowing for the construction of a ✳=[:code "BigInt"]🔚 from the ✳= [:code "BoxedInt"]🔚's string representation.
+
+✳+(defmethod py-proto/pyobject->jvm :boxed-int
+   [pyobj & args] (bigint (py/as-jvm (python/str pyobj))))🔚
+   
+
+Going the other way, the ✳= [:code "PCopyToPython"]🔚 protocol can be extended to new types, including the two JVM types used for larger-than-64-bit integers.
+
+✳+ (extend-protocol py-proto/PCopyToPython
+    clojure.lang.BigInt
+    (py/->python [item opts] (boxed-py-int (str item)))
+    java.math.BigDecimal
+    (py/->python [item opts] (boxed-py-int (str item))))🔚
+    
+Another integer value can be used to verify the roundtrip behavior:
+
+✳+(let [large-val 29289384293856920729839229839285108
+       after-conv (-> large-val
+                      py/->python
+                      py/->jvm)]
+
+   (assert (= large-val after-conv)
+           "Values should successfully roundtrip to/from boxed int type"))🔚
+
+✳= [:h4 "Concluding remarks"]🔚
+
+When still working through this problem, I tried to define the BoxedInt class using ✳=[:a {:href "https://clj-python.github.io/libpython-clj/libpython-clj2.python.html#var-create-class"} [:code "libpython-clj2.python/create-class"]]🔚, but I couldn't define the constructor and ✳=[:code "__call__"]🔚 methods using Clojure functions without again encountering the Python -> JVM conversion that prompted the overflow in the first place. Perhaps there's a way to achieve the same result using ✳=[:code "create-class"]🔚 that I couldn't figure out, but I knew I'd have complete control over the Python side of things by just using the class definition.
+
+I was also struck by how well-designed ✳=[:code "libpython-clj"]🔚 is, and how comprehensible its codebase is. I was able to rework its behavior to operate on new data types by just reading through the implementations of multimethods and protocols it uses for its core data types. Though I struggled to solve this problem, it was never because it was difficult to figure out what ✳=[:code "libpython-clj"]🔚 was doing.
+
+Thanks again to Chris Neurnberger for pointing me in the right direction on the Clojurians slack when I was still figuring out what to do.

@@ -44,13 +44,14 @@
 
   ;; site building functions
   }
- :jvm-opts ["--illegal-access=warn"
-            "-Dio.netty.tryReflectionSetAccessible=false"
-            "-Xms4G" "-Xmx12G"]
  :aliases
+
 
  {:test {:extra-paths ["test"]
          :extra-deps {org.clojure/test.check {:mvn/version "1.1.0"}}}
+  :libpython-clj {:jvm-opts ["--add-modules" "jdk.incubator.foreign"
+                             "--enable-native-access=ALL-UNNAMED"]
+                  :extra-deps {clj-python/libpython-clj {:mvn/version "2.020"}}}
   :runner
   {:extra-deps
    {io.github.cognitect-labs/test-runner
@@ -65,4 +66,7 @@
                      babashka/babashka.curl {:mvn/version "0.1.1"}}
         :jvm-opts ["-Djdk.attach.allowAttachSelf"
                    "-XX:+UnlockDiagnosticVMOptions"
-                   "-XX:+DebugNonSafepoints"]}}}
+                   "-XX:+DebugNonSafepoints"
+                   "--illegal-access=warn"
+                   "-Dio.netty.tryReflectionSetAccessible=false"
+                   "-Xms4G" "-Xmx12G"]}}}
