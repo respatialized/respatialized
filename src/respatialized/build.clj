@@ -56,19 +56,28 @@
              (archive/record-post! page-data archive/db)
              page-data))))
 
+(defn deep-merge
+  "Recursively merges maps."
+  [& maps]
+  (letfn [(m [& xs]
+            (if (some #(and (map? %) (not (record? %))) xs)
+              (apply merge-with m xs)
+              (last xs)))]
+    (reduce m maps)))
+
 (def initital-state
-  (merge write/initial-state
-         {:site.fabricate/settings
-          {:site.fabricate.file/template-suffix ".fab"
-           :site.fabricate.file/input-dir "./content"
-           :site.fabricate.file/output-dir "./public"
-           :site.fabricate.file/operations operations
-           :site.fabricate.page/doc-header site-page-header
-           :site.fabricate.server/config
-           {:cors-allow-headers nil,
-            :dir (str (System/getProperty "user.dir") "/public"),
-            :port 8000,
-            :no-cache true}}}))
+  (deep-merge write/initial-state
+              {:site.fabricate/settings
+               {:site.fabricate.file/template-suffix ".fab"
+                :site.fabricate.file/input-dir "./content"
+                :site.fabricate.file/output-dir "./public"
+                :site.fabricate.file/operations operations
+                :site.fabricate.page/doc-header site-page-header
+                :site.fabricate.server/config
+                {:cors-allow-headers nil,
+                 :dir (str (System/getProperty "user.dir") "/public"),
+                 :port 8000,
+                 :no-cache true}}}))
 
 (assert (m/validate write/state-schema initital-state))
 
@@ -100,6 +109,11 @@
   (do (fsm/complete operations
                     "content/working-definition.html.fab"
                     initital-state)
+      (println "done"))
+
+  (do (fsm/complete operations
+                    "content/boxed_types_libpython_clj.html.fab"
+                    @write/state)
       (println "done"))
 
   (do (fsm/complete operations
@@ -153,4 +167,6 @@
 
   (agent-error write/state)
 
+
+  (get-in write/default-site-settings )
   )
