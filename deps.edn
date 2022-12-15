@@ -4,7 +4,6 @@
   ;; core
   org.clojure/clojure {:mvn/version "1.11.1"}
   org.clojure/test.check {:mvn/version "1.1.0"}
-  org.clojure/math.combinatorics {:mvn/version "0.1.6"}
 
   ;; site generation
   site.fabricate/fabricate
@@ -13,28 +12,27 @@
    :git/sha "35b3ddecc6044904ea14c10baaa0fa647ac65146" }
   hiccup/hiccup {:mvn/version "2.0.0-alpha2" :exclusions [org.clojure/clojure]}
   hickory/hickory {:mvn/version "0.7.1"}
-  garden/garden {:mvn/version "1.3.9"}
+  garden/garden {:mvn/version "1.3.10"}
 
   ;; data munging
-  org.clojure/data.xml {:mvn/version "0.2.0-alpha6"}
-  metosin/malli #_{:mvn/version "0.8.4"}
-  {:git/url "https://github.com/metosin/malli"
-   :sha "6751b1d767f6189cde56f39c9e79e950b7264aca"}
-  borkdude/sci {:mvn/version "0.2.6"}
-  com.gfredericks/test.chuck {:mvn/version "0.2.10"}
+  org.clojure/data.xml {:mvn/version "0.2.0-alpha8"}
+  metosin/malli {:mvn/version "0.9.2"}
+
   org.flatland/ordered {:mvn/version "1.5.9"}
-  babashka/babashka.curl {:mvn/version "0.0.3"}
+  babashka/babashka.curl {:mvn/version "0.1.2"}
 
   ;; site content
-  clojure2d/clojure2d {:mvn/version "1.4.3"}
-  thi.ng/geom {:mvn/version "1.0.0-RC4"}
-  org.apache.commons/commons-math3 {:mvn/version "3.6.1"}
+  clojure2d/clojure2d {:mvn/version "1.4.4"}
+  thi.ng/geom {:mvn/version "1.0.0-RC5"}
   generateme/fastmath {:mvn/version "2.1.8"}
-  scicloj/tablecloth {:mvn/version "6.076"}
+  scicloj/tablecloth {:mvn/version "6.103"}
   io.github.adam-james-v/svg-clj
   {#_ #_:mvn/version "0.0.11"
    :git/url "https://github.com/adam-james-v/svg-clj"
-   :sha "74fff5c02b69c965654dcc6943e437357133a5d4"}
+   :sha "4220d7036113564a2af84a61d8f7db486ce858da"}
+  adam-james-v/eyebrowse
+  {:git/url "https://github.com/adam-james-v/eyebrowse/"
+   :sha "e0890ba2be97b90c2a43dd35d0e946ea92a89cc4"}
   applied-science/darkstar {:git/url "https://github.com/applied-science/darkstar/"
                             :sha "541a3ff36065c59e92fe6aa61e41a4385ba6f893"}
 
