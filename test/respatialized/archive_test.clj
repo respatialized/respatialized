@@ -169,8 +169,9 @@
                        :where
                        [?elem :html/tag :blockquote]
                        [?elem :html/tag ?tag]
-                       [?elem ?a* ?contents]]
-                     conn)]
+                       [?elem :html/contents+ ?contents]]
+                     (d/db conn))]
+          (clojure.pprint/pprint (take 20 q-res))
           (t/is (not-empty q-res))))
 
       (t/testing "update semantics for existing posts"
@@ -187,7 +188,7 @@
                           :where
                           [?p :respatialized.writing/title ?title]
                           [?p :site.fabricate.page/title ?page-title]
-                          [?p ?a+ ?d]
+                          [?p :html/contents+ ?d]
                           [?d :html/tag :div]
                           [?d :html/contents ?dc]
                           [?dc :tg/contains "one final updated div"]]
