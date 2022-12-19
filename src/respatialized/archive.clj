@@ -10,12 +10,14 @@
    [clojure.set :as set]
    [clojure.zip :as zip]
    [clojure.string :as str]
+   [babashka.fs :as fs]
    [malli.core :as m]
    [malli.transform :as mt]
    [clojure.java.shell :as sh]
-   [malli.util :as mu])
-  (:import [java.security MessageDigest]
-           [java.util.concurrent Executors]))
+   [malli.util :as mu]
+   [com.brunobonacci.mulog :as u])
+  (:import [java.time Instant]
+           [java.util UUID]))
 
 #_(def exec (Executors/newSingleThreadExecutor))
 
@@ -44,22 +46,125 @@
 
 (def db (d/connect db-uri))
 
-(defn git-sha []
-  (clojure.string/trim-newline
-   (:out (sh/sh "git" "log" "--format=%H" "-n" "1"))))
 
-(defn md5 [^String s]
-  (let [algorithm (MessageDigest/getInstance "MD5")
-        raw (.digest algorithm (.getBytes s))]
-    (format "%032x" (BigInteger. 1 raw))))
 
-(defn file-hash
-  "Combines the file with a git SHA to provide a weak cache reset mechanism"
-  ([file-contents sha]
-   (md5 (str sha file-contents)))
-  ([file-contents] (file-hash file-contents (git-sha))))
+;; A question: composite IDs for page revisions?
+
+;; if I think about it more, then all that's needed to uniquely identify a revision is:
+;; - git sha
+;; - file hash
+;; - page id (page id can be derived from filename recorded in DB in a stateful context)
+
+;; Asami does support these types for :db/ident and :id: https://github.com/threatgrid/asami/issues/168
+;; so it may be better to derive the uniqueness of revisions from observable facts.
+;; the :id attribute is observable, so it is more appropriate to use here than :db/ident
+;; (which isn't). this is probably erring on the side of redundancy, but that's OK.
+
+(def sha-schema
+  (m/schema [:string {:min 40 :max 40
+                      :description "A 40-character SHA"}]))
+
+(def revision-entity-schema
+  (let [file-sha (mu/update-properties sha-schema assoc :description "A git file SHA")
+        repo-sha (mu/update-properties sha-schema assoc :description "A git commit SHA")]
+    (m/schema
+     [:map
+      [:id [:tuple
+            [:uuid {:description "The page ID"}]
+            file-sha
+            repo-sha]]
+      [:file/path [:string {:description "The path of the input file"}]]
+      [:page/id [:uuid {:description "The page ID"}]]
+      [:git/sha repo-sha]
+      [:git/file-hash file-sha]
+      [:git/worktree-status
+       [:keyword
+        {:description "A description of the worktree status at the time a post was recorded"}]]
+      [::revision-time
+       [:fn {:description
+             "The time a given page's revision entered the database"} inst? ]]
+      [::revision-index
+       [:int {:description "A sequentially increasing index number for page revisions"}]]
+      [::revision-new?
+       [:boolean {:description "A boolean value indicating whether the revision has changed"}]]
+      ])))
+
 
 (comment
+  (fs/normalize (fs/file "./content/holotyp3.html.fab") )
+
+  (m/validate :string "a")
+
+  (m/validate [:string {:description "something"}] "a")
+
+  )
+
+(defn git-sha []
+  (str/trim-newline
+   (:out (sh/sh "git" "log" "--format=%H" "-n" "1"))))
+
+(defn file-hash [filename]
+  (str/trim-newline
+   (:out (sh/sh "git" "hash-object" filename))))
+
+(defn git-worktree-status []
+  (-> (sh/sh "git" "describe" "--dirty" "--always")
+      :out
+      str/trim-newline
+      (.endsWith  "-dirty")
+      {true :dirty false :clean}))
+
+(defn file->revision
+  "Generates a revision entity map for the given file (and database).
+
+  Attempts to find a page ID and revision number for the given file;
+  will assume the post is new if no DB is passed in as an input."
+  ([file db]
+   (let [now (Instant/now)
+         normalized (fs/normalize (fs/file file))
+         [page-id r-ix hash] #_existing-post?
+         (d/q '[:find ?id ?r-ix ?hash .
+                :in $ ?path
+                :where
+                [?p :file/path ?path]
+                [?p :page/id ?id]
+                [?p ::revision-index ?r-ix]
+                [?p :git/file-hash ?hash]]
+              db normalized)
+         page-id (or page-id (UUID/randomUUID))
+         input-hash (file-hash (str normalized))
+         repo-hash (git-sha)]
+     {:id [page-id input-hash repo-hash]
+      :git/sha repo-hash
+      :git/file-hash input-hash
+      :git/worktree-status (git-worktree-status)
+      :page/id page-id
+      :file/path (str normalized)
+      ::revision-time now
+      ::revision-index (inc (or r-ix 0))
+      ::revision-new? (if hash (= hash input-hash) true)}))
+  ([file]
+   (let [now (Instant/now)
+         normalized (fs/normalize (fs/file file))
+         page-id  (UUID/randomUUID)
+         input-hash (file-hash (str normalized))
+         repo-hash (git-sha)]
+     {:id [page-id input-hash repo-hash]
+      :git/sha repo-hash
+      :git/file-hash input-hash
+      :file/path (str normalized)
+      :git/worktree-status (git-worktree-status)
+      :page/id page-id
+      ::revision-time now
+      ::revision-index 1
+      ::revision-new? true})))
+
+(comment
+
+  (inst? (Instant/now) )
+
+  (count (file-hash  "content/holotype3.html.fab") )
+
   (def example-page (get @site.fabricate.prototype.write/pages
                          "content/design-doc-database.html.fab"))
 
@@ -68,16 +173,12 @@
   (clojure.repl/doc d/connect)
   (clojure.repl/doc d/transact!))
 
-;; the trouble here is that I don't know how to enforce the
-;; upsert semantics for a path
-;; the pragmatic choice right now: 1 path = 1 entity
-
 (defn html-attr->kw [attr-name]
   (cond
     (keyword? attr-name) (keyword "html.attribute" (name attr-name))
     (.startsWith attr-name "data-")
     (keyword "html.attribute.data"
-             (second (clojure.string/split attr-name #"-")))
+             (second (str/split attr-name #"-")))
     :else (keyword "html.attribute"
                    attr-name)))
 
@@ -109,7 +210,7 @@
 (def page-parser (m/parser html/html))
 
 (defn page->asami [{:keys [site.fabricate.page/evaluated-content
-                           site.fabricate.file/filename
+                           site.fabricate.file/input-filename
                            site.fabricate.page/title
                            site.fabricate.page/namespace
                            site.fabricate.page/metadata]
@@ -120,59 +221,60 @@
            (clojure.walk/postwalk #(if (and (map? %)
                                             (every? #{:tag :attrs :contents}
                                                     (keys %)))
-                                     (parsed->asami %) %))
-           (#(assoc
-              %
-              :db/ident filename
-              :respatialized.writing/title title))
-           (merge (select-keys page-map [:site.fabricate.file/filename
-                                         :site.fabricate.page/title
-                                         #_:site.fabricate.page/namespace
-                                         :site.fabricate.page/metadata]))))))
+                                     (parsed->asami %) %))))))
 
 (defn replacement-annotation [kw]
   (->> kw str (drop 1) (#(concat % (list \'))) (apply str) keyword))
 
 (comment
-  (replacement-annotation :some/kw))
+  (replacement-annotation :some/kw) )
 
-(defn record-post!
-  "Records the post in the database. Associates data with known entities for that path"
+;; write a proper database schema, not just repurposed attributes
+;; not everything can have a schema (and it's good that some things don't)
+;; but the attributes with significance for upsert + uniqueness behavior
+;; certainly need to have some boundaries placed on them.
+
+(defn record-page!
+  "Generate a revision ID and records the page's revision in the database - if updated.
+
+  Returns the revision identifier."
   [{:keys [site.fabricate.page/evaluated-content
            site.fabricate.page/rendered-content
            site.fabricate.page/unparsed-content
            site.fabricate.file/input-file
-           site.fabricate.file/filename
            site.fabricate.page/title]
     :as page-data}
-   db]
-  (let [current-sha (git-sha)
-        post-hash (file-hash unparsed-content
-                             current-sha)
-        existing-post
-        (try (d/q '[:find ?post-id
-                    :in $ ?post-id
-                    :where
-                    (or
-                     [?post-id :db/ident $]
-                     [?post-id :site.fabricate.file/filename $])]
-                  (d/db db) filename)
-             (catch Exception e nil))
+   conn]
+  (let [revision-entity (file->revision input-file conn)
+        ;; [BUG] - replacement annotations can't be used on non-existent entities
+        ;; so there needs to be a conditional workaround for now
+        page-ent-data
+        (if (d/entity conn (:page/id revision-entity))
+          {:id (:page/id revision-entity)
+           :page/revisions+ (:id revision-entity) ; append revision
+           :page/title' title} ; update title
+          {:id (:page/id revision-entity)
+           :page/revisions (:id revision-entity)
+           :page/title title})
+        filename (:file/path revision-entity)
         asami-post (page->asami page-data)]
-    (cond
-      (nil? asami-post) (do (println "skipping recording") (future nil))
-      (empty?
-       existing-post)
-      (d/transact-async db {:tx-data [asami-post]
-                            #_ #_ :executor exec})
-      :else
-      (d/transact-async
-       db
-       {:tx-data
-        [(merge (into {} (map (fn [[k v]] [(replacement-annotation k) v]) asami-post)))]
-        #_ #_ :executor exec}))))
+    (if (::revision-new? revision-entity)
+      (u/trace ::record-page-revision!
+        {:pairs [:site.fabricate.page/title title
+                 ]}
+        (d/transact
+         conn
+         [#_(merge revision-entity
+                   (select-keys asami-post
+                                [:site.fabricate.page/evaluated-content
+                                 :site.fabricate.page/metadata
+                                 :site.fabricate.page/title]))
+          page-ent-data])))
+    (:id revision-entity)))
 
 (comment
+
+
 
   (def db-after-post
     @(record-post! example-page db))

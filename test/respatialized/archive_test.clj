@@ -93,7 +93,44 @@
    :site.fabricate.file/input-file "example-file.html.fab"
    :site.fabricate.page/title "Empty Example"})
 
+(def test-post-files
+  ["content/not-a-tree.html.fab" "content/ai-and-labor.html.fab"
+   "./content/not-a-tree.html.fab" "./content/ai-and-labor.html.fab"
+   "content/database-driven-applications.html.fab"
+   "./content/database-driven-applications.html.fab"])
+
+(def completed-posts
+  (->> test-post-files
+       (map #(fsm/complete (dissoc write/default-operations write/rendered-state)
+                           % write/initial-state))
+       (filter map?)
+       (into [])))
+
+
+
+(comment
+  (file->revision
+   (:site.fabricate.file/input-file (first completed-posts)))
+
+  (count test-post-files)
+
+  )
+
 (t/deftest recording
+
+  (t/is (= 3
+           (->> test-post-files
+                (map #(dissoc (file->revision %)
+                              :id :page/id :respatialized.archive/revision-time))
+                distinct
+                count))
+        "File path normalization should result in consistent revision data")
+
+  (doseq [post completed-posts]
+    (t/is (m/validate
+           revision-entity-schema
+           (file->revision (get post :site.fabricate.file/input-file)))
+          "Schema should be consistent for revisions generated from example files"))
 
   (let [quot-tx @(d/transact conn {:tx-data [quotation-asami]})
         figs (d/q '[:find  [?tag ?attr-prop]
@@ -102,7 +139,7 @@
                     [?e :html.attribute/itemprop ?attr-prop]]
                   (d/db conn))]
 
-    (t/is (any? @(record-post! example-post conn))
+    (t/is (any? (record-page! example-post conn) )
           "Post data should be recorded without errors.")
 
     (t/is (any? quot-tx)
@@ -117,20 +154,8 @@
 ;; - ensure you understand and can write code that performs what you want to do in the correct order
 ;; - stabilize system properties
 
-(def test-post-files
-  ["content/not-a-tree.html.fab" "content/ai-and-labor.html.fab"
-   "./content/not-a-tree.html.fab" "./content/ai-and-labor.html.fab"
-   "content/database-driven-applications.html.fab"
-   "./content/database-driven-applications.html.fab"])
-
 (comment
-  (def completed-posts
-    (->> test-post-files
-         (map #(fsm/complete (dissoc write/default-operations write/rendered-state)
-                             % write/initial-state))
-         (filter map?)
-         (map :site.fabricate.page/evaluated-content)
-         (into [])))
+
 
   (second (first completed-posts))
 
@@ -144,76 +169,142 @@
 
 (t/deftest post-database
   (t/testing "database capabilities for writing"
-    (let [ops (dissoc write/default-operations write/rendered-state)
-          completed-posts
-          (->> test-post-files
-               (map #(fsm/complete ops % write/initial-state))
-               (filter map?))]
-      (t/testing "parsing posts into Asami format"
-        (let [asami-posts
-              (mapv
-               #(let [a (page->asami %)]
-                  (if (= a :malli.core/invalid)
-                    (do (println
-                         (:errors
-                          (m/explain html/html %))) a)
-                    a))
-               completed-posts)]
-          (t/is (not-any? #(= :malli.core/invalid %)
-                          asami-posts))
-          (d/transact conn {:tx-data asami-posts})))
+    (t/testing "parsing posts into Asami format"
+      (let [asami-posts
+            (mapv
+             #(let [a (page->asami %)]
+                (if (= a :malli.core/invalid)
+                  (do (println
+                       (:errors
+                        (m/explain html/html %))) a)
+                  a))
+             completed-posts)]
+        (t/is (not-any? #(= :malli.core/invalid %)
+                        asami-posts))
+        (d/transact conn {:tx-data asami-posts})))
 
-      (t/testing "queries for post contents by html attributes"
-        (let [q-res (d/q
-                     '[:find ?tag ?contents
-                       :where
-                       [?elem :html/tag :blockquote]
-                       [?elem :html/tag ?tag]
-                       [?elem :html/contents+ ?contents]]
-                     (d/db conn))]
-          (clojure.pprint/pprint (take 20 q-res))
-          (t/is (not-empty q-res))))
+    (t/testing "queries for post contents by html attributes"
+      (let [q-res (d/q
+                   '[:find ?tag ?contents
+                     :where
+                     [?elem :html/tag :blockquote]
+                     [?elem :html/tag ?tag]
+                     [?elem :html/contents+ ?contents]]
+                   (d/db conn))]
+        (clojure.pprint/pprint (take 20 q-res))
+        (t/is (not-empty q-res))))
 
-      (t/testing "update semantics for existing posts"
-        (let [random-post (first (shuffle completed-posts))
-              changed-post
-              (update random-post
-                      :site.fabricate.page/evaluated-content
-                      (fn [p] (let [h (pop p) t (peek p)]
-                                (conj h (conj t [:div "one final updated div"])))))]
-          @(record-post! changed-post conn)
-          (t/is (= (:site.fabricate.page/title random-post)
-                   (d/q '[:find ?title .
-                          :in $ ?page-title
+    (t/testing "update semantics for existing posts"
+      (let [random-post (first (shuffle completed-posts))
+            changed-post
+            (update random-post
+                    :site.fabricate.page/evaluated-content
+                    (fn [p] (let [h (pop p) t (peek p)]
+                              (conj h (conj t [:div "one final updated div"])))))]
+
+
+        (record-page! changed-post conn)
+        (Thread/sleep 500)
+
+        (t/is (= (:site.fabricate.page/title random-post)
+                 (d/q '[:find ?title .
+                        :in $ ?page-title
+                        :where
+                        [?p :respatialized.writing/title ?title]
+                        [?p :site.fabricate.page/title ?page-title]
+                        [?p :html/contents+ ?d]
+                        #_[?d :html/tag :div]
+                        #_[?d :html/contents ?dc]
+                        [?d :a/contains "one final updated div"]]
+                      (d/db conn) (:site.fabricate.page/title random-post))))
+
+        (t/is (= 1 (d/q '[:find (count ?p) .
+                          :in $ ?page-title ?page-path
                           :where
-                          [?p :respatialized.writing/title ?title]
+                          [?p :respatialized.writing/title ?page-title]
                           [?p :site.fabricate.page/title ?page-title]
-                          [?p :html/contents+ ?d]
-                          [?d :html/tag :div]
-                          [?d :html/contents ?dc]
-                          [?dc :tg/contains "one final updated div"]]
-                        (d/db conn) (:site.fabricate.page/title random-post)))))))))
+                          [?p :site.fabricate.file/input-filename ?page-path]]
+                        (d/db conn)
+                        (:site.fabricate.page/title random-post)
+                        (:site.fabricate.file/input-filename random-post)))
+              "Uniqueness for existing posts should be enforced")
+        (clojure.pprint/pprint
+         (d/q '[:find (count ?eid) .
+                :in $ ?page-title
+                :where  [?eid :respatialized.writing/title ?page-title]
+                [?eid :site.fabricate.page/title ?page-title]]
+              (d/db conn) (:site.fabricate.page/title random-post)))
+        ))))
 
 (comment
   (do
     (d/create-database test-db-uri)
     (def conn (d/connect test-db-uri)))
 
-  (d/transact
-   conn
-   {:tx-data {:respatialized.tests/test-content
-              [:main [:article "some text"]]}}
-   )
+
+  (let [uri (str "asami:mem://test-" (rand-int 128000))
+        tdb (-> uri
+                (#(do (d/create-database %) %))
+                (d/connect))]
+
+    (mapv #(clojure.pprint/pprint (:tx-data @(d/transact tdb [%])))
+          [{:db/ident "abc"}
+           {:id "ghi"}
+           {:id [:kw "string"]}
+           {:id "something" :attr 1}
+           #_{:id "something else" :attr' 1}
+           #_{:id "some other thing" :attr' 1}
+           ])
+
+    (clojure.pprint/pprint (d/entity tdb "xyz"))
+    (clojure.pprint/pprint (d/entity tdb "abc"))
+    (clojure.pprint/pprint (d/entity tdb "ghi"))
+
+    (d/delete-database uri)
+    )
+
+    (page->asami (first completed-posts))
+
+    (mapv #(do @(record-post! % conn)) completed-posts)
+
+    (d/q '[:find ?tag
+           :in $
+           :where [?e :html/tag ?tag]
+           #_[?e :html/tag :div]
+           #_[?e :html/contents+ ?contents]
+           [?e :a/contains+ "Database-driven applications"]]
+         conn)
+
+    (d/q '[:find ?eid ?filename ?title
+           :in $
+           :where [?eid :site.fabricate.file/input-filename ?filename]
+           [?eid :site.fabricate.page/title ?title]
+           #_[?e :html/tag :div]
+           #_[?e :html/contents+ ?contents]]
+         conn)
+
+    (d/q '[:find ?p ?page-title ?page-path
+           :in $ ?page-title ?page-path
+           :where
+           [?p :respatialized.writing/title ?page-title]
+           [?p :site.fabricate.page/title ?page-title]
+           [?p :site.fabricate.file/input-filename ?page-path]]
+         (d/db conn)
+         "This Website Is Not A Tree"
+         "content/not-a-tree.html.fab"
+         )
+
+    (keys (first completed-posts))
+
+    (keys (page->asami (first completed-posts)))
+
+    ((::html/span html/element-parsers)  [:span "text"])
+
+    (element-parser [:span "text"])
+
+    (m/unparse html/html {:html/tag :span
+                          :html/contents "text"})
 
 
-
-  ((::html/span html/element-parsers)  [:span "text"])
-
-  (element-parser [:span "text"])
-
-  (m/unparse html/html {:html/tag :span
-                        :html/contents "text"})
-
-
-  (d/delete-database test-db-uri)
-  )
+    (d/delete-database test-db-uri)
+    )

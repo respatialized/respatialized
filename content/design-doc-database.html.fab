@@ -89,6 +89,8 @@ For one thing, that may not actually be a problem if the pages can be re-evaluat
 ✳=[:pre [:code "(query! all-quotes-query)"]]🔚
 This query would need to capture its revision hash at time of execution for reproducibility. If a query tries to reach a commit not in the DB, that revision can be checked out and re-evaluated.
 
+
+
 ✳=[:h4 "One way of implementing this: " [:code "konserve-git"]]🔚
 
 The general idea is that git would still handle all the plumbing and Datahike would be a kind of cache or porcelain atop it, giving users Clojure and fabricate-specific query capabilities. Might be unfeasible for performance reasons, as content-addressed files accessed through git may not be fast enough for real queries (counterexample: sqlite). Evaluated pages/forms could be stored directly in git using write-object, providing the caching mechanism for results.
@@ -110,6 +112,12 @@ Asami is the database to use right now, for the following reasons:
 ✳=[:h3 "Relational Model"]🔚
 
 For the time being, the following property is assumed of all posts: 1 input file, 1 post, 1 output page. Top-level metadata are encoded as attributes of the page. Sub-page elements are modeled as descendent entities.
+
+
+✳=[:h4 "Modeling history"]🔚
+
+Asami doesn't have the same query semantics as Datomic, so queries cannot use 
+✳=[:em :db/txInstant]🔚 to query across the history of values for an attribute. This means that time needs to be modeled explicitly via attributes rather than implicitly using the database's underlying history storage mechanism. As I understand it, this is already  ✳=[:a {:href "https://vvvvalvalval.github.io/posts/2017-07-08-Datomic-this-is-not-the-history-youre-looking-for.html"} "best practice" ]🔚 for any "human time" attributes (as opposed to "system time") for Datomic, so the effort put in to thinking through this problem will make the resulting database design more robust.
 
 ✳=[:h2 "Experiments with a live database"]🔚
 
