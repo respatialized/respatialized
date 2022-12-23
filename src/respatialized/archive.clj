@@ -221,7 +221,10 @@
            (clojure.walk/postwalk #(if (and (map? %)
                                             (every? #{:tag :attrs :contents}
                                                     (keys %)))
-                                     (parsed->asami %) %))))))
+                                     (parsed->asami %) %))
+           (merge (select-keys
+                   page-map
+                   [:site.fabricate.page/title]))))))
 
 (defn replacement-annotation [kw]
   (->> kw str (drop 1) (#(concat % (list \'))) (apply str) keyword))
@@ -245,31 +248,35 @@
            site.fabricate.page/title]
     :as page-data}
    conn]
-  (let [revision-entity (file->revision input-file conn)
+  (let [revision-entity
+        (file->revision input-file conn)
+
         ;; [BUG] - replacement annotations can't be used on non-existent entities
         ;; so there needs to be a conditional workaround for now
         page-ent-data
         (if (d/entity conn (:page/id revision-entity))
           {:id (:page/id revision-entity)
-           :page/revisions+ (:id revision-entity) ; append revision
+           :page/revisions+ {:db/id (:id revision-entity)} ; append revision
            :page/title' title} ; update title
           {:id (:page/id revision-entity)
-           :page/revisions (:id revision-entity)
+           :page/revisions [ {:db/id (:id revision-entity)}]
            :page/title title})
         filename (:file/path revision-entity)
-        asami-post (page->asami page-data)]
+        revision-data (merge
+                       revision-entity
+                       (page->asami page-data))]
+    (clojure.pprint/pprint (dissoc revision-data :html/contents))
     (if (::revision-new? revision-entity)
       (u/trace ::record-page-revision!
-        {:pairs [:site.fabricate.page/title title
-                 ]}
-        (d/transact
-         conn
-         [#_(merge revision-entity
-                   (select-keys asami-post
-                                [:site.fabricate.page/evaluated-content
-                                 :site.fabricate.page/metadata
-                                 :site.fabricate.page/title]))
-          page-ent-data])))
+        {:pairs [:site.fabricate.page/title title]}
+        (let [{:keys [tx-data] :as r}
+              @(d/transact
+                conn
+                [revision-data
+                 page-ent-data])]
+          #_(clojure.pprint/pprint tx-data)
+          ))
+      )
     (:id revision-entity)))
 
 (comment

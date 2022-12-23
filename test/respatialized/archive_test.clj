@@ -168,7 +168,7 @@
                   2)))
 
 (t/deftest post-database
-  (t/testing "database capabilities for writing"
+  (t/testing "database capabilities:"
     (t/testing "parsing posts into Asami format"
       (let [asami-posts
             (mapv
@@ -206,28 +206,31 @@
         (record-page! changed-post conn)
         (Thread/sleep 500)
 
-        (t/is (= (:site.fabricate.page/title random-post)
-                 (d/q '[:find ?title .
-                        :in $ ?page-title
-                        :where
-                        [?p :respatialized.writing/title ?title]
-                        [?p :site.fabricate.page/title ?page-title]
-                        [?p :html/contents+ ?d]
-                        #_[?d :html/tag :div]
-                        #_[?d :html/contents ?dc]
-                        [?d :a/contains "one final updated div"]]
-                      (d/db conn) (:site.fabricate.page/title random-post))))
+        (let [q-res
+              (d/q '[:find ?title . #_ #_ ?rev ?r-id
+                     :in $ ?page-title
+                     :where
+                     [?rev :site.fabricate.page/title ?title]
+                     [?page :page/title ?page-title]
+                     [?page :page/revisions ?revs]
+                     [?revs :a/contains ?rev]
+                     [?rev :id ?r-id]
+                     #_[?p :html/contents+ ?d]
+                     #_[?d :html/tag :div]
+                     #_[?d :html/contents ?dc]
+                     #_[?d :a/contains "one final updated div"]]
+                   (d/db conn) (:site.fabricate.page/title random-post))]
+          (t/is (= (:site.fabricate.page/title random-post)
+                   q-res)))
 
         (t/is (= 1 (d/q '[:find (count ?p) .
-                          :in $ ?page-title ?page-path
+                          :in $ ?page-title
                           :where
-                          [?p :respatialized.writing/title ?page-title]
-                          [?p :site.fabricate.page/title ?page-title]
-                          [?p :site.fabricate.file/input-filename ?page-path]]
+                          [?p :page/title ?page-title]
+                          [?p :page/revisions _]]
                         (d/db conn)
-                        (:site.fabricate.page/title random-post)
-                        (:site.fabricate.file/input-filename random-post)))
-              "Uniqueness for existing posts should be enforced")
+                        (:site.fabricate.page/title random-post)))
+              "Uniqueness for existing pages should be enforced")
         (clojure.pprint/pprint
          (d/q '[:find (count ?eid) .
                 :in $ ?page-title
@@ -237,9 +240,19 @@
         ))))
 
 (comment
+  (page-parser (:site.fabricate.page/evaluated-content
+                (first completed-posts)))
+
+  (page->asami (first completed-posts))
+
   (do
     (d/create-database test-db-uri)
     (def conn (d/connect test-db-uri)))
+
+  (clojure.pprint/pprint  (page-parser [:html [:head {:title "something"}] [:body]]))
+
+
+
 
 
   (let [uri (str "asami:mem://test-" (rand-int 128000))
@@ -263,48 +276,48 @@
     (d/delete-database uri)
     )
 
-    (page->asami (first completed-posts))
+  (page->asami (first completed-posts))
 
-    (mapv #(do @(record-post! % conn)) completed-posts)
+  (mapv #(do @(record-post! % conn)) completed-posts)
 
-    (d/q '[:find ?tag
-           :in $
-           :where [?e :html/tag ?tag]
-           #_[?e :html/tag :div]
-           #_[?e :html/contents+ ?contents]
-           [?e :a/contains+ "Database-driven applications"]]
-         conn)
+  (d/q '[:find ?tag
+         :in $
+         :where [?e :html/tag ?tag]
+         #_[?e :html/tag :div]
+         #_[?e :html/contents+ ?contents]
+         [?e :a/contains+ "Database-driven applications"]]
+       conn)
 
-    (d/q '[:find ?eid ?filename ?title
-           :in $
-           :where [?eid :site.fabricate.file/input-filename ?filename]
-           [?eid :site.fabricate.page/title ?title]
-           #_[?e :html/tag :div]
-           #_[?e :html/contents+ ?contents]]
-         conn)
+  (d/q '[:find ?eid ?filename ?title
+         :in $
+         :where [?eid :site.fabricate.file/input-filename ?filename]
+         [?eid :site.fabricate.page/title ?title]
+         #_[?e :html/tag :div]
+         #_[?e :html/contents+ ?contents]]
+       conn)
 
-    (d/q '[:find ?p ?page-title ?page-path
-           :in $ ?page-title ?page-path
-           :where
-           [?p :respatialized.writing/title ?page-title]
-           [?p :site.fabricate.page/title ?page-title]
-           [?p :site.fabricate.file/input-filename ?page-path]]
-         (d/db conn)
-         "This Website Is Not A Tree"
-         "content/not-a-tree.html.fab"
-         )
+  (d/q '[:find ?p ?page-title ?page-path
+         :in $ ?page-title ?page-path
+         :where
+         [?p :respatialized.writing/title ?page-title]
+         [?p :site.fabricate.page/title ?page-title]
+         [?p :site.fabricate.file/input-filename ?page-path]]
+       (d/db conn)
+       "This Website Is Not A Tree"
+       "content/not-a-tree.html.fab"
+       )
 
-    (keys (first completed-posts))
+  (keys (first completed-posts))
 
-    (keys (page->asami (first completed-posts)))
+  (keys (page->asami (first completed-posts)))
 
-    ((::html/span html/element-parsers)  [:span "text"])
+  ((::html/span html/element-parsers)  [:span "text"])
 
-    (element-parser [:span "text"])
+  (element-parser [:span "text"])
 
-    (m/unparse html/html {:html/tag :span
-                          :html/contents "text"})
+  (m/unparse html/html {:html/tag :span
+                        :html/contents "text"})
 
 
-    (d/delete-database test-db-uri)
-    )
+  (d/delete-database test-db-uri)
+  )
