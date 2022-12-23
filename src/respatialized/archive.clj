@@ -256,10 +256,10 @@
         page-ent-data
         (if (d/entity conn (:page/id revision-entity))
           {:id (:page/id revision-entity)
-           :page/revisions+ {:db/id (:id revision-entity)} ; append revision
+           :page/revisions+ {:id (:id revision-entity)} ; append revision
            :page/title' title} ; update title
           {:id (:page/id revision-entity)
-           :page/revisions [ {:db/id (:id revision-entity)}]
+           :page/revisions [ {:id (:id revision-entity)}]
            :page/title title})
         filename (:file/path revision-entity)
         revision-data (merge
