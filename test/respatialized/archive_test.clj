@@ -169,7 +169,18 @@
 
 (t/deftest post-database
   (t/testing "database capabilities:"
+
     (t/testing "parsing posts into Asami format"
+
+      (doseq [{:keys [site.fabricate.page/evaluated-content]
+               :as results}
+              completed-posts]
+        (let [r (-> evaluated-content
+                    page-parser
+                    page-unparser)]
+          (t/is (= evaluated-content r)
+                "Parsing and unparsing should produce identical pages")))
+
       (let [asami-posts
             (mapv
              #(let [a (page->asami %)]
@@ -191,7 +202,6 @@
                      [?elem :html/tag ?tag]
                      [?elem :html/contents+ ?contents]]
                    (d/db conn))]
-        (clojure.pprint/pprint (take 20 q-res))
         (t/is (not-empty q-res))))
 
     (t/testing "update semantics for existing posts"
@@ -206,7 +216,7 @@
         (record-page! changed-post conn)
         (Thread/sleep 500)
 
-        (let [q-res
+        (let [q-res-1
               (d/q '[:find ?title . #_ #_ ?d-attr ?d-val
                      :in $ ?page-title
                      :where
@@ -215,18 +225,18 @@
                      [?page :page/revisions ?revs]
                      [?revs :a/contains ?rev]
                      [?rev :id ?r-id]
-                     [?rev :html/contents ?rc]
-                     [?rc :body ?bn]
+                     [?rev :html/contents ?hc]
+                     [?hc :body ?bn]
                      [?bn :html/tag :body]
-                     [?bn :html/contents* ?bcn]
-                     [?bcn :a/contains ?d]
+                     [?bn :html/contents ?bc]
+                     [?bc :a/contains ?d]
                      [?d :html/tag :div]
                      [?d :html/contents ?dc]
                      [?dc :a/contains "one final updated div"]]
                    (d/db conn) (:site.fabricate.page/title random-post))]
-          (println q-res)
+
           (t/is (= (:site.fabricate.page/title random-post)
-                   q-res)))
+                   q-res-1)))
 
         (t/is (= 1 (d/q '[:find (count ?p) .
                           :in $ ?page-title
