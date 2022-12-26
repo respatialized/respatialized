@@ -207,7 +207,7 @@
         (Thread/sleep 500)
 
         (let [q-res
-              (d/q '[:find ?title . #_ #_ ?rev ?r-id
+              (d/q '[:find ?title . #_ #_ ?d-attr ?d-val
                      :in $ ?page-title
                      :where
                      [?rev :site.fabricate.page/title ?title]
@@ -215,11 +215,16 @@
                      [?page :page/revisions ?revs]
                      [?revs :a/contains ?rev]
                      [?rev :id ?r-id]
-                     #_[?p :html/contents+ ?d]
-                     #_[?d :html/tag :div]
-                     #_[?d :html/contents ?dc]
-                     #_[?d :a/contains "one final updated div"]]
+                     [?rev :html/contents ?rc]
+                     [?rc :body ?bn]
+                     [?bn :html/tag :body]
+                     [?bn :html/contents* ?bcn]
+                     [?bcn :a/contains ?d]
+                     [?d :html/tag :div]
+                     [?d :html/contents ?dc]
+                     [?dc :a/contains "one final updated div"]]
                    (d/db conn) (:site.fabricate.page/title random-post))]
+          (println q-res)
           (t/is (= (:site.fabricate.page/title random-post)
                    q-res)))
 

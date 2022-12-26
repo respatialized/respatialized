@@ -265,7 +265,6 @@
         revision-data (merge
                        revision-entity
                        (page->asami page-data))]
-    (clojure.pprint/pprint (dissoc revision-data :html/contents))
     (if (::revision-new? revision-entity)
       (u/trace ::record-page-revision!
         {:pairs [:site.fabricate.page/title title]}
