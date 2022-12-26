@@ -53,7 +53,7 @@
              (println "writing page content to" output-file)
              (spit output-file rendered-content)
              (println "Recording page data in database")
-             (archive/record-post! page-data archive/db)
+             (archive/record-page! page-data archive/db)
              page-data))))
 
 (defn deep-merge
