@@ -5,8 +5,31 @@
             [site.fabricate.prototype.read :as read]
             [site.fabricate.prototype.fsm :as fsm]
             [malli.core :as m]
+            [asami.core :as d]
             [clojure.java.io :as io]
             [clojure.test :as t]))
+
+(def test-db-uri "asami:mem://respatialized-test")
+(declare conn)
+(def test-state (agent initial-state))
+
+(defn db-fixture [f]
+  (do
+    (defonce conn (d/connect test-db-uri))
+    (d/create-database test-db-uri)
+    (send test-state
+          (fn [{:keys [site.fabricate.app/database]
+                :as state}]
+            (-> state
+                (assoc-in [:site.fabricate.app/database :db/uri]
+                          test-db-uri)
+                (assoc-in [:site.fabricate.app/database :db/conn]
+                          conn))))
+
+    (f)
+    (d/delete-database test-db-uri)))
+
+(t/use-fixtures :once db-fixture)
 
 (def error-schema
   [:catn
@@ -51,10 +74,11 @@
 
 
 (def eval-ops
-  (dissoc operations
-          write/html-state
-          write/markdown-state
-          write/rendered-state))
+  (dissoc
+   site.fabricate.prototype.write/default-operations
+   write/html-state
+   write/markdown-state
+   write/rendered-state))
 
 (def allowed-failures
   {"./content/holotype-blueprint.html.fab" 1})
@@ -64,8 +88,16 @@
     (t/is (= "content/not-a-tree.html.fab"
              (str (read/->dir-local-file nat-f))))))
 
+(def expensive-pages
+  #{"./content/holotype4.html.fab"
+    "./content/sketchbook/extruder.html.fab"
+    "./content/color-extraction.html.fab"})
+
 (t/deftest conformance
-  (let [pages  (shuffle (write/get-template-files "./content" ".fab"))]
+  (let [pages
+        (->>  (write/get-template-files "./content" ".fab")
+              (filter #(and (not (expensive-pages %)) true))
+              (shuffle ))]
     (doseq [p pages]
       (t/testing (str "page " p)
         (println "reading page " p)
@@ -80,3 +112,34 @@
           (t/is (or (= 0 (count errors))
                     (= (count errors) (allowed-failures p)))
                 (str "Post " title " had " (count errors) " evaluation errors")))))))
+
+
+
+(t/deftest archive
+
+  (t/testing "ability to skip unmodified pages"
+
+    (let [ops (dissoc operations write/rendered-state
+                      write/html-state
+                      write/markdown-state)
+          example-file "content/ai-and-labor.html.fab"]
+      ;; TODO: figure out how to make this idempotent
+      ;; and test that nothing is recorded even though
+      ;; the results are identical - purely functional page renders
+
+
+      (let [result1 (fsm/complete
+                     ops
+                     example-file
+                     @test-state)
+            result2 (fsm/complete
+                     ops
+                     example-file
+                     @test-state)]
+        (t/is (contains?
+               result1
+               :site.fabricate.page/evaluated-content))
+        (t/is (not= result1 result2)))
+      )
+    )
+  )

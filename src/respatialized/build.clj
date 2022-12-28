@@ -16,44 +16,34 @@
    [respatialized.archive :as archive]
    [clojure.string :as str]))
 
-(defn post-hashes [path db]
-  (let [res
-        (d/q
-         '[:find ?post-id ?hash
-           :in $ ?path
-           :where
-           [?post-id :file/path ?path]
-           [?post-id ::archive/file-hash ?hash]]
-         (d/db db) path)
-        [_ fh] (first res)
-        current-hash (archive/file-hash (slurp path))]
-    {:recorded-hash fh
-     :current-hash current-hash}))
+(defn new-page? [{:keys [site.fabricate.file/input-file] :as page-data}
+                 {:keys [site.fabricate.app/database]
+                  :as application-state-map}]
+  (let [{:keys [archive/revision-new?] :as rev-entity}
+        (archive/file->revision input-file
+                                (:db/conn database))]
+    revision-new?))
 
 (def operations
   (assoc write/default-operations
          write/file-state
          (fn [{:keys [site.fabricate.file/input-file] :as page-data}
               application-state-map]
-           (let [hashes (try (post-hashes (.toString input-file) archive/db)
-                             (catch Exception e nil))]
-             println hashes
-             (if (and hashes (= (:recorded-hash hashes) (:current-hash hashes)))
-               (do
-                 (println "Page at" (.toString input-file)
-                          "up to date, skipping")
-                 page-data)
-               (assoc page-data :site.fabricate.page/unparsed-content
-                      (slurp input-file)))))
+           (if (new-page? page-data)
+             (assoc page-data :site.fabricate.page/unparsed-content
+                    (slurp input-file))
+             (do (println "Page at" (.toString input-file)
+                          "up to date, skipping") page-data)))
          write/rendered-state
          (fn [{:keys [site.fabricate.page/rendered-content
                       site.fabricate.file/output-file] :as page-data}
-              application-state-map]
+              {:keys [site.fabricate.app/database]
+               :as application-state-map}]
            (do
              (println "writing page content to" output-file)
              (spit output-file rendered-content)
              (println "Recording page data in database")
-             (archive/record-page! page-data archive/db)
+             (archive/record-page! page-data (:db/conn database))
              page-data))))
 
 (defn deep-merge
@@ -65,7 +55,7 @@
               (last xs)))]
     (reduce m maps)))
 
-(def initital-state
+(def initial-state
   (deep-merge write/initial-state
               {:site.fabricate/settings
                {:site.fabricate.file/template-suffix ".fab"
@@ -77,13 +67,16 @@
                 {:cors-allow-headers nil,
                  :dir (str (System/getProperty "user.dir") "/public"),
                  :port 8000,
-                 :no-cache true}}}))
+                 :no-cache true}}
+               :site.fabricate.app/database
+               {:db/uri archive/db-uri
+                :db/conn nil}}))
 
-(assert (m/validate write/state-schema initital-state))
+(assert (m/validate write/state-schema initial-state))
 
 (defn -main
   ([]
-   (send write/state (constantly initital-state))
+   (send write/state (constantly initial-state))
 
    (write/publish! {:dirs ["./content/"]})
    (send-off write/state write/stop!)
@@ -108,7 +101,7 @@
 
   (do (fsm/complete operations
                     "content/working-definition.html.fab"
-                    initital-state)
+                    initial-state)
       (println "done"))
 
   (do (fsm/complete operations
@@ -118,12 +111,12 @@
 
   (do (fsm/complete operations
                     "content/not-a-tree.html.fab"
-                    initital-state)
+                    initial-state)
       (println "done"))
 
   (do (fsm/complete operations
                     "content/holotype4.html.fab"
-                    initital-state)
+                    initial-state)
       (println "done"))
 
   )
@@ -131,13 +124,14 @@
 (comment
 
   (-> write/state
-      (send (constantly initital-state))
+      (send (constantly initial-state))
       (#(do (set-error-handler!
              %
              (fn [ag ^Throwable ex]
                (.printStackTrace ex)
                ag)) %))
       (send-off write/draft!)
+
       #_(send-off
          (fn [{:keys [site.fabricate/settings]
                :as application-state-map}]
@@ -163,7 +157,7 @@
                          :as application-state-map}]
                      (juxt.dirwatch/close-watcher watcher))))
 
-  (restart-agent write/state initital-state)
+  (restart-agent write/state initial-state)
 
   (agent-error write/state)
 
