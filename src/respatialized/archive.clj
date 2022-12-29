@@ -130,7 +130,7 @@
                 [?p :page/id ?id]
                 [?p ::revision-index ?r-ix]
                 [?p :git/file-hash ?hash]]
-              db normalized)
+              db (str normalized))
          page-id (or page-id (UUID/randomUUID))
          input-hash (file-hash (str normalized))
          repo-hash (git-sha)]

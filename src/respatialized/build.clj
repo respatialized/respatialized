@@ -19,7 +19,7 @@
 (defn new-page? [{:keys [site.fabricate.file/input-file] :as page-data}
                  {:keys [site.fabricate.app/database]
                   :as application-state-map}]
-  (let [{:keys [archive/revision-new?] :as rev-entity}
+  (let [{:keys [::archive/revision-new?] :as rev-entity}
         (archive/file->revision input-file
                                 (:db/conn database))]
     revision-new?))
@@ -29,7 +29,7 @@
          write/file-state
          (fn [{:keys [site.fabricate.file/input-file] :as page-data}
               application-state-map]
-           (if (new-page? page-data)
+           (if (new-page? page-data application-state-map)
              (assoc page-data :site.fabricate.page/unparsed-content
                     (slurp input-file))
              (do (println "Page at" (.toString input-file)

@@ -1,6 +1,7 @@
 (ns respatialized.build-test
   (:require [respatialized.build :refer :all]
             [respatialized.render :as render]
+            [respatialized.archive :as archive]
             [site.fabricate.prototype.write :as write]
             [site.fabricate.prototype.read :as read]
             [site.fabricate.prototype.fsm :as fsm]
@@ -20,11 +21,8 @@
     (send test-state
           (fn [{:keys [site.fabricate.app/database]
                 :as state}]
-            (-> state
-                (assoc-in [:site.fabricate.app/database :db/uri]
-                          test-db-uri)
-                (assoc-in [:site.fabricate.app/database :db/conn]
-                          conn))))
+            (assoc state :site.fabricate.app/database {:db/uri test-db-uri
+                                                       :db/conn conn})))
 
     (f)
     (d/delete-database test-db-uri)))
@@ -118,28 +116,50 @@
 (t/deftest archive
 
   (t/testing "ability to skip unmodified pages"
+    #_(d/delete-database test-db-uri)
+    #_(d/create-database test-db-uri)
 
-    (let [ops (dissoc operations write/rendered-state
-                      write/html-state
-                      write/markdown-state)
+    (def conn (d/connect test-db-uri))
+    (let [ops
+          (assoc
+           operations
+           write/rendered-state
+           (fn [page-data {:keys [site.fabricate.app/database]}]
+             (println "recording page in DB")
+             (let [id
+                   (archive/record-page! page-data (:db/conn database))]
+               (println "id of recorded page:" id)
+               )))
+
           example-file "content/ai-and-labor.html.fab"]
       ;; TODO: figure out how to make this idempotent
       ;; and test that nothing is recorded even though
       ;; the results are identical - purely functional page renders
 
-
       (let [result1 (fsm/complete
                      ops
                      example-file
-                     @test-state)
-            result2 (fsm/complete
-                     ops
-                     example-file
                      @test-state)]
+
+        #_(t/is (some? (archive/record-page! result1 conn)))
+
+        (let [r-data (archive/file->revision
+                      (:site.fabricate.file/input-file result1)
+                      (get-in @test-state
+                              [:site.fabricate.app/database
+                               :db/conn]))]
+          (clojure.pprint/pprint r-data)
+          (t/is (some? r-data)))
         (t/is (contains?
                result1
                :site.fabricate.page/evaluated-content))
-        (t/is (not= result1 result2)))
+        (t/is (not (new-page? result1 @test-state)))
+
+        (let [result2 (fsm/complete
+                       ops
+                       example-file
+                       @test-state)]
+          (t/is (not= result1 result2))))
       )
     )
   )
