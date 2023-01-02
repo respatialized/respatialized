@@ -3,6 +3,7 @@
  {
   ;; core
   org.clojure/clojure {:mvn/version "1.11.1"}
+  ;; bizarrely, commenting this dep out causes tests to fail
   org.clojure/test.check {:mvn/version "1.1.0"}
 
   ;; site generation
