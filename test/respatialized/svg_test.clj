@@ -1,6 +1,6 @@
 (ns respatialized.svg-test
   (:require [respatialized.svg :refer :all]
-            [svg-clj.utils :as utils]
+            [svg-clj.jvm-utils :as utils]
             [clojure.test :as t]))
 
 (def example-svg

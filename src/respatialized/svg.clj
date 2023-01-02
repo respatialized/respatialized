@@ -3,7 +3,7 @@
   (:require [malli.core :as m]
             [site.fabricate.prototype.html :as html]
             [svg-clj.path :as path]
-            [svg-clj.utils :as utils]
+            [svg-clj.jvm-utils :as utils]
             [thi.ng.geom.core :as g]
             [thi.ng.geom.polygon :as poly]
             [thi.ng.geom.rect :as rect]

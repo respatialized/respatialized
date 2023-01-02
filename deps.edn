@@ -30,12 +30,10 @@
   io.github.adam-james-v/svg-clj
   {#_ #_:mvn/version "0.0.11"
    :git/url "https://github.com/adam-james-v/svg-clj"
-   :sha "4220d7036113564a2af84a61d8f7db486ce858da"}
-  adam-james-v/eyebrowse
-  {:git/url "https://github.com/adam-james-v/eyebrowse/"
-   :sha "e0890ba2be97b90c2a43dd35d0e946ea92a89cc4"}
+   :sha "dce9d756bb1052034d360ae7c0743dd9153fca18"}
   applied-science/darkstar {:git/url "https://github.com/applied-science/darkstar/"
-                            :sha "541a3ff36065c59e92fe6aa61e41a4385ba6f893"}
+                            :sha
+                            "abd480cc382b7ae143f7902ee9d300cdc1a705cc"}
 
   ;; site indexing and dbs
   org.clojars.quoll/asami {:mvn/version "2.3.2"}
