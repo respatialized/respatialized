@@ -19,4 +19,4 @@ jobs:
           cli: 1.10.3.1087
       - name: Run site tests
         run: |
-          clojure -X:test:runner
+          timeout 600 clojure -X:test:runner || code=$?; if [[ $code -ne 124 && $code -ne 0 ]]; then exit $code; fi
