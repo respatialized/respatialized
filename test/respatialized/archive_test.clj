@@ -174,7 +174,22 @@
                     page-parser
                     page-unparser)]
           (t/is (= evaluated-content r)
-                "Parsing and unparsing should produce identical pages")))
+                "Parsing and unparsing should produce identical page contents")
+
+          (t/is (= (write/evaluated->hiccup results write/initial-state)
+                   (write/evaluated->hiccup
+                    (assoc results :site.fabricate.page/evaluated-content r)
+                    write/initial-state))
+                "Parsing and unparsing should produce identical hiccup elements")
+
+          (t/is (=
+                 (-> results
+                     (write/evaluated->hiccup write/initial-state)
+                     (hiccup/html))
+                 (-> (assoc results :site.fabricate.page/evaluated-content r)
+                     (write/evaluated->hiccup write/initial-state)
+                     (hiccup/html)))
+                "Parsing and unparsing should produce identical hiccup elements")))
 
       (let [asami-posts
             (mapv
@@ -239,124 +254,4 @@
                           [?p :page/revisions _]]
                         (d/db conn)
                         (:site.fabricate.page/title random-post)))
-              "Uniqueness for existing pages should be enforced")
-        (clojure.pprint/pprint
-         (d/q '[:find (count ?eid) .
-                :in $ ?page-title
-                :where  [?eid :respatialized.writing/title ?page-title]
-                [?eid :site.fabricate.page/title ?page-title]]
-              (d/db conn) (:site.fabricate.page/title random-post)))))))
-
-(comment
-  (page-parser (:site.fabricate.page/evaluated-content
-                (first completed-posts)))
-
-  (page->asami (first completed-posts))
-
-  (do
-    (d/create-database test-db-uri)
-    (def conn (d/connect test-db-uri)))
-
-  (clojure.pprint/pprint  (page-parser [:html [:head {:title "something"}] [:body]]))
-
-  (let [uri (str "asami:mem://test-" (rand-int 128000))
-        tdb (-> uri
-                (#(do (d/create-database %) %))
-                (d/connect))]
-
-    (mapv #(clojure.pprint/pprint (:tx-data @(d/transact tdb [%])))
-          [{:db/ident "abc"}
-           {:id "ghi"}
-           {:id [:kw "string"]}
-           {:id "something" :attr 1}
-           #_{:id "something else" :attr' 1}
-           #_{:id "some other thing" :attr' 1}])
-
-    (clojure.pprint/pprint (d/entity tdb "xyz"))
-    (clojure.pprint/pprint (d/entity tdb "abc"))
-    (clojure.pprint/pprint (d/entity tdb "ghi"))
-
-    (d/delete-database uri))
-
-  (page->asami (first completed-posts))
-
-  (mapv #(do @(record-post! % conn)) completed-posts)
-
-  (d/q '[:find ?tag
-         :in $
-         :where [?e :html/tag ?tag]
-         #_[?e :html/tag :div]
-         #_[?e :html/contents+ ?contents]
-         [?e :a/contains+ "Database-driven applications"]]
-       conn)
-
-  (d/q '[:find ?eid ?filename ?title
-         :in $
-         :where [?eid :site.fabricate.file/input-filename ?filename]
-         [?eid :site.fabricate.page/title ?title]
-         #_[?e :html/tag :div]
-         #_[?e :html/contents+ ?contents]]
-       conn)
-
-  (d/q '[:find ?p ?page-title ?page-path
-         :in $ ?page-title ?page-path
-         :where
-         [?p :respatialized.writing/title ?page-title]
-         [?p :site.fabricate.page/title ?page-title]
-         [?p :site.fabricate.file/input-filename ?page-path]]
-       (d/db conn)
-       "This Website Is Not A Tree"
-       "content/not-a-tree.html.fab")
-
-  (keys (first completed-posts))
-
-  (keys (page->asami (first completed-posts)))
-
-  ((::html/span html/element-parsers)  [:span "text"])
-
-  (element-parser [:span "text"])
-
-  (m/unparse html/html {:html/tag :span
-                        :html/contents "text"})
-
-  (d/delete-database test-db-uri))
-
-(comment
-  (type (d/db conn))
-
-  (defmethod print-method asami.memory.MemoryDatabase
-    [v ^java.io.Writer w]
-    (.write w (str "Asami.memory.MemoryDatabase#" (hash v))))
-
-  completed-posts
-
-  (doseq [page completed-posts]
-    (record-page! page conn))
-
-  (d/q '[:find ?id ?r-ix ?hash .
-         :in $ ?path
-         :where
-         [?p :file/path ?path]
-         [?p :page/id ?id]
-         [?p :respatialized.archive/revision-index ?r-ix]
-         [?p :git/file-hash ?hash]]
-       conn (str
-             (babashka.fs/normalize
-              (:site.fabricate.file/input-file
-               (first completed-posts)))))
-
-  (d/q '[:find ?f ?hash
-         :in $ ?f
-         :where [?id :page/id ?page-id]
-         [?id :respatialized.archive/revision-index ?r-ix]
-         [?id :file/path ?f]
-         [?id :git/file-hash ?hash]]
-       (d/db conn)
-       (str (babashka.fs/normalize
-             (:site.fabricate.file/input-file
-              (first completed-posts)))))
-
-  (file->revision
-   (:site.fabricate.file/input-file
-    (first completed-posts))
-   conn))
+              "Uniqueness for existing pages should be enforced")))))
