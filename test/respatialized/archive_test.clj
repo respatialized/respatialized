@@ -25,7 +25,7 @@
       (f)
       (d/delete-database test-db-uri))))
 
-(t/use-fixtures :each db-fixture)
+(t/use-fixtures :once db-fixture)
 
 
 (def quotation-hiccup
