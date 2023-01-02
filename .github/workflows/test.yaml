@@ -6,17 +6,17 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
-      - uses: actions/cache@v1
+        uses: actions/checkout@v3
+      - uses: actions/cache@v3
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-deps-${{ hashFiles('**/deps.edn') }}
           restore-keys: |
             ${{ runner.os }}-deps-
       - name: Set up clojure
-        uses: DeLaGuardo/setup-clojure@9.5
+        uses: DeLaGuardo/setup-clojure@10.1
         with:
-          cli: 1.10.3.1087
+          cli: 1.11.1.1208
       - name: Run site tests
         run: |
-          timeout 600 clojure -X:test:runner || code=$?; if [[ $code -ne 124 && $code -ne 0 ]]; then exit $code; fi
+          clojure -X:dev:kaocha/test
