@@ -130,6 +130,9 @@
              (fn [ag ^Throwable ex]
                (.printStackTrace ex)
                ag)) %))
+      (send-off (fn [{:keys [site.fabricate.app/database] :as s}]
+                  (assoc-in s [:site.fabricate.app/database :db/conn]
+                            (d/connect (:db/uri database)))))
       (send-off write/draft!)
 
       #_(send-off
@@ -163,4 +166,11 @@
 
 
   (get-in write/default-site-settings )
+  )
+
+
+(comment
+
+  (get-in @write/state [:site.fabricate.app/database :db/conn])
+
   )
