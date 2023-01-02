@@ -261,6 +261,7 @@
                           [?p :page/revisions _]]
                         (d/db conn)
                         (:site.fabricate.page/title random-post)))
+              ;; FIXME: isolate the non-determinism in this assertion
               "Uniqueness for existing pages should be enforced")))))
 
 (comment
