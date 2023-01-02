@@ -9,17 +9,24 @@
             [respatialized.archive :refer :all]
             [malli.transform :as mt]))
 
-(def test-db-uri "asami:mem://respatialized-test")
-(declare conn)
+(defn ->db-uri []
+  (str "asami:mem://respatialized-test-" (rand-int 1e7)))
+
+(def ^:dynamic test-db-uri (->db-uri))
+(declare ^:dynamic conn)
 
 (defn db-fixture [f]
   (do
-    (d/create-database test-db-uri)
-    (def conn (d/connect test-db-uri))
-    (f)
-    (d/delete-database test-db-uri)))
+    (binding [test-db-uri
+              (let [uri (->db-uri)]
+                (d/create-database uri)
+                uri)
+              conn (d/connect test-db-uri)]
+      (f)
+      (d/delete-database test-db-uri))))
 
-(t/use-fixtures :once db-fixture)
+(t/use-fixtures :each db-fixture)
+
 
 (def quotation-hiccup
   [:figure {:itemprop "quotation"
@@ -255,3 +262,10 @@
                         (d/db conn)
                         (:site.fabricate.page/title random-post)))
               "Uniqueness for existing pages should be enforced")))))
+
+(comment
+  (record-page! (first completed-posts) conn)
+
+  (record-page! (first completed-posts) conn)
+
+  )
