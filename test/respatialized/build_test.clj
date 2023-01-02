@@ -70,7 +70,6 @@
          (some fab-error?)
          true?)))
 
-
 (def eval-ops
   (dissoc
    site.fabricate.prototype.write/default-operations
@@ -95,13 +94,13 @@
   (let [pages
         (->>  (write/get-template-files "./content" ".fab")
               (filter #(and (not (expensive-pages %)) true))
-              (shuffle ))]
+              (shuffle))]
     (doseq [p pages]
       (t/testing (str "page " p)
         (println "reading page " p)
         (let [{:keys [site.fabricate.page/title site.fabricate.page/evaluated-content]
                :or {title p}
-               :as finished} (fsm/complete eval-ops p initital-state)
+               :as finished} (fsm/complete eval-ops p initial-state)
               errors (->> evaluated-content
                           (tree-seq vector? identity)
                           (filter eval-error?))]
@@ -111,13 +110,11 @@
                     (= (count errors) (allowed-failures p)))
                 (str "Post " title " had " (count errors) " evaluation errors")))))))
 
-
-
 (t/deftest archive
 
   (t/testing "ability to skip unmodified pages"
-    #_(d/delete-database test-db-uri)
-    #_(d/create-database test-db-uri)
+    (d/delete-database test-db-uri)
+    (d/create-database test-db-uri)
 
     (def conn (d/connect test-db-uri))
     (let [ops
@@ -128,8 +125,8 @@
              (println "recording page in DB")
              (let [id
                    (archive/record-page! page-data (:db/conn database))]
-               (println "id of recorded page:" id)
-               )))
+               (println "id of recorded page:" id))
+             page-data))
 
           example-file "content/ai-and-labor.html.fab"]
       ;; TODO: figure out how to make this idempotent
@@ -141,7 +138,7 @@
                      example-file
                      @test-state)]
 
-        #_(t/is (some? (archive/record-page! result1 conn)))
+        (t/is (some? (archive/record-page! result1 conn)))
 
         (let [r-data (archive/file->revision
                       (:site.fabricate.file/input-file result1)
@@ -153,13 +150,12 @@
         (t/is (contains?
                result1
                :site.fabricate.page/evaluated-content))
-        (t/is (not (new-page? result1 @test-state)))
 
         (let [result2 (fsm/complete
                        ops
                        example-file
                        @test-state)]
-          (t/is (not= result1 result2))))
-      )
-    )
-  )
+          (t/is (not (new-page? result1 @test-state)))
+
+          (Thread/sleep 600)
+          (t/is (not= result1 result2)))))))

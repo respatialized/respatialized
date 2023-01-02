@@ -40,13 +40,9 @@
 (comment
   (d/create-database db-uri)
 
-  (d/delete-database db-uri)
-
-  )
+  (d/delete-database db-uri))
 
 (def db (d/connect db-uri))
-
-
 
 ;; A question: composite IDs for page revisions?
 
@@ -82,22 +78,18 @@
         {:description "A description of the worktree status at the time a post was recorded"}]]
       [::revision-time
        [:fn {:description
-             "The time a given page's revision entered the database"} inst? ]]
+             "The time a given page's revision entered the database"} inst?]]
       [::revision-index
        [:int {:description "A sequentially increasing index number for page revisions"}]]
       [::revision-new?
-       [:boolean {:description "A boolean value indicating whether the revision has changed"}]]
-      ])))
-
+       [:boolean {:description "A boolean value indicating whether the revision has changed"}]]])))
 
 (comment
-  (fs/normalize (fs/file "./content/holotyp3.html.fab") )
+  (fs/normalize (fs/file "./content/holotyp3.html.fab"))
 
   (m/validate :string "a")
 
-  (m/validate [:string {:description "something"}] "a")
-
-  )
+  (m/validate [:string {:description "something"}] "a"))
 
 (defn git-sha []
   (str/trim-newline
@@ -122,8 +114,8 @@
   ([file db]
    (let [now (Instant/now)
          normalized (fs/normalize (fs/file file))
-         [page-id r-ix hash] #_existing-post?
-         (d/q '[:find ?id ?r-ix ?hash .
+         [[page-id r-ix rev-hash]] #_existing-post?
+         (d/q '[:find ?id ?r-ix ?hash
                 :in $ ?path
                 :where
                 [?p :file/path ?path]
@@ -142,7 +134,7 @@
       :file/path (str normalized)
       ::revision-time now
       ::revision-index (inc (or r-ix 0))
-      ::revision-new? (if hash (= hash input-hash) true)}))
+      ::revision-new? (if rev-hash (not= rev-hash input-hash) true)}))
   ([file]
    (let [now (Instant/now)
          normalized (fs/normalize (fs/file file))
@@ -161,9 +153,9 @@
 
 (comment
 
-  (inst? (Instant/now) )
+  (inst? (Instant/now))
 
-  (count (file-hash  "content/holotype3.html.fab") )
+  (count (file-hash  "content/holotype3.html.fab"))
 
   (def example-page (get @site.fabricate.prototype.write/pages
                          "content/design-doc-database.html.fab"))
@@ -210,7 +202,6 @@
 (def page-parser (m/parser html/html))
 (def page-unparser (m/unparser html/html))
 
-
 (defn page->asami [{:keys [site.fabricate.page/evaluated-content
                            site.fabricate.file/input-filename
                            site.fabricate.page/title
@@ -232,7 +223,7 @@
   (->> kw str (drop 1) (#(concat % (list \'))) (apply str) keyword))
 
 (comment
-  (replacement-annotation :some/kw) )
+  (replacement-annotation :some/kw))
 
 ;; write a proper database schema, not just repurposed attributes
 ;; not everything can have a schema (and it's good that some things don't)
@@ -261,7 +252,7 @@
            :page/revisions+ {:id (:id revision-entity)} ; append revision
            :page/title' title} ; update title
           {:id (:page/id revision-entity)
-           :page/revisions [ {:id (:id revision-entity)}]
+           :page/revisions [{:id (:id revision-entity)}]
            :page/title title})
         filename (:file/path revision-entity)
         revision-data (merge
@@ -275,14 +266,11 @@
                 conn
                 [revision-data
                  page-ent-data])]
-          #_(clojure.pprint/pprint tx-data)
-          ))
-      )
+          #_(clojure.pprint/pprint tx-data))))
+
     (:id revision-entity)))
 
 (comment
-
-
 
   (def db-after-post
     @(record-post! example-page db))
@@ -367,8 +355,7 @@
     @(d/import-data
       test-db
       (d/export-data db))
-    nil
-    )
+    nil)
 
   (d/delete-database "asami:mem://test-db")
 
@@ -411,7 +398,7 @@
                                        :filename filename))))))
                       (filter some?))]
     (d/transact-async test-db {:tx-data  articles
-                               #_ #_ :executor exec}))
+                               #_#_:executor exec}))
 
   (d/q '[:find ?c :tg/contains ?q
          :where [?e :html/tag :blockquote]

@@ -106,15 +106,11 @@
        (filter map?)
        (into [])))
 
-
-
 (comment
   (file->revision
    (:site.fabricate.file/input-file (first completed-posts)))
 
-  (count test-post-files)
-
-  )
+  (count test-post-files))
 
 (t/deftest recording
 
@@ -139,7 +135,7 @@
                     [?e :html.attribute/itemprop ?attr-prop]]
                   (d/db conn))]
 
-    (t/is (any? (record-page! example-post conn) )
+    (t/is (any? (record-page! example-post conn))
           "Post data should be recorded without errors.")
 
     (t/is (any? quot-tx)
@@ -155,7 +151,6 @@
 ;; - stabilize system properties
 
 (comment
-
 
   (second (first completed-posts))
 
@@ -212,12 +207,11 @@
                     (fn [p] (let [h (pop p) t (peek p)]
                               (conj h (conj t [:div "one final updated div"])))))]
 
-
         (record-page! changed-post conn)
         (Thread/sleep 500)
 
         (let [q-res-1
-              (d/q '[:find ?title . #_ #_ ?d-attr ?d-val
+              (d/q '[:find ?title . #_#_?d-attr ?d-val
                      :in $ ?page-title
                      :where
                      [?rev :site.fabricate.page/title ?title]
@@ -251,8 +245,7 @@
                 :in $ ?page-title
                 :where  [?eid :respatialized.writing/title ?page-title]
                 [?eid :site.fabricate.page/title ?page-title]]
-              (d/db conn) (:site.fabricate.page/title random-post)))
-        ))))
+              (d/db conn) (:site.fabricate.page/title random-post)))))))
 
 (comment
   (page-parser (:site.fabricate.page/evaluated-content
@@ -266,10 +259,6 @@
 
   (clojure.pprint/pprint  (page-parser [:html [:head {:title "something"}] [:body]]))
 
-
-
-
-
   (let [uri (str "asami:mem://test-" (rand-int 128000))
         tdb (-> uri
                 (#(do (d/create-database %) %))
@@ -281,15 +270,13 @@
            {:id [:kw "string"]}
            {:id "something" :attr 1}
            #_{:id "something else" :attr' 1}
-           #_{:id "some other thing" :attr' 1}
-           ])
+           #_{:id "some other thing" :attr' 1}])
 
     (clojure.pprint/pprint (d/entity tdb "xyz"))
     (clojure.pprint/pprint (d/entity tdb "abc"))
     (clojure.pprint/pprint (d/entity tdb "ghi"))
 
-    (d/delete-database uri)
-    )
+    (d/delete-database uri))
 
   (page->asami (first completed-posts))
 
@@ -319,8 +306,7 @@
          [?p :site.fabricate.file/input-filename ?page-path]]
        (d/db conn)
        "This Website Is Not A Tree"
-       "content/not-a-tree.html.fab"
-       )
+       "content/not-a-tree.html.fab")
 
   (keys (first completed-posts))
 
@@ -333,6 +319,44 @@
   (m/unparse html/html {:html/tag :span
                         :html/contents "text"})
 
+  (d/delete-database test-db-uri))
 
-  (d/delete-database test-db-uri)
-  )
+(comment
+  (type (d/db conn))
+
+  (defmethod print-method asami.memory.MemoryDatabase
+    [v ^java.io.Writer w]
+    (.write w (str "Asami.memory.MemoryDatabase#" (hash v))))
+
+  completed-posts
+
+  (doseq [page completed-posts]
+    (record-page! page conn))
+
+  (d/q '[:find ?id ?r-ix ?hash .
+         :in $ ?path
+         :where
+         [?p :file/path ?path]
+         [?p :page/id ?id]
+         [?p :respatialized.archive/revision-index ?r-ix]
+         [?p :git/file-hash ?hash]]
+       conn (str
+             (babashka.fs/normalize
+              (:site.fabricate.file/input-file
+               (first completed-posts)))))
+
+  (d/q '[:find ?f ?hash
+         :in $ ?f
+         :where [?id :page/id ?page-id]
+         [?id :respatialized.archive/revision-index ?r-ix]
+         [?id :file/path ?f]
+         [?id :git/file-hash ?hash]]
+       (d/db conn)
+       (str (babashka.fs/normalize
+             (:site.fabricate.file/input-file
+              (first completed-posts)))))
+
+  (file->revision
+   (:site.fabricate.file/input-file
+    (first completed-posts))
+   conn))
