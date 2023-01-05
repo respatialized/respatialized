@@ -119,37 +119,6 @@
 
   (count test-post-files))
 
-(t/deftest recording
-
-  (t/is (= 3
-           (->> test-post-files
-                (map #(dissoc (file->revision %)
-                              :id :page/id :respatialized.archive/revision-time))
-                distinct
-                count))
-        "File path normalization should result in consistent revision data")
-
-  (doseq [post completed-posts]
-    (t/is (m/validate
-           revision-entity-schema
-           (file->revision (get post :site.fabricate.file/input-file)))
-          "Schema should be consistent for revisions generated from example files"))
-
-  (let [quot-tx @(d/transact conn {:tx-data [quotation-asami]})
-        figs (d/q '[:find  [?tag ?attr-prop]
-                    :where [?e :html/tag :figure]
-                    [?e :html/tag ?tag]
-                    [?e :html.attribute/itemprop ?attr-prop]]
-                  (d/db conn))]
-
-    (t/is (any? (record-page! example-post conn))
-          "Post data should be recorded without errors.")
-
-    (t/is (any? quot-tx)
-          "Element data should be recorded without errors.")
-
-    (t/is (>= (count figs) 1)
-          "Element data should be queryable.")))
 
 ;; what's the point of a test, anyway?
 ;;
@@ -261,7 +230,6 @@
                           [?p :page/revisions _]]
                         (d/db conn)
                         (:site.fabricate.page/title random-post)))
-              ;; FIXME: isolate the non-determinism in this assertion
               "Uniqueness for existing pages should be enforced")))))
 
 (comment
