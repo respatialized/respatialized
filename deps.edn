@@ -10,7 +10,12 @@
   site.fabricate/fabricate
   {:git/url "https://github.com/fabricate-site/fabricate/"
    #_ #_ :git/tag "2022.10.10"
-   :git/sha "35b3ddecc6044904ea14c10baaa0fa647ac65146" }
+   :git/sha "35b3ddecc6044904ea14c10baaa0fa647ac65146"
+   :exclusions [org.apache.logging.log4j/log4j-slf4j-impl
+                org.slf4j/slf4j-api
+                org.apache.logging.log4j/log4j-api
+                org.apache.logging.log4j/log4j-core
+                log4j/log4j]}
   hiccup/hiccup {:mvn/version "2.0.0-alpha2" :exclusions [org.clojure/clojure]}
   hickory/hickory {:mvn/version "0.7.1"}
   garden/garden {:mvn/version "1.3.10"}
@@ -24,10 +29,13 @@
   babashka/babashka.curl {:mvn/version "0.1.2"}
 
   ;; site content
-  clojure2d/clojure2d {:mvn/version "1.4.4"}
+  clojure2d/clojure2d {:mvn/version "1.4.4"
+                       :exclusions [commons-logging/commons-logging]}
   thi.ng/geom {:mvn/version "1.0.0-RC5"}
   generateme/fastmath {:mvn/version "2.1.8"}
-  scicloj/tablecloth {:mvn/version "6.103"}
+  scicloj/tablecloth {:mvn/version "6.103"
+                      :exclusions [org.apache.logging.log4j/log4j-api
+                                   ch.qos.logback/logback-classic]}
   io.github.adam-james-v/svg-clj
   {#_ #_:mvn/version "0.0.11"
    :git/url "https://github.com/adam-james-v/svg-clj"
@@ -38,6 +46,11 @@
 
   ;; site indexing and dbs
   org.clojars.quoll/asami {:mvn/version "2.3.2"}
+
+  ;; unified logging
+  com.stuartsierra/log.dev {:mvn/version "0.2.0"}
+  ch.qos.logback/logback-core {:mvn/version "1.4.5"}
+  ch.qos.logback/logback-classic {:mvn/version "1.4.5"}
 
 
   ;; site building functions
