@@ -20,7 +20,6 @@
    [:html {:line-sizing "normal"}]
    [:body {:margin "0"}]
    [(attr "hidden") {:display "none"}]
-   [:h1 :h2 :h3 :h4 :h5 :h6 {:font-weight "800" }]
    [:h1 {:font-size "2rem"}]
    [:h2 {:font-size "1.5rem"}]
    [:h3 {:font-size "1.17rem"}]
@@ -219,76 +218,83 @@
    [:.token.symbol (get wal-colors "color6")]))
 
 (def page-style
-       (list
-        (at-import
-         "https://fonts.googleapis.com/css2?family=Inter:wght@600;900&display=swap")
-        (at-import "https://fonts.googleapis.com/css2?family=Karla:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Red+Hat+Mono:wght@700&display=swap")
-        [:a {:color "#C14825"
-             :text-decoration "none"}]
-        [(select/a select/after)
-         {:position "relative"
-          :vertical-align "super"
-          :margin-left "0.15em"
-          :margin-bottom "-0.15em"
-          :line-height "0.5em"
-          :margin-top "-0.15em"
-          :font-weight "Bold"
-          :font-size "0.7em"
-          :content "\"→\""}]
-        [:body {:background-color "#FFF"
-                :font-size "20px"
-                :font-weight "400"
-                :font-family "'Default Sans', sans-serif"
-                :line-height "27px"
-                :color "#444"}]
-        [:header {:font-weight "600"
-                  :font-family "Default Sans"}]
-        [:h1 {:font-size "2rem"}]
-        [:h2 {:font-size "1.7rem"}]
-        [:h3 {:font-size "1.5rem"}]
-        [:h4 {:font-size "1.3rem"}]
-        [:h5 {:font-size "1.3rem"}]
-        [:h6 {:font-size "1.3rem"}]
-        #_[:h1 :h2 :h3 {:font-size "3rem"
-                        :line-height "3rem"
-                        :margin-bottom "0.6em"
-                        :margin-top "0.2em"}]
-        [:h4 :h5 :h6 {:font-size "1.5rem"}]
-        [:blockquote :aside
-         {:font-size "0.9em"
-          :margin-left "1em"}]
-        [:code {:font-size "0.95em"
-                :line-height "1.2em"
-                :font-weight "500"}]
-        [:pre :code
-         {:white-space "pre-wrap"
-          :font-family "'Red Hat Mono', monospace"
-          :color "#66220e"}]
-        [:pre {:margin-bottom "0.4em"
-               :line-height "27px"
-               :font-size "0.9em"}
-         [:code {:line-height "27px"}]]
-        [:dt {:margin-bottom "0.2rem"}]
-        [:dd {:margin-bottom "0.4rem"}]
-        [:summary {:margin-bottom "0.4em"}]
-        [:article {:max-width "45rem"
-                   :padding-left "20px"
-                   :color "#333"  }]
-        [:p {:margin-bottom "0.4em"
-             :margin-top "0.2em"}]
-        [:table {:font-size "0.95rem"
-                 :letter-spacing "0.01rem"
-                 :line-height "1.45em"
-                 :max-width "90em"}]
-        [:td :th {#_#_:border "0.5px solid"
-                  :padding "0.25rem"
-                  :text-align "left"}]
-        [(select/attr "colspan") {:text-align "center"
-                                  :border-bottom "0.5px solid"
-                                  :border-top "0.5px solid"
-                                  }]
-        [:table {:border-collapse "collapse"
-                 :max-width "1400px"}]))
+  (list
+   (at-import
+    "https://fonts.googleapis.com/css2?family=Inter:wght@600;900&display=swap")
+   (at-import "https://fonts.googleapis.com/css2?family=Karla:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Red+Hat+Mono:wght@700&display=swap")
+   [:a {:color "#C14825"
+        :text-decoration "none"}
+    [:img {:border-right-color "#C14825"
+           :border-right-width "0.35rem"
+           :border-right-style "solid"}]]
+
+   [:body {:background-color "#FFF"
+           :font-size "20px"
+           :font-weight "400"
+           :font-family "'Default Sans', sans-serif"
+           :line-height "27px"
+           :color "#444"}]
+   [:header {:font-weight "600"
+             :font-family "Default Sans"}]
+   [:h1 {:font-size "2rem"}]
+   [:h2 {:font-size "1.7rem"}]
+   [:h3 {:font-size "1.5rem"}]
+   [:h4 {:font-size "1.3rem"}]
+   [:h5 {:font-size "1.3rem"}]
+   [:h6 {:font-size "1.3rem"}]
+   #_[:h1 :h2 :h3 {:font-size "3rem"
+                   :line-height "3rem"
+                   :margin-bottom "0.6em"
+                   :margin-top "0.2em"}]
+   [:h4 :h5 :h6 {:font-size "1.5rem"}]
+   [:h1 :h2 :h3 :h4 :h5 :h6 {:font-weight "800"
+                             :line-height "1.25em"}]
+   [:strong {:font-weight "900"}]
+   [:blockquote :aside
+    {:font-size "0.9em"
+     :margin-left "1em"}]
+   [:code {:font-size "0.95em"
+           :line-height "1.2em"
+           :font-weight "500"}]
+   [:pre :code
+    {:white-space "pre-wrap"
+     :font-family "'Red Hat Mono', monospace"
+     :color "#66220e"}]
+   [:pre {:margin-bottom "0.4em"
+          :line-height "27px"
+          :font-size "0.9em"}
+    [:code {:line-height "27px"}]]
+   [:dt {:margin-bottom "0.2rem"}]
+   [:dd {:margin-bottom "0.4rem"}]
+   [:summary {:margin-bottom "0.4em"}]
+   [:article {:max-width "45rem"
+              :padding-left "20px"
+              :color "#333"  }]
+   [:p {:margin-bottom "0.4em"
+        :margin-top "0.2em"}
+    [(select/a select/after)
+     {:position "relative"
+      :vertical-align "super"
+      :margin-left "0.15em"
+      :margin-bottom "-0.15em"
+      :line-height "0.5em"
+      :margin-top "-0.15em"
+      :font-weight "Bold"
+      :font-size "0.7em"
+      :content "\"→\""}]]
+   [:table {:font-size "0.95rem"
+            :letter-spacing "0.01rem"
+            :line-height "1.45em"
+            :max-width "90em"}]
+   [:td :th {#_#_:border "0.5px solid"
+             :padding "0.25rem"
+             :text-align "left"}]
+   [(select/attr "colspan") {:text-align "center"
+                             :border-bottom "0.5px solid"
+                             :border-top "0.5px solid"
+                             }]
+   [:table {:border-collapse "collapse"
+            :max-width "1400px"}]))
 
 (defn -main
   "main fn"
