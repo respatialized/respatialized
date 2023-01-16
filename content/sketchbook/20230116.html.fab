@@ -1,0 +1,43 @@
+
+✳(ns respatialized.sketchbook.20230116
+  (:require [clojure2d.core :as clj2d]
+            [garden.core :refer [style]]
+            [svg-clj.jvm-utils :as svgutils])) 🔚
+            
+✳(def metadata {:title "Experimentation with displacement maps"}) 🔚
+✳= [:h1 (:title metadata)]🔚
+
+In both clojure2d and in HTML/CSS. 
+
+✳=[:h3 "Resources"] 🔚
+
+✳= [:ul [:li [:a{:href "https://www.smashingmagazine.com/2021/09/deep-dive-wonderful-world-svg-displacement-filtering/"} "Smashing Magazine: A Deep Dive Into The Wonderful World Of SVG Displacement Filtering"]]] 🔚
+
+✳ (def glyph 
+  (svgutils/svg-str->hiccup
+   (slurp "resources/respatialized/glyph-main.svg"))) 🔚
+   
+
+
+✳=[:h3 "Starting point"] 🔚
+
+✳= [:figure glyph] 🔚
+
+✳(def disp-filter
+  [:filter {:id "traffic-light-disp-filter-0" :filterUnits "userSpaceOnUse"
+            :color-interpolation-filters "sRGB"}
+   [:feImage {:href "/media/traffic-light-crop.jpg"
+              :result "FEIMG"}]
+   [:feDisplacementMap {:id "traffic-light-disp-map-0"
+                        :in "SourceGraphic" :xChannelSelector "B" :yChannelSelector "G"
+                        :scale 10}]]) 🔚
+                        
+✳= [:figure {:style (style {:max-width 700})}
+  (let [[[tag attrs nv defs] contents] (split-at 4 glyph) ]
+    (vec (concat [tag attrs nv (conj defs disp-filter)]
+                 (assoc-in (vec contents)
+                           [0 1 :style]
+                           (style {:filter "url(#traffic-light-disp-filter-0)"})))))] 🔚
+                           
+✳= [:figure [:img {:src "/media/traffic-light-crop.jpg"}]] 🔚
+
