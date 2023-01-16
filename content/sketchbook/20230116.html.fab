@@ -4,34 +4,41 @@
             [garden.core :refer [style]]
             [svg-clj.jvm-utils :as svgutils])) 🔚
             
-✳(def metadata {:title "Experimentation with displacement maps"}) 🔚
+✳(def metadata {:title "Experimentation with SVG filters"}) 🔚
 ✳= [:h1 (:title metadata)]🔚
 
 In both clojure2d and in HTML/CSS. 
 
 ✳=[:h3 "Resources"] 🔚
-
-✳= [:ul [:li [:a{:href "https://www.smashingmagazine.com/2021/09/deep-dive-wonderful-world-svg-displacement-filtering/"} "Smashing Magazine: A Deep Dive Into The Wonderful World Of SVG Displacement Filtering"]]] 🔚
-
+✳= [:ul [:li [:a {:href "https://www.smashingmagazine.com/2021/09/deep-dive-wonderful-world-svg-displacement-filtering/"} "Smashing Magazine: A Deep Dive Into The Wonderful World Of SVG Displacement Filtering"]]
+  [:li [:a {:href "https://vanseodesign.com/web-design/svg-filter-primitives-fediffuselighting/"} "Create SVG Lighting Effects With The feDiffuseLighting Filter Primitive"]]] 🔚
+  
 ✳ (def glyph 
   (svgutils/svg-str->hiccup
    (slurp "resources/respatialized/glyph-main.svg"))) 🔚
-   
 
 
 ✳=[:h3 "Starting point"] 🔚
 
 ✳= [:figure glyph] 🔚
 
+✳= [:figure [:img {:src "/media/traffic-light-crop.jpg"}]] 🔚
+
 ✳(def disp-filter
   [:filter {:id "traffic-light-disp-filter-0" :filterUnits "userSpaceOnUse"
+            :x -25 :y -25
             :color-interpolation-filters "sRGB"}
    [:feImage {:href "/media/traffic-light-crop.jpg"
               :result "FEIMG"}]
    [:feDisplacementMap {:id "traffic-light-disp-map-0"
                         :in "SourceGraphic" :xChannelSelector "B" :yChannelSelector "G"
-                        :scale 10}]]) 🔚
+                        :scale 9}]]) 🔚
                         
+✳ (def blur-filter
+  [:filter {:id "gauss-blur"}]) 🔚
+  
+✳= [:h3 "Application 1: Displacement Map"] 🔚
+
 ✳= [:figure {:style (style {:max-width 700})}
   (let [[[tag attrs nv defs] contents] (split-at 4 glyph) ]
     (vec (concat [tag attrs nv (conj defs disp-filter)]
@@ -39,5 +46,47 @@ In both clojure2d and in HTML/CSS.
                            [0 1 :style]
                            (style {:filter "url(#traffic-light-disp-filter-0)"})))))] 🔚
                            
-✳= [:figure [:img {:src "/media/traffic-light-crop.jpg"}]] 🔚
 
+✳= [:h3 "Small multiples with functions"] 🔚
+
+
+✳ (defn add-filter [svg-def filter-def]
+  (let [[[tag attrs nv defs] contents] (split-at 4 svg-def) ]
+    (vec (concat [tag attrs nv (conj defs filter-def)]
+                 (vec contents)))))  🔚
+                 
+
+✳= (let [filter-params
+       (vec
+        (for [scale (range 2 37 7) 
+              y (range 0 -150 -30)]
+          {:scale scale :y y
+           :id (str "disp-filter-scale" scale "-y" y)})) 
+       grid-positions
+       (vec (for [x (range 0 200 40)
+                  y (range 0 200 40)]
+              {:x x :y y}))
+       svg-g (peek glyph)
+       transformed-groups
+       (map-indexed
+        (fn [ix {:keys [x y]}]
+          (-> svg-g
+              (assoc-in [1 :id] (str "glyph-sm-group-" ix))
+              (assoc-in [1 :transform] (format "translate(%d,%d),scale(0.2)" x y))
+              (assoc-in [1 :style] (style
+                                    {:filter (format "url(#%s)"
+                                                     (get-in filter-params [ix :id]))}))
+              ))
+        grid-positions)]
+   [:figure
+    (apply conj
+           (reduce
+            (fn [svg-def {:keys [scale y id]}]
+              (add-filter svg-def
+                          (-> disp-filter
+                              (assoc-in [3 1 :scale] scale)
+                              (assoc-in [1 :id] id)
+                              (assoc-in [1 :y] y))))
+            (update (pop glyph) 1 assoc :width 900 :height 900)
+            filter-params)
+           transformed-groups)]) 🔚                
