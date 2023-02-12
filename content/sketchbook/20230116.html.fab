@@ -37,6 +37,17 @@ In both clojure2d and in HTML/CSS.
 ✳ (def blur-filter
   [:filter {:id "gauss-blur"}]) 🔚
   
+✳ (def lighting-filter
+  [:filter {:id "traffic-light-lighting-filter-0"
+            :filterUnits "objectBoundingBox"}
+   [:feImage {:href "/media/traffic-light-crop.jpg"
+              :result "FEIMG"}]
+   [:feDiffuseLighting {:surfaceScale 1.0 :diffuseConstant 0.1
+                        :in "SourceGraphic" :result "light"
+                        :lighting-color "white"}]
+   [:fePointLight {}]]
+  )  🔚
+  
 ✳= [:h3 "Application 1: Displacement Map"] 🔚
 
 ✳= [:figure {:style (style {:max-width 700})}
