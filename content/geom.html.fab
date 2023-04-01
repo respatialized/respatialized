@@ -1,0 +1,16 @@
+
+
+✳(ns respatialized.documentation.geom
+  (:require [thi.ng.geom.core :as g]
+            [garden.core :as garden]
+            [respatialized.styles :refer [geom-style]]
+            )) 🔚
+            
+✳(def metadata
+  {:title "thi.ng/geom"
+   :page-style (garden/css geom-style)}) 🔚
+
+   
+✳= [:h1 {:class "big wide"} "thi.ng/geom"] 🔚
+
+computational geometry with Clojure

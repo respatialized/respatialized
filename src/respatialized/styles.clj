@@ -92,3 +92,24 @@
   stat-rethinking-css
 
   )
+
+
+(def geom-style
+
+  (list
+   (stylesheet/at-import
+    "https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@50..150,100..900&family=Spline+Sans+Mono:wght@300..700&display=swap"
+    )
+   [:.wide {:font-family "Anybody"
+            :font-weight 900
+            :font-stretch "150%"
+            :text-transform "uppercase"}]
+   [:.big {:font-size "4rem"}]
+   [:article {:background-color "#1a1a1aff"
+              :color "#e6e6e6ff"
+              :font-family "Spline Sans Mono"}]
+   [:body {:background-color "#1a1a1aff"
+           :color "#e6e6e6ff"}]
+   )
+
+  )
