@@ -1,0 +1,41 @@
+✳(ns respatialized.writing.against-rationalism) 🔚
+
+✳ (def metadata {:title "Against Rationalism"}) 🔚
+
+I have never found existential risk and longtermist arguments plausible.
+
+Here is a brief presentation emblematic of the form - on a topic at the top of everyone's mind these days.
+
+". If £1 billion of grants could reduce the chance of a catastrophic AI outcome — in which humanity’s future is rendered near-worthless— by just 0.001%, then a £10,000 donation can do as much good as saving 10,000 lives."
+
+"The Moral Case for Long-Term Thinking", Hilary Greaves, William MacAskill, and Elliott Thornley, included in "The Long View"
+
+Estimates like this seem precise because people put estimated numeric figures on them, and sometimes draw graphs to go with them; the quantities included are so vast that even if the numbers aren't terribly accurate they put the expected value of the author's preferred research programs far, far beyond the meager benefits of anything they're compared against.
+
+There's a lot that be objected to in how that extremely brief chapter lays out its case. It has a Pollyannaish view that just because you put money towards something means you can plausibly expect that it will advance your research aims. This view must be seriously examined in light of the fact that a leading "AI safety" research lab has quickly become captured by the interests of a for-profit company, and will no longer even entertain the risk that its continued activities are net-negative for society. It relies heavily on estimates and conjecture, a common theme in essays like this. It doesn't even attempt to make the case for what Derek Parfit called the "total view" of the good, instead just assuming it and expecting the reader to share that assumption.
+
+But I want to focus on one subtler problem, one that highlights a deep difference in how I see the world versus how people in the "rationalist" camp seem to see it. The best way to get at this problem is with a question that occurs to me whenever I read arguments of the form given by MacAskill et. al in the above quotation. And that question is:
+
+✳= [:strong "is there a physical quantity that you can measure that will let you know you in fact " [:em "have"] " reduced the risk of 'a catastrophic AI outcome' by 0.001% when you take an action?"] 🔚
+
+Stated in this form, I think the answer is obvious: you can't. 
+
+This problem is endemic to AI research and x-risk communities. Once you notice it, you begin to see iterations of it everywhere. There's the idea that every scientific problem is "bottlenecked on cognition" and a sufficiently intelligent agent, even one lacking direct perception of the world, would somehow be able to derive the laws of physics, chemistry, biology, and psychology from the data that currently exists in the world without running any experiments or building any new technologies upon which to test hypotheses.
+
+There's another meta-level of rationalism: where instead of doing what you think is good, you get nerd sniped by estimates of expected utility and what you think is likely to happen and what the relative risks of those estimates are. That gets you into places like:
+
+"We think that within a couple of decades, we’re likely[3] to live in a world where most of the R&D behind all the new innovations of much consequence is conducted by AI systems, where human CEOs have to rely on AI consultants and hire mostly AI employees for their company to have much chance of making money on the open market, where human military commanders have to defer to AI strategists and tacticians (and automate all their physical weapons with AI) for their country to stand much of a chance in a war, where human heads of state and policymakers and regulators have to lean on AI advisors to make sense of this all and craft policies that have much hope of responding intelligently (and have to use AI surveillance and AI policing to have a prayer of properly enforcing these policies).
+
+We’ll refer to this future as “the obsolescence regime.” The obsolescence regime is a world where economic and military competition don’t operate on human timescales and aren’t constrained by human limitations — in this regime, a company or country that tries to make do with mere human creativity and understanding and reasoning alone would be outcompeted as surely as one that refuses to touch a computer would be today."
+
+To be clear, this is what the authors define as AI "going well." Given the choice between that world and a world where we all have no mouths, and must scream, I suppose the "planned obsolescence" world is better. I think instead it is far better to pull back and asking ourselves, wait; do we ✳=[:em "want"] 🔚 to live in that world? But the longtermist frame  says that question of what you think is good is nothing compared to the expected net negative utility of hostile AI, so shut up and calculate, you sentimental, narrow-minded aesthete. 
+
+I don't particularly like the idea of hostile AI, but all that has meant for me in my personal and professional life is that I have tried to build and use systems I actually understand rather than just throwing more and more computational capacity at the problem and hoping I can understand it eventually. I don't want to live in a world where human creativity is obsolete, so I don't do things that contribute towards that world. I don't try to play 5-dimensional chess against that outcome, and so I don't have to worry that I'm going to inadvertently speak the true name of the paperclip-maximizing monster when researching how to surround it with the appropriate circles of alignment salt.
+
+I guess I have chosen for myself what every rationalist thinks is impossible in the aggregate: simply not build the torment nexus.
+
+There really only is one name for this pattern of thought: rationalism. At the end of the day, I am an empiricist. I think numbers are meaningful to the extent you can tie them back to quantities that you can measure in the world. It doesn't matter how much we use the term "priors" and how artificially precise we make our estimates - the further we get away from direct measurement and observation, the more susceptible we are to motivated reasoning. You cannot observe the world two centuries from now. Observation can only happen in the present. You may never know if those predictions about the expected value of your actions two centuries hence turned out to be wrong; you will not live to know the log-loss error on your grandiose predictions of future net utility. 
+
+Someone might be able to run the numbers if your writing survives. But to make a wildly imprecise prediction of my own: they probably won't care.
+
+One might take this to be an argument against trying to make the future go well. That is not my intention. I have come to believe, though, that means and ends are more closely linked than is assumed by "strong longtermists". I also have a strong aversion to the political economy of a system that links the moral worthiness of actions so closely to "what you can fund research for" versus "what you actually do."
