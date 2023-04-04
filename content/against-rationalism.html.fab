@@ -2,11 +2,14 @@
 
 ✳ (def metadata {:title "Against Rationalism"}) 🔚
 
+✳=[:h1 (:title metadata)] 🔚
+
 I have never found existential risk and longtermist arguments plausible.
 
+✳=[:h2 "The canonical argument"] 🔚
 Here is a brief presentation emblematic of the form - on a topic at the top of everyone's mind these days.
 
-". If £1 billion of grants could reduce the chance of a catastrophic AI outcome — in which humanity’s future is rendered near-worthless— by just 0.001%, then a £10,000 donation can do as much good as saving 10,000 lives."
+"If £1 billion of grants could reduce the chance of a catastrophic AI outcome — in which humanity’s future is rendered near-worthless— by just 0.001%, then a £10,000 donation can do as much good as saving 10,000 lives."
 
 "The Moral Case for Long-Term Thinking", Hilary Greaves, William MacAskill, and Elliott Thornley, included in "The Long View"
 
@@ -14,13 +17,33 @@ Estimates like this seem precise because people put estimated numeric figures on
 
 There's a lot that be objected to in how that extremely brief chapter lays out its case. It has a Pollyannaish view that just because you put money towards something means you can plausibly expect that it will advance your research aims. This view must be seriously examined in light of the fact that a leading "AI safety" research lab has quickly become captured by the interests of a for-profit company, and will no longer even entertain the risk that its continued activities are net-negative for society. It relies heavily on estimates and conjecture, a common theme in essays like this. It doesn't even attempt to make the case for what Derek Parfit called the "total view" of the good, instead just assuming it and expecting the reader to share that assumption.
 
-But I want to focus on one subtler problem, one that highlights a deep difference in how I see the world versus how people in the "rationalist" camp seem to see it. The best way to get at this problem is with a question that occurs to me whenever I read arguments of the form given by MacAskill et. al in the above quotation. And that question is:
+But I want to focus on one subtler problem, one that highlights a deep difference in how I see the world versus how people in the "rationalist" camp seem to see it. The best way to get at this problem is with a question that occurs to me whenever I read arguments of the form given by MacAskill et. al in the above quotation. And that question is: 
+
 
 ✳= [:strong "is there a physical quantity that you can measure that will let you know you in fact " [:em "have"] " reduced the risk of 'a catastrophic AI outcome' by 0.001% when you take an action?"] 🔚
 
-Stated in this form, I think the answer is obvious: you can't. 
+Stated in this form, I think the answer is obvious: you can't. It is not a question that lends itself to empirical methods. 
 
-This problem is endemic to AI research and x-risk communities. Once you notice it, you begin to see iterations of it everywhere. There's the idea that every scientific problem is "bottlenecked on cognition" and a sufficiently intelligent agent, even one lacking direct perception of the world, would somehow be able to derive the laws of physics, chemistry, biology, and psychology from the data that currently exists in the world without running any experiments or building any new technologies upon which to test hypotheses.
+That passage about AI risk is more of a meme than an argument: it is not a precise prediction. A precise, more empirical restatement would be more like:
+
+"Assuming £1 billion of grants will reduce the chance of a catastrophic AI outcome — in which humanity’s future is rendered near-worthless— by just 0.001%,then over the next 250 years, a £10,000 donation to the Future of Humanity Institute will do as much good as a donation to the Against Malaria Foundation which saves 10,000 lives."
+
+Here we're getting beyond the hand-waving of the earlier version:
+1. we're making an actual prediction ("will" rather than "could" and "can")
+2. we're putting a time threshold on that prediction
+3. we're making a specific comparison between two actual, rather than hypothetical institutions
+
+Falsifiability may not be the be-all-end-all of science, but it's a decent starting point. Really, if you were trying to do this properly, you'd probably also try to put some error bars on those numbers and then try to reason over a distribution of possible outcomes by sampling Monte Carlo style, but again - this passage is rhetoric, not science.
+
+This problem is endemic to AI research and x-risk communities. Once you notice it, you begin to see iterations of it everywhere. 
+
+✳=[:h2 "Deriving sociology from first principles"] 🔚
+
+There's the idea that every scientific problem is "bottlenecked on cognition" and a sufficiently intelligent agent, even one lacking direct perception of the world, would somehow be able to derive the laws of physics, chemistry, biology, and psychology from the data that currently exists in the world without running any experiments or building any new technologies upon which to test hypotheses.
+
+Human language, rather than being necessarily vague to obey the constraints of communicative action in limited time, apparently contains enough embedded causal information about the world to allow a system with a sufficient number of parameters to spontaneously develop a realistic model of the world, capable of counterfactual reasoning and explanation, and gain expertise in any topic, without any perceptual system at all. Scientists must feel like a bunch of absolute suckers! They've been wasting their time observing the world, when all they needed to do was observe probability distributions in language and derive their results from that n-dimensional parameter space.
+
+✳= [:h2 "Effective altruism is misaligned"] 🔚
 
 There's another meta-level of rationalism: where instead of doing what you think is good, you get nerd sniped by estimates of expected utility and what you think is likely to happen and what the relative risks of those estimates are. That gets you into places like:
 
@@ -28,14 +51,32 @@ There's another meta-level of rationalism: where instead of doing what you think
 
 We’ll refer to this future as “the obsolescence regime.” The obsolescence regime is a world where economic and military competition don’t operate on human timescales and aren’t constrained by human limitations — in this regime, a company or country that tries to make do with mere human creativity and understanding and reasoning alone would be outcompeted as surely as one that refuses to touch a computer would be today."
 
-To be clear, this is what the authors define as AI "going well." Given the choice between that world and a world where we all have no mouths, and must scream, I suppose the "planned obsolescence" world is better. I think instead it is far better to pull back and asking ourselves, wait; do we ✳=[:em "want"] 🔚 to live in that world? But the longtermist frame  says that question of what you think is good is nothing compared to the expected net negative utility of hostile AI, so shut up and calculate, you sentimental, narrow-minded aesthete. 
+To be clear, this is what the authors define as AI "going well." Given the choice between that world and a world where we all have no mouths, and must scream, I suppose the "obsolescence regime" is better. I think instead it is far better to pull back and asking ourselves, wait; do we ✳=[:em "want"] 🔚 to live in that world? But the longtermist frame  says that question of what you think is good is nothing compared to the expected net negative utility of hostile AI, so shut up and calculate, you sentimental, narrow-minded aesthete. 
 
-I don't particularly like the idea of hostile AI, but all that has meant for me in my personal and professional life is that I have tried to build and use systems I actually understand rather than just throwing more and more computational capacity at the problem and hoping I can understand it eventually. I don't want to live in a world where human creativity is obsolete, so I don't do things that contribute towards that world. I don't try to play 5-dimensional chess against that outcome, and so I don't have to worry that I'm going to inadvertently speak the true name of the paperclip-maximizing monster when researching how to surround it with the appropriate circles of alignment salt.
+Hostile AI is a scary prospect, in large part because an AI might use the resources we allocate to it to do things that offend our human moral sensibilities. Here are some of the things a hostile AI might do:
+
+-  demand we devote as many resources as humanly possible towards its aims, despite the fact that those aims will not directly benefit anyone now alive
+- create a secret ranking of humans based on their expected instrumental value and other desireable traits and then use that ranking to grant or withhold resources to favored members of its circle
+- discard our ordinary moral commitments in favor of a singular goal
+- use artificially precise definitions of "optimal" to justify extremely risky behavior because it's reasoning on an infinite timescale
+- deceive people about its true aims using moral language while swindling them
+
+I do not think it is an accident that there are these symmetries between effective altruists' aspirations and fears. What they seem to fear most is a system that plays the calculation game better than them.
+
+Unfortunately, as more and more people have entered the field of AI safety, the systems ostensibly constrained by it have only gotten more powerful, more widely deployed, and the field itself has grown more concerned about the very catastrophic risks they're trying to prevent. They openly embrace the rhetoric of an arms race, posing questions like "well, what would this technology look like if China were in control of it?"
+
+✳=[:aside "I'd perhaps be slightly more concerned about what 'China' is doing with AI if anyone could point me towards a translation of a research strategy paper where Chinese researchers claim they're on the cusp of building an AI god - because that's the situation we face in the English-speaking world."] 🔚
+
+This arms race logic is a direct consequence of assuming these developments are inevitable and trying to get out in front of them as quickly as possible. That logic, perversely, has been producing the very outcomes these researchers fear: the deployment of systems we don't understand, that have goals alien to our own.
+
+✳= [:h2 "An alternative: empiricist praxis"] 🔚
+
+I don't particularly like the idea of hostile AI, but my critique of AI systems is based more in the mundane harms they will inflict than in the science ficion stories that rationalists use to keep each other up at night. What that has meant for me in my personal and professional life is that I have tried to build and use systems I actually understand and control rather than just throwing more and more computational capacity at the problem and hoping I can understand it eventually. I don't want to live in a world where human creativity is obsolete, so I don't do things that contribute towards that world. I don't try to play 5-dimensional chess against that outcome, and so I don't have to worry that I'm going to inadvertently speak the true name of the paperclip-maximizing monster when researching how to surround it with the appropriate circles of alignment salt.
 
 I guess I have chosen for myself what every rationalist thinks is impossible in the aggregate: simply not build the torment nexus.
+
+One might take what I have written here to be an argument against trying to make the future go well. That is not my intention. I have come to believe, though, that means and ends are more closely linked than is assumed by "strong longtermists". I also have a strong aversion to the political economy of a system that links the moral worthiness of actions so closely to "what you can fund research for" versus "what you actually do."
 
 There really only is one name for this pattern of thought: rationalism. At the end of the day, I am an empiricist. I think numbers are meaningful to the extent you can tie them back to quantities that you can measure in the world. It doesn't matter how much we use the term "priors" and how artificially precise we make our estimates - the further we get away from direct measurement and observation, the more susceptible we are to motivated reasoning. You cannot observe the world two centuries from now. Observation can only happen in the present. You may never know if those predictions about the expected value of your actions two centuries hence turned out to be wrong; you will not live to know the log-loss error on your grandiose predictions of future net utility. 
 
 Someone might be able to run the numbers if your writing survives. But to make a wildly imprecise prediction of my own: they probably won't care.
-
-One might take this to be an argument against trying to make the future go well. That is not my intention. I have come to believe, though, that means and ends are more closely linked than is assumed by "strong longtermists". I also have a strong aversion to the political economy of a system that links the moral worthiness of actions so closely to "what you can fund research for" versus "what you actually do."
