@@ -10,8 +10,6 @@
 ✳ (def metadata {:title "Large language models' impoverished theory of cognition"
                :summary "Language models fail to understand because they don't even try."
                :page-style (css
-                            (at-import "https://fonts.googleapis.com/css2?family=Inter+Tight:wght@800;900&display=swap")
-                            
                             [:aside {:padding-left "3em"
                                      :font-style "italic"}
                              [:em {:font-style "normal"}]]
@@ -30,11 +28,6 @@
                                   :line-height "1.40em"
                                   :font-weight "500"}]]
                             [:strong {:font-weight "700"}]
-                            [:h1 {:font-family "'Inter Tight', sans-serif"
-                                  :font-weight "900"}]
-                            [:h2 :h3 :h4 :h5 :h6
-                             {:font-family "'Inter Tight', sans-serif"
-                              :font-weight "800"}]
                             ) }) 🔚
                             
 ✳= [:h1 (:title metadata)]🔚

@@ -124,7 +124,10 @@
            "url(../fonts/DefaultSans-SemiBold.woff2)"
            "url(../fonts/DefaultSans-SemiBoldItalic.woff2)"
            "url(../fonts/DefaultSans-Thin.woff2)"
-           "url(../fonts/DefaultSans-ThinItalic.woff2)"]} )
+           "url(../fonts/DefaultSans-ThinItalic.woff2)"]})
+   (at-font-face
+    {:font-family "Def Sans"
+     :src ["url(../fonts/DefSansVF.woff2)"]})
    (at-font-face
     {:font-family "Mainframe"
      :src ["url(../fonts/Mainframe-Regular.woff2)"
@@ -140,8 +143,8 @@
 
   )
 
-(def sans-serif "'Default Sans', sans-serif")
-(def monospace "'Red Hat Mono', monospace")
+(def sans-serif "'Def Sans', sans-serif")
+(def monospace "'Mainframe', monospace")
 
 (def html-rules
   [:html {:-webkit-font-smoothing "auto"
@@ -222,6 +225,8 @@
    (at-import
     "https://fonts.googleapis.com/css2?family=Inter:wght@600;900&display=swap")
    (at-import "https://fonts.googleapis.com/css2?family=Karla:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Red+Hat+Mono:wght@700&display=swap")
+
+   (at-import "https://fonts.googleapis.com/css2?family=Chivo+Mono:wght@100..900&display=swap" )
    [:a {:color "#C14825"
         :text-decoration "none"}
     [:img {:border-right-color "#C14825"
@@ -231,11 +236,11 @@
    [:body {:background-color "#FFF"
            :font-size "20px"
            :font-weight "400"
-           :font-family "'Default Sans', sans-serif"
+           :font-family "'Def Sans', sans-serif"
            :line-height "27px"
            :color "#444"}]
    [:header {:font-weight "600"
-             :font-family "Default Sans"}]
+             :font-family "Def Sans"}]
    [:h1 {:font-size "2rem"}]
    [:h2 {:font-size "1.7rem"}]
    [:h3 {:font-size "1.5rem"}]
@@ -258,7 +263,7 @@
            :font-weight "500"}]
    [:pre :code
     {:white-space "pre-wrap"
-     :font-family "'Red Hat Mono', monospace"
+     :font-family "'Chivo Mono', monospace"
      :color "#66220e"}]
    [:pre {:margin-bottom "0.4em"
           :line-height "27px"

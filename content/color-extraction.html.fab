@@ -315,11 +315,11 @@ Here are the manual colors converted to HSV + RGB representations:
                                          :type :nominal}
                                  :x {:aggregate :count :title ""}}}]}]
          :config {:view {:stroke :transparent}
-                  :axis {:labelFont "Default Sans"
-                         :titleFont "Default Sans"
+                  :axis {:labelFont "Def Sans"
+                         :titleFont "Def Sans"
                          :titleFontSize 16
                          :labelFontSize 14}
-                  :title {:font "Default Sans"
+                  :title {:font "Def Sans"
                           :fontSize 24}}}]
    (plot-edn->svg hist-edn)
        ) 🔚
