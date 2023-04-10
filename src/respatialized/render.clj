@@ -7,7 +7,8 @@
             [site.fabricate.prototype.page :as page]
             [flatland.ordered.set :refer [ordered-set]]
             [flatland.ordered.map :refer [ordered-map]]
-            [respatialized.styles :as styles]))
+            [respatialized.styles :as styles]
+            [respatialized.css :as css]))
 
 (defn site-page-header
   "Returns a default header from a map with a post's metadata."
@@ -19,10 +20,9 @@
                 [:meta {:charset "utf-8"}]
                 [:meta {:http-equiv "X-UA-Compatible" :content "IE=edge,chrome=1"}]
                 [:meta {:name "viewport" :content "width=device-width, initial-scale=1.0, user-scalable=no"}]
-                [:script {:type "text/javascript" :src "/js/prism.js" :async "async"}]
-                [:script {:type "text/javascript" :src "https://cdnjs.cloudflare.com/ajax/libs/prism/1.17.1/plugins/autoloader/prism-autoloader.min.js"}]
-                [:link {:type "text/css" :href "/css/normalize.css" :rel "stylesheet"}]
-                [:link {:type "text/css" :href "/css/main.css" :rel "stylesheet"}]]
+                [:link {:type "text/css" :href "/css/main.css" :rel "stylesheet"}]
+                [:link {:href css/google-fonts-url :rel "stylesheet"}]
+                ]
                scripts)]
     (if page-style (conj page-header [:style page-style]) page-header)))
 

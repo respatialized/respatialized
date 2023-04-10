@@ -17,7 +17,7 @@
   [#_[:*
       (before) (after)
       {:box-sizing "border-box"}]    ; unclear if I got the selectors right here
-   [:html {:line-sizing "normal"}]
+   #_ [:html {:line-sizing "normal"}] ; the line-sizing property isn't implemented yet
    [:body {:margin "0"}]
    [(attr "hidden") {:display "none"}]
    [:h1 {:font-size "2rem"}]
@@ -104,39 +104,14 @@
 ;; DISPLAY
 ;; FONTS
 
+(def google-fonts-url
+  "https://fonts.googleapis.com/css2?family=Chivo+Mono:wght@100..900&display=swap")
+
 (def font-spec
   (list
    (at-font-face
-    {:font-family "Default Sans"
-     :src ["url(../fonts/DefaultSans-Regular.woff2)"
-           "url(../fonts/DefaultSans-Black.woff2)"
-           "url(../fonts/DefaultSans-BlackItalic.woff2)"
-           "url(../fonts/DefaultSans-BoldItalic.woff2)"
-           "url(../fonts/DefaultSans-ExtraBold.woff2)"
-           "url(../fonts/DefaultSans-ExtraBoldItalic.woff2)"
-           "url(../fonts/DefaultSans-ExtraLight.woff2)"
-           "url(../fonts/DefaultSans-ExtraLightItalic.woff2)"
-           "url(../fonts/DefaultSans-Italic.woff2)"
-           "url(../fonts/DefaultSans-Light.woff2)"
-           "url(../fonts/DefaultSans-LightItalic.woff2)"
-           "url(../fonts/DefaultSans-Medium.woff2)"
-           "url(../fonts/DefaultSans-MediumItalic.woff2)"
-           "url(../fonts/DefaultSans-SemiBold.woff2)"
-           "url(../fonts/DefaultSans-SemiBoldItalic.woff2)"
-           "url(../fonts/DefaultSans-Thin.woff2)"
-           "url(../fonts/DefaultSans-ThinItalic.woff2)"]})
-   (at-font-face
-    {:font-family "Def Sans"
-     :src ["url(../fonts/DefSansVF.woff2)"]})
-   (at-font-face
-    {:font-family "Mainframe"
-     :src ["url(../fonts/Mainframe-Regular.woff2)"
-           "url(../fonts/Mainframe-Bold.woff2)"
-           "url(../fonts/Mainframe-ExtraBold.woff2)"
-           "url(../fonts/Mainframe-ExtraLight.woff2)"
-           "url(../fonts/Mainframe-Light.woff2)"
-           "url(../fonts/Mainframe-Medium.woff2)"
-           "url(../fonts/Mainframe-SemiBold.woff2)"]})))
+    {:font-family "'Def Sans'"
+     :src ["url('../fonts/DefSansVF.woff2')"]})))
 
 (comment
   (garden/css font-spec)
@@ -160,73 +135,12 @@
 
 
 
-(def prism-rules
-  ^{:doc "Garden translation of syntax highlighting rules from prism.js"
-    :url "https://prismjs.com/download.html#themes=prism&languages=markup+css+clojure"}
-  [[:code (attr "class" "*=" "\"language-\"") :pre
-    (attr "class" "*=" "\"language-\"")
-    {:color "black", :text-align "left", :tab-size "4", :-o-tab-size "4", :white-space "pre", :font-size "1em", :-ms-hyphens "none", :hyphens "none", :word-wrap "normal", :background "none", :word-spacing "normal", :word-break "normal", :-webkit-hyphens "none", :-moz-tab-size "4", :-moz-hyphens "none"}]
-   [:pre (attr "class" "*=" "\"language-\"")
-    ;; _:::-moz-selection
-    :pre (attr "class" "*=" "\"language-\"") " "
-    ;; :::-moz-selection
-    :code (attr "class" "*=" "\"language-\"")
-    ;; :::-moz-selection
-    :code (attr "class" "*=" "\"language-\"") " "
-    ;; :::-moz-selection
-    {:text-shadow "none", :background "#b3d4fc"}]
-   [:pre (attr "class" "*=" "\"language-\"")
-    ;; :::selection
-    :pre (attr "class" "*=" "\"language-\"") " "
-    ;; :::selection
-    :code (attr "class" "*=" "\"language-\"")
-    ;; :::selection
-    :code (attr "class" "*=" "\"language-\"") " "
-    ;; :::selection
-    {:text-shadow "none", :background "#b3d4fc"}]
-   (at-media {:print true}
-             [:code (attr "class" "*=" "\"language-\"")
-              :pre (attr "class" "*=" "\"language-\"")
-              {:text-shadow "none"}])
-   [:pre (attr "class" "*=" "\"language-\"")
-    {:padding "1em", :margin ".5em 0", :overflow "auto"}]
-   [":not(pre)" ">" :code (attr "class" "*=" "\"language-\"")
-    :pre (attr "class" "*=" "\"language-\"")
-    {:background "#f5f2f0"}]
-   [":not(pre)" ">" :code
-    (attr "class" "*=" "\"language-\"")
-    {:padding ".1em", :border-radius ".3em",
-     :white-space "normal"}]
-   [:.token :.comment :.token :.prolog :.token :.doctype :.token :.cdata {:color "slategray"}]
-   [:.token :.namespace {:opacity ".7"}]
-   [:.token :.property :.token :.tag :.token :.boolean :.token :.number :.token :.constant :.token :.symbol :.token :.deleted {:color "#905"}]
-   [:.token :.selector :.token :.attr-name :.token :.string :.token :.char :.token :.builtin :.token :.inserted {:color "#690"}]
-   [:.token :.operator :.token :.entity :.token :.url :.language-css " " :.token :.string :.style " " :.token :.string {:color "#9a6e3a", :background "hsla(0,0%,100%,.5)"}]
-   [:.token :.atrule :.token :.attr-value :.token :.keyword {:color "#07a"}]
-   [:.token :.function :.token :.class-name {:color "#DD4A68"}]
-   [:.token :.regex :.token #_ :.important :.token :.variable {:color "#66220e" }]
-   [:.operator {:color "#66220e"}]
-   [:.token [:.operator {:color "#66220e"}]]
-   #_[:.token :.punctuation {:color "#222"}]
-   [:.token [:.punctuation {:color "#222"}]]
-   [:.token :.important :.token :.bold {:font-weight "bold"}]
-   #_[:.token :.italic {:font-style "italic"}]])
 
-(def highlight-rules
-  (list
-   [:.token.comment
-    :.token.prolog
-    :.token.doctype
-    {:color (get wal-colors "color5")}]
-   [:.token.symbol (get wal-colors "color6")]))
 
 (def page-style
   (list
-   (at-import
-    "https://fonts.googleapis.com/css2?family=Inter:wght@600;900&display=swap")
-   (at-import "https://fonts.googleapis.com/css2?family=Karla:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Red+Hat+Mono:wght@700&display=swap")
 
-   (at-import "https://fonts.googleapis.com/css2?family=Chivo+Mono:wght@100..900&display=swap" )
+   #_(at-import google-fonts-url )
    [:a {:color "#C14825"
         :text-decoration "none"}
     [:img {:border-right-color "#C14825"
@@ -258,17 +172,14 @@
    [:blockquote :aside
     {:font-size "0.9em"
      :margin-left "1em"}]
-   [:code {:font-size "0.95em"
-           :line-height "1.2em"
-           :font-weight "500"}]
    [:pre :code
     {:white-space "pre-wrap"
      :font-family "'Chivo Mono', monospace"
+     :font-weight 375
+     ;;:line-height "27px"
+     :font-size "0.925em"
      :color "#66220e"}]
-   [:pre {:margin-bottom "0.4em"
-          :line-height "27px"
-          :font-size "0.9em"}
-    [:code {:line-height "27px"}]]
+   [:pre {:margin-bottom "0.4em"}]
    [:dt {:margin-bottom "0.2rem"}]
    [:dd {:margin-bottom "0.4rem"}]
    [:summary {:margin-bottom "0.4em"}]
@@ -305,7 +216,6 @@
   "main fn"
   []
   (->> [remedy
-        prism-rules
         page-style
         font-spec
         ;; [:h1 :h2 :h3 :h4 :h5 :h6 {:color (get wal-colors "color6")}]
@@ -316,8 +226,7 @@
 (comment
   (-main)
 
-(->> [remedy
-        prism-rules
+  (->> [remedy
         page-style
         font-spec
         ;; [:h1 :h2 :h3 :h4 :h5 :h6 {:color (get wal-colors "color6")}]
