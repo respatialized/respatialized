@@ -1,7 +1,7 @@
-✳ (ns respatialized.writing.semantic-overfitting) 🔚
+✳ (ns respatialized.writing.semantic-brownian-motion) 🔚
 
 
-✳ (def metadata {:title "Semantic Overfit"}) 🔚
+✳ (def metadata {:title "Semantic Brownian Motion"}) 🔚
 
 
 ✳= [:h1 (:title metadata)] 🔚
@@ -25,24 +25,32 @@ It is important to remember that the corpus of text contains both documents wher
 
 The other, less sensational possibility, she said, is that what appears to be emergent may instead be the culmination of an internal, statistics-driven process that works through chain-of-thought-type reasoning. Large LLMs may simply be learning heuristics that are out of reach for those with fewer parameters or lower-quality data."] 🔚
 
-I think phrases like "explain yourself" or "describe how you got to this result" are the exact kinds of heuristics that could cause a model to weight text written by more careful writers more highly, and therefore more likely to replicate the correctly stated facts in the original texts.
+I think phrases like "explain yourself" or "describe how you got to this result" are the exact kinds of heuristics that could cause a model to weight token embeddings derived from text written by more careful writers more highly, and therefore more likely to replicate the correctly stated facts in the original texts.
 ✳= [:h2 "Local Maxima"] 🔚
 
 The story goes like: the model shows linear improvement (on the tasks envisioned by its creators) as scaling increases, but then when turned loose on the internet, people begin supplying all kinds of examples. Which of those are "spontaneous breakthroughs" and which of those are just "things we didn't think to ask before?" Some of these tasks may not have been specified in a problem statement that researchers used to describe the problem, but they are identified just fine by the objective function of "predict next token." But those things were present in the data all along, even if the creators didn't bother to look for them. 
 
 As for sudden increases in performance, I personally do not find it surprising at all: the model was in a local maximum before, and increasing the number of parameters, or, potentially, just reinitializing the same model with the same data and the same number of parameters but with different randomization applied to its starting point, caused it to break out of that local maximum. Once it did so, it could identify more statistical regularities within the texts that its previous local maximum prevented it from identifying or retaining in its compressed copy of the data.
 
-Stephen Wolfram has made some extremely grandiose predictions about the application of large language models
+Stephen Wolfram has written one of the best explanations of how ChatGPT actually works from the ground up, introducing neural networks in a general way before 
+
+Later on, he makes some extremely grandiose predictions about the application of large language models
+
+✳=[:blockquote "once its whole computational language framework is built, we can expect that it will be able to be used to erect tall towers of “generalized semantic logic”, that allow us to work in a precise and formal way with all sorts of things that have never been accessible to us before, except just at a “ground-floor level” through human language, with all its vagueness.
+
+We can think of the construction of computational language—and semantic grammar—as representing a kind of ultimate compression in representing things."] 🔚
 
 Imagine if we had trained a language model on examples of scientific writing when phlogiston theory or the idea of "spontaneous generation" was still in vogue. Would one expect a LLM deliver any novel scientific insights under such conditions by giving us an artificially precise definition of "phlogiston?" 
 
 But we're so much smarter now, right? We couldn't possibly be stuck in a local scientific maximum requiring a paradigm shift to get out of, right? (oh right, I guess the paradigm shift will itself be supplied by the LLM, so I can just make the computer do my thinking for me)
 
+If probabilistic rearrangement of tokens leads to a scientific breakthrough that was hiding in the plain sight of the extant literature on the topic, I would certainly welcome it. We would owe the model due credit for assembling the right ideas, perhaps even via a scholarly attribution. But I must stress that it would only be a breakthrough if we actually ran experiments that verified what the model was saying. 
+
 Even if we "pop the hood" on the language model and determine that one specific 32x16,777,216 matrix of weights and biases corresponds to the term "car", what have we learned about cars? I wouldn't expect to learn anything about cars from the specific neurons or regions of the brain that light up when people are asked questions about cars. I might learn something about the brain - and so too we might learn something about the ✳=[:em "model"] 🔚 from that exercise. But trying to infer facts about the world from facts about the model is a category error.
 
 So I think Wolfram's whole project is mistaken, and building it on the non-deterministic sand foundations of LLMs is not going to deliver the insights he thinks it will. It is telling that he cannot offer a more formal statement of ✳=[:em "how"] 🔚 LLMs will get around the vagueness of language than a weak analogy to formal logic.
 
-This analogy is completely mistaken. First-order logic became a successful paradigm because you can do higher-order logic to ✳=[:em "prove"] 🔚 that the correct sets of premises never generate an incorrect conclusion. What proof could possibly be done that our 32x16,777,216 "car" matrix represents the concept faithfully? It would depend on facts about cars, not on facts about that matrix or its releationship with other matrices produced by the same model. Would we even get the same matrix for the term "car" if we re-trained the model on the same data and the same parameters but with randomization applied to the starting data? If we don't, then how can we possibly rely on this technique to engineer vagueness out of natural language?
+This analogy is completely mistaken. First-order logic became a successful paradigm because you can do ✳=[:a {:href "https://plato.stanford.edu/entries/logic-higher-order/"} "higher-order logic"] 🔚  to ✳=[:em "prove"] 🔚 that the correct sets of premises never generate an incorrect conclusion. What proof could possibly be done that our 32x16,777,216 "car" matrix represents the concept faithfully? Or that it cleanly divides the concept of "car" from the concept of "train?" It would depend on facts about cars and trains, not on facts about that matrix or its releationship with other matrices produced by the same model. Would we even get the same matrix for the term "car" if we re-trained the model on the same data and the same parameters but with randomization applied to the starting data? If we don't, then how can we possibly rely on this technique to engineer vagueness out of natural language?
 
 ✳=[:aside [:em [:a {:href "http://arayo.scripts.mit.edu/home/portfolio-archive/vague-representation/"} "also, vagueness is a feature, not a bug of language"]]] 🔚
 
@@ -67,5 +75,20 @@ LLMs literally are designed to word sequence predictors. Because that is what we
 
 Unfortunately, the flawed-but-useful process of peer review has been thrown out the window in favor of a new style of scientific publishing: drop a "preprint" that may not have even been submitted anywhere on arxiv and let your Twitter followers engage in memetic warfare on behalf of the article's conclusions. Reply guy? I think you mean "peer reviewer," thank you very much.
 
-Spooking yourself and your Twitter followers with scary stories about what the oracle told you about paperclip-maximizing robots may be emotionally compelling, but it isn't science.
+
+Spooking yourself and your Twitter followers with scary stories about what the oracle told you about paperclip-maximizing robots may be emotionally compelling, but it isn't science. This hype cycle is incredibly susceptible to conformation bias and attempting to find patterns that aren't there. 
+
+Why can ChatGPT associate emojis with Finding Nemo? Because it's predicting the next token in a sequence.
+Why can ChatGPT produce correct-sounding text in response to theory of mind questions? Because it's predicting the next token in a sequence.
+Why can ChatGPT describe plans and goals? Because it's predicting the next token in a sequence.
+
+These explanations do not sound intellectually satisfying. We crave an alternative explanation as opposed to the boring one. But let's look at an earlier technology that also provided effects that seemed like magic at the time: electricity.
+
+How can a filament glow with light and illuminate a room? Because electrons are passing through it.
+How can a chemical battery produce forward motion in a vehicle? Because electrons are passing through it.
+How can a previously inert piece of metal spring to life and attract other pieces of metal? Because electrons are passing through it.
+
+Those sentences don't really capture the wonder that filled audiences when early demonstrations of electricity took place. But they are, in fact, true. There is no need to posit unobserved latent properties of electricity to see why they work. The impressive and diverse uses that we put electricity towards were the results of human ingenuity applying general properties of electromagnetism to different tasks. So too are the impressive uses of large-language models the result of clever prompting and iterative ideation on what we can do with this new tool.
+
+
 
