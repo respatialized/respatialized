@@ -1,0 +1,94 @@
+✳ (ns respatialized.writing.semantic-brownian-motion) 🔚
+
+
+✳ (def metadata {:title "Semantic Brownian Motion"}) 🔚
+
+
+✳= [:h1 (:title metadata)] 🔚
+
+There's a hypothesis circulating in meme form about large language models: that they are "spontaneously" developing new capabilities. Stephen Ornes has a good overview of these perspectives in ✳= [:a {:href "https://www.quantamagazine.org/the-unpredictable-abilities-emerging-from-large-ai-models-20230316/"} "an article for " [:em "Quanta"] " magazine."] 🔚
+
+You can trace this from the GPT-3 paper itself, which introduces the idea of "few-shot" learning to a broad audience, to a paper claiming that LLMs are developing theory of mind as a "byproduct" of token sequence prediction, to a now-pervasive hope (or fear) that language models don't need to have a model for the world or truth engineered into them because one will just arise with a sufficient number of parameters, a hypothesis commonly known as 'scaling maximalism'.
+
+I think the examples discussed don't reveal the model's knowledge as much as the researchers' ignorance of language in general, and of the linguistic dataset used to train LLMs in particular.
+
+✳= [:h2 "Mimicking Carefulness"] 🔚
+
+One of the capacities labeled "spontaneous" is the so-called "chain of thought" capabilities in LLMs.
+
+✳=[:blockquote "a model prompted to explain itself (a capacity called chain-of-thought reasoning) could correctly solve a math word problem, while the same model without that prompt could not."] 🔚
+
+It is important to remember that the corpus of text contains both documents where a writer explains their reasoning, and ones where the writer just makes assertions. These models will learn from and attempt to replicate context-specific details from both. "More careful writers that explain themselves are correct more of the time" is almost a trivial observation. "Language model explains itself" is earth-shattering news. So which might it be? The article quotes Ellie Pavlick, a linguistics researcher, who says:
+
+✳=[:blockquote
+"“That’s what we’re all hoping is the case, that there’s some fundamental shift that happens when models are scaled up.”
+
+The other, less sensational possibility, she said, is that what appears to be emergent may instead be the culmination of an internal, statistics-driven process that works through chain-of-thought-type reasoning. Large LLMs may simply be learning heuristics that are out of reach for those with fewer parameters or lower-quality data."] 🔚
+
+I think phrases like "explain yourself" or "describe how you got to this result" are the exact kinds of heuristics that could cause a model to weight token embeddings derived from text written by more careful writers more highly, and therefore more likely to replicate the correctly stated facts in the original texts.
+✳= [:h2 "Local Maxima"] 🔚
+
+The story goes like: the model shows linear improvement (on the tasks envisioned by its creators) as scaling increases, but then when turned loose on the internet, people begin supplying all kinds of examples. Which of those are "spontaneous breakthroughs" and which of those are just "things we didn't think to ask before?" Some of these tasks may not have been specified in a problem statement that researchers used to describe the problem, but they are identified just fine by the objective function of "predict next token." But those things were present in the data all along, even if the creators didn't bother to look for them. 
+
+As for sudden increases in performance, I personally do not find it surprising at all: the model was in a local maximum before, and increasing the number of parameters, or, potentially, just reinitializing the same model with the same data and the same number of parameters but with different randomization applied to its starting point, caused it to break out of that local maximum. Once it did so, it could identify more statistical regularities within the texts that its previous local maximum prevented it from identifying or retaining in its compressed copy of the data.
+
+Stephen Wolfram has written one of the best explanations of how ChatGPT actually works from the ground up, introducing neural networks in a general way before 
+
+Later on, he makes some extremely grandiose predictions about the application of large language models
+
+✳=[:blockquote "once its whole computational language framework is built, we can expect that it will be able to be used to erect tall towers of “generalized semantic logic”, that allow us to work in a precise and formal way with all sorts of things that have never been accessible to us before, except just at a “ground-floor level” through human language, with all its vagueness.
+
+We can think of the construction of computational language—and semantic grammar—as representing a kind of ultimate compression in representing things."] 🔚
+
+Imagine if we had trained a language model on examples of scientific writing when phlogiston theory or the idea of "spontaneous generation" was still in vogue. Would one expect a LLM deliver any novel scientific insights under such conditions by giving us an artificially precise definition of "phlogiston?" 
+
+But we're so much smarter now, right? We couldn't possibly be stuck in a local scientific maximum requiring a paradigm shift to get out of, right? (oh right, I guess the paradigm shift will itself be supplied by the LLM, so I can just make the computer do my thinking for me)
+
+If probabilistic rearrangement of tokens leads to a scientific breakthrough that was hiding in the plain sight of the extant literature on the topic, I would certainly welcome it. We would owe the model due credit for assembling the right ideas, perhaps even via a scholarly attribution. But I must stress that it would only be a breakthrough if we actually ran experiments that verified what the model was saying. 
+
+Even if we "pop the hood" on the language model and determine that one specific 32x16,777,216 matrix of weights and biases corresponds to the term "car", what have we learned about cars? I wouldn't expect to learn anything about cars from the specific neurons or regions of the brain that light up when people are asked questions about cars. I might learn something about the brain - and so too we might learn something about the ✳=[:em "model"] 🔚 from that exercise. But trying to infer facts about the world from facts about the model is a category error.
+
+So I think Wolfram's whole project is mistaken, and building it on the non-deterministic sand foundations of LLMs is not going to deliver the insights he thinks it will. It is telling that he cannot offer a more formal statement of ✳=[:em "how"] 🔚 LLMs will get around the vagueness of language than a weak analogy to formal logic.
+
+This analogy is completely mistaken. First-order logic became a successful paradigm because you can do ✳=[:a {:href "https://plato.stanford.edu/entries/logic-higher-order/"} "higher-order logic"] 🔚  to ✳=[:em "prove"] 🔚 that the correct sets of premises never generate an incorrect conclusion. What proof could possibly be done that our 32x16,777,216 "car" matrix represents the concept faithfully? Or that it cleanly divides the concept of "car" from the concept of "train?" It would depend on facts about cars and trains, not on facts about that matrix or its releationship with other matrices produced by the same model. Would we even get the same matrix for the term "car" if we re-trained the model on the same data and the same parameters but with randomization applied to the starting data? If we don't, then how can we possibly rely on this technique to engineer vagueness out of natural language?
+
+✳=[:aside [:em [:a {:href "http://arayo.scripts.mit.edu/home/portfolio-archive/vague-representation/"} "also, vagueness is a feature, not a bug of language"]]] 🔚
+
+✳= [:h2 "Heuristic and Stereotype"] 🔚
+Another limitation of "scaling maximalism" is that the behavior of a model cannot be predictably guided as the number of parameters increases - sometimes with perverse results.
+
+✳=[:blockquote "“Certain harmful behaviors kind of come up abruptly in some models,” Ganguli said. He points to a recent analysis of LLMs, known as the BBQ benchmark, which showed that social bias emerges with enormous numbers of parameters. “Larger models abruptly become more biased.”"] 🔚
+
+The 'spontaneous' re-emergence of bias as a model is scaled up makes perfect sense when you consider the the paradigm used to condition LLMs like GPT-3. Known as "reinforcement learning with human feedback", it involves providing a model with human-labeled examples of truly horrific things and applying penalty scores to any learned associations with those things in the model's weights and outputs. These examples are intended to apply the same context-specific weighting mechanism used by the model in an overall capacity to the specific problem of generalizing from individual examples to broader patterns of harmful language.
+
+I think it is relatively uncontroversial to note that the curated examples cannot possibly capture the full range of human bigotry that they hope the models avoid. Bigotry and bias can show up in extremely subtle ways that are not obvious, even to a cautious observer. And that's even assuming people agree on what the bias consists of, to say nothing at all of the fact that "bias" is itself a politically contested term.
+
+This example, I think, provides additional compelling evidence for Pavlick's hypothesis that the LLM is just picking up more heuristics as the number of parameters increases. The model, through feedback, develops an imperfect heuristic for avoiding bias, but then identifies a way around that heuristic when it is given the ability to capture and store even more context and is exposed to even more horrific material. Whatever stereotypes it "unlearned" are replaced by subtler ones, not foreseen by the model's creators or the people tasked with helping the model avoid saying harmful things.
+
+The model, when provided with prompts (I dislike and try to avoid the uncritical use of anthropomorphizing terms like "told"), containing instructions about avoiding stereotypes and bias, displays a reduction in bias. I do not find this revelatory or surprising. The prompt guides the model away from examples written by uncritical or biased writers and towards examples written by more careful writers, and phrases like "avoid stereotypes" can indeed serve as useful heuristics for fragments of writing about implicit bias. Once again, it can be made to mimic carefulness, but the carefulness is still supplied by examples in the training data.
+
+The stochastic parrot is reminding us of things we've forgot we have said. That doesn't mean it's intelligent.
+
+✳=[:h2 "The Null Hypothesis"] 🔚
+
+LLMs literally are designed to word sequence predictors. Because that is what we ✳=[:em "know"] 🔚 about their design, the null hypothesis should certainly be that they are exploiting statistical regularities in the text. Any claims of new capabilities should be taken with a lot of skepticism unless there is extremely well-established evidence, grounded in a rigorous internal understanding of how LLMs work, to believe otherwise. 
+
+Unfortunately, the flawed-but-useful process of peer review has been thrown out the window in favor of a new style of scientific publishing: drop a "preprint" that may not have even been submitted anywhere on arxiv and let your Twitter followers engage in memetic warfare on behalf of the article's conclusions. Reply guy? I think you mean "peer reviewer," thank you very much.
+
+
+Spooking yourself and your Twitter followers with scary stories about what the oracle told you about paperclip-maximizing robots may be emotionally compelling, but it isn't science. This hype cycle is incredibly susceptible to conformation bias and attempting to find patterns that aren't there. 
+
+Why can ChatGPT associate emojis with Finding Nemo? Because it's predicting the next token in a sequence.
+Why can ChatGPT produce correct-sounding text in response to theory of mind questions? Because it's predicting the next token in a sequence.
+Why can ChatGPT describe plans and goals? Because it's predicting the next token in a sequence.
+
+These explanations do not sound intellectually satisfying. We crave an alternative explanation as opposed to the boring one. But let's look at an earlier technology that also provided effects that seemed like magic at the time: electricity.
+
+How can a filament glow with light and illuminate a room? Because electrons are passing through it.
+How can a chemical battery produce forward motion in a vehicle? Because electrons are passing through it.
+How can a previously inert piece of metal spring to life and attract other pieces of metal? Because electrons are passing through it.
+
+Those sentences don't really capture the wonder that filled audiences when early demonstrations of electricity took place. But they are, in fact, true. There is no need to posit unobserved latent properties of electricity to see why they work. The impressive and diverse uses that we put electricity towards were the results of human ingenuity applying general properties of electromagnetism to different tasks. So too are the impressive uses of large-language models the result of clever prompting and iterative ideation on what we can do with this new tool.
+
+
+
