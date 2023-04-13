@@ -1,7 +1,9 @@
 (ns respatialized.css
   "Compositional css generated with garden"
   (:require [garden.core :as garden]
-            [garden.stylesheet :refer [at-media at-import at-font-face]]
+            [garden.stylesheet
+             :as style
+             :refer [at-media at-import at-font-face]]
             [garden.selectors :as select :refer [attr-starts-with attr before after]]
             [garden.units :as u]
             [garden.color]))
@@ -68,11 +70,42 @@
    "foreground" "#e6cca4",
    "cursor" "#e6cca4"})
 
-;(defn color-shades "Yields" [color-hex])
+(def oklch-hex-conversions
+  {"red" "#fc4354"
+   "sand"  "#f9f2ec"
+   "off-white" "#fcfaf7"
+   "aqua" "#34b7d7"
+   "cobalt" "#0378b4"
+   "leaf" "#309457"
+   "steel" "#e1e8f6"
+   "dark-steel" "#3f4454"
+   "golden" "#fbdd6f"
+   "ochre" "#9e4305"
+   "dark-umber""#31080e"
+   "ink"  "#061627"
+   "violet" "#b05fe1"
+   "marine" "#2464b4"
+   })
+
+;;(defn color-shades "Yields" [color-hex])
 
 ;; SIZES
 ;;
 
+
+(def grid-ratios
+  {:columns {:desktop "6"
+             :mobile "4"}
+   :main {:desktop "1 / 4"
+          :mobile "1 / 4"}
+   :side {:desktop "5 / 6"
+          :mobile "2 / 4"}})
+
+(def grid-areas
+  {:desktop "main main main main side side"
+   :mobile
+   "main main main main main main
+    _    side side side side side"})
 
 
 ;; SPACING
@@ -141,18 +174,18 @@
   (list
 
    #_(at-import google-fonts-url )
-   [:a {:color "#C14825"
+   [:a {:color (get oklch-hex-conversions "ochre")
         :text-decoration "none"}
-    [:img {:border-right-color "#C14825"
+    [:img {:border-right-color (get oklch-hex-conversions "ochre")
            :border-right-width "0.35rem"
            :border-right-style "solid"}]]
 
-   [:body {:background-color "#FFF"
-           :font-size "20px"
+   [:body {:background-color (oklch-hex-conversions "off-white")
+           :font-size "min(5vmin, 20px)"
            :font-weight "400"
            :font-family "'Def Sans', sans-serif"
-           :line-height "27px"
-           :color "#444"}]
+           :line-height "1.35em"
+           :color (oklch-hex-conversions "ink")}]
    [:header {:font-weight "600"
              :font-family "Def Sans"}]
    [:h1 {:font-size "2rem"}]
@@ -178,14 +211,16 @@
      :font-weight 375
      ;;:line-height "27px"
      :font-size "0.925em"
-     :color "#66220e"}]
+     :color (oklch-hex-conversions "dark-steel")}]
    [:pre {:margin-bottom "0.4em"}]
    [:dt {:margin-bottom "0.2rem"}]
    [:dd {:margin-bottom "0.4rem"}]
    [:summary {:margin-bottom "0.4em"}]
-   [:article {:max-width "45rem"
-              :padding-left "20px"
-              :color "#333"  }]
+   [:article {:max-width "105ch"
+              :color (oklch-hex-conversions "ink")  }]
+   (at-media {:screen true} [:article {:padding-left "1.5em"}])
+   (at-media {:max-width "700px"} [:article { :padding-left "0.25em"}])
+
    [:p {:margin-bottom "0.4em"
         :margin-top "0.2em"}
     [(select/a select/after)
