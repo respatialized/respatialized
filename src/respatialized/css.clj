@@ -168,7 +168,9 @@
 
 
 
+;; ASSEMBLING IT
 
+(select/defpseudoelement selection)
 
 (def page-style
   (list
@@ -186,6 +188,7 @@
            :font-family "'Def Sans', sans-serif"
            :line-height "1.35em"
            :color (oklch-hex-conversions "ink")}]
+   [(selection) {:background-color (oklch-hex-conversions "aqua")}]
    [:header {:font-weight "600"
              :font-family "Def Sans"}]
    [:h1 {:font-size "2rem"}]
@@ -218,9 +221,10 @@
    [:summary {:margin-bottom "0.4em"}]
    [:article {:max-width "105ch"
               :color (oklch-hex-conversions "ink")  }]
-   (at-media {:screen true} [:article {:padding-left "1.5em"}])
-   (at-media {:max-width "700px"} [:article { :padding-left "0.25em"}])
-
+   (at-media {:screen true} [:article {:padding-left "1.5em"
+                                       :padding-right "2.5em"}])
+   (at-media {:max-width "700px"} [:article { :padding-left "0.25em"
+                                             :padding-right "0.05em"}])
    [:p {:margin-bottom "0.4em"
         :margin-top "0.2em"}
     [(select/a select/after)
