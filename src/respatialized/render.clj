@@ -21,8 +21,7 @@
                 [:meta {:http-equiv "X-UA-Compatible" :content "IE=edge,chrome=1"}]
                 [:meta {:name "viewport" :content "width=device-width, initial-scale=1.0, user-scalable=no"}]
                 [:link {:type "text/css" :href "/css/main.css" :rel "stylesheet"}]
-                [:link {:href css/google-fonts-url :rel "stylesheet"}]
-                ]
+                [:link {:href css/google-fonts-url :rel "stylesheet"}]]
                scripts)]
     (if page-style (conj page-header [:style page-style]) page-header)))
 

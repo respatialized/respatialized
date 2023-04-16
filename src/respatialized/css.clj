@@ -130,7 +130,8 @@
 ;; FONTS
 
 (def google-fonts-url
-  "https://fonts.googleapis.com/css2?family=Chivo+Mono:wght@100..900&display=swap")
+  "https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@50..150,100..900&family=Chivo+Mono:wght@100..900&display=swap"
+  )
 
 (def font-spec
   (list
@@ -166,8 +167,6 @@
 
 (def page-style
   (list
-
-   #_(at-import google-fonts-url )
    [:a {:color (get oklch-hex-conversions "ochre")
         :text-decoration "none"}
     [:img {:border-right-color (get oklch-hex-conversions "ochre")
@@ -187,7 +186,11 @@
     {:text-align "justify"
      :hyphens "auto"
      :text-justify "inter-word"}]
-   [:.logotype {:font-weight 900}]
+   [:.logotype {:font-family "'Anybody', sans-serif"
+                :font-variation-settings "'wdth' 130"
+                :text-transform "uppercase"
+                :line-height "1.05em"
+                :font-weight 850}]
    [:h1 {:font-size "2rem"}]
    [:h2 {:font-size "1.7rem"}]
    [:h3 {:font-size "1.5rem"}]
@@ -202,7 +205,8 @@
    [:h1 :h2 :h3 :h4 :h5 :h6
     {:font-weight "800"
      :grid-column "1 / -1"
-     :line-height "1.25em"}]
+     :line-height "1.25em"
+     :text-align "left"}]
    [:strong {:font-weight "900"}]
    [:s {:text-decoration-thickness "15%"}]
    [:pre :code

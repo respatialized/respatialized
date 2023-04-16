@@ -7,11 +7,10 @@
    [site.fabricate.prototype.page :refer :all])) 🔚
    
 
-
 ✳ (def metadata {:title "Large language models' impoverished theory of cognition"
                :summary "Language models fail to understand because they don't even try."}) 🔚
                
-✳= [:h1 (:title metadata)]🔚
+✳= [:h1 #_{:class "logotype"} (:title  metadata)]🔚
 
 
 ✳=[:em (:summary metadata)]🔚
