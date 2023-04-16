@@ -94,18 +94,10 @@
 
 
 (def grid-ratios
-  {:columns {:desktop "6"
-             :mobile "4"}
-   :main {:desktop "1 / 4"
-          :mobile "1 / 4"}
-   :side {:desktop "5 / 6"
-          :mobile "2 / 4"}})
-
-(def grid-areas
-  {:desktop "main main main main side side"
-   :mobile
-   "main main main main main main
-    _    side side side side side"})
+  {:main {:desktop "1 / span 4"
+          :mobile "1 / -1"}
+   :side {:desktop "5 / -1"
+          :mobile "2 / -1"}})
 
 
 ;; SPACING
@@ -183,7 +175,7 @@
            :border-right-style "solid"}]]
 
    [:body {:background-color (oklch-hex-conversions "off-white")
-           :font-size "min(5vmin, 20px)"
+           :font-size "min(4.5vmin, 22px)"
            :font-weight "400"
            :font-family "'Def Sans', sans-serif"
            :line-height "1.35em"
@@ -191,6 +183,11 @@
    [(selection) {:background-color (oklch-hex-conversions "aqua")}]
    [:header {:font-weight "600"
              :font-family "Def Sans"}]
+   [:article
+    {:text-align "justify"
+     :hyphens "auto"
+     :text-justify "inter-word"}]
+   [:.logotype {:font-weight 900}]
    [:h1 {:font-size "2rem"}]
    [:h2 {:font-size "1.7rem"}]
    [:h3 {:font-size "1.5rem"}]
@@ -202,12 +199,12 @@
                    :margin-bottom "0.6em"
                    :margin-top "0.2em"}]
    [:h4 :h5 :h6 {:font-size "1.5rem"}]
-   [:h1 :h2 :h3 :h4 :h5 :h6 {:font-weight "800"
-                             :line-height "1.25em"}]
+   [:h1 :h2 :h3 :h4 :h5 :h6
+    {:font-weight "800"
+     :grid-column "1 / -1"
+     :line-height "1.25em"}]
    [:strong {:font-weight "900"}]
-   [:blockquote :aside
-    {:font-size "0.9em"
-     :margin-left "1em"}]
+   [:s {:text-decoration-thickness "15%"}]
    [:pre :code
     {:white-space "pre-wrap"
      :font-family "'Chivo Mono', monospace"
@@ -220,11 +217,36 @@
    [:dd {:margin-bottom "0.4rem"}]
    [:summary {:margin-bottom "0.4em"}]
    [:article {:max-width "105ch"
-              :color (oklch-hex-conversions "ink")  }]
-   (at-media {:screen true} [:article {:padding-left "1.5em"
-                                       :padding-right "2.5em"}])
-   (at-media {:max-width "700px"} [:article { :padding-left "0.25em"
-                                             :padding-right "0.05em"}])
+              :color (oklch-hex-conversions "ink")
+              :display "grid"
+              :grid-template-columns "repeat(6,minmax(3px, 1fr))"
+              :column-gap "max(10px, 0.5em)"}]
+   (at-media
+    {:screen true}
+    [:article {:padding-left "1.5em"
+               :padding-right "2.5em"}]
+    [:p :blockquote {:grid-column (get-in grid-ratios [:main :desktop])}]
+    [:aside {:grid-column (get-in grid-ratios [:side :desktop])}]
+    [:figure
+     [:blockquote {:grid-column (get-in grid-ratios [:main :desktop])}]
+     [:img {:grid-column "1 / span 4"}]
+     [:figcaption {:grid-column (get-in grid-ratios [:side :desktop])
+                   :display "flex"
+                   :margin-bottom "0.75em"
+                   :align-items "flex-end"}]])
+   (at-media
+    {:max-width "700px"}
+    [:article
+     { :padding-left "0.15em"
+      :padding-right "0.15em"
+      }]
+    [:figure
+     [:img {:grid-column "1 / -1"}]
+     [:blockquote {:grid-column (get-in grid-ratios [:main :mobile])}]
+     [:figcaption {:grid-column (get-in grid-ratios [:side :mobile])}]]
+    [:aside {:grid-column (get-in grid-ratios [:side :mobile])}]
+    [:p :blockquote {:grid-column (get-in grid-ratios [:main :mobile])}]
+    )
    [:p {:margin-bottom "0.4em"
         :margin-top "0.2em"}
     [(select/a select/after)
@@ -237,6 +259,21 @@
       :font-weight "Bold"
       :font-size "0.7em"
       :content "\"→\""}]]
+   [:blockquote {:border-left-color "#3f4454"
+                 :margin-left "0.1em"
+                 :border-left-style "solid"
+                 :border-left-width "0.35em"
+                 :padding-left "0.25em"}]
+   [:figure {:margin-left "0em"}]
+   [:aside :figcaption
+    {:font-weight "300"
+     :font-size "0.85em"
+     :line-height "1.25em"
+     :font-variation-settings "\"slnt\" -20"}
+    [:em {:font-variation-settings "'slnt' 0"}]]
+
+   [:figure {:display "contents"}
+    [:a {:display "contents"}]]
    [:table {:font-size "0.95rem"
             :letter-spacing "0.01rem"
             :line-height "1.45em"

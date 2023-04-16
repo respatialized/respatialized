@@ -1,21 +1,11 @@
-
 ✳ (ns respatialized.writing.computational-oracle
   (:require 
    [garden.core :refer [style css]]
    [garden.stylesheet :refer [at-import]]
    [site.fabricate.prototype.page :refer :all])) 🔚
-   
-
-
-
 ✳(def metadata {:title "The signs and portents of the computational oracle"
                :summary "Can we even seriously criticize large language models?"}) 🔚
-               
-
-
 ✳= [:h1 (:title metadata)]🔚
-
-
 ✳= [:h2 "On the uselessness of LLM critique"]🔚
 
 As you enter the chamber, the thick smell of incense makes you feel a little light-headed. The oracle seems to speak with one voice, but vague shapes behind the veil suggest more than one person is behind it. The dim candlelight makes it difficult to tell.  When you leave, you will remember only the prophecies that seemed true and forget what seemed false. Someone you know asked the oracle the same question you did and got a completely different response, but you want to believe it's because the oracle sees further than you, and grasps the details of your friend's life in mysterious ways.
