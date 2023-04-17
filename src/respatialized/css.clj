@@ -174,10 +174,10 @@
            :border-right-style "solid"}]]
 
    [:body {:background-color (oklch-hex-conversions "off-white")
-           :font-size "min(4.5vmin, 22px)"
+           :font-size "min(4.25vmin, 21px)"
            :font-weight "400"
            :font-family "'Def Sans', sans-serif"
-           :line-height "1.35em"
+           :line-height "1.32em"
            :color (oklch-hex-conversions "ink")}]
    [(selection) {:background-color (oklch-hex-conversions "aqua")}]
    [:header {:font-weight "600"
@@ -206,7 +206,8 @@
     {:font-weight "800"
      :grid-column "1 / -1"
      :line-height "1.25em"
-     :text-align "left"}]
+     :text-align "left"
+     :hyphens "none"}]
    [:strong {:font-weight "900"}]
    [:s {:text-decoration-thickness "15%"}]
    [:pre :code
@@ -220,7 +221,7 @@
    [:dt {:margin-bottom "0.2rem"}]
    [:dd {:margin-bottom "0.4rem"}]
    [:summary {:margin-bottom "0.4em"}]
-   [:article {:max-width "105ch"
+   [:article {:max-width "80ch"
               :color (oklch-hex-conversions "ink")
               :display "grid"
               :grid-template-columns "repeat(6,minmax(3px, 1fr))"
@@ -263,11 +264,16 @@
       :font-weight "Bold"
       :font-size "0.7em"
       :content "\"→\""}]]
-   [:blockquote {:border-left-color "#3f4454"
+   [:blockquote {#_ :border-left-color "#3f4454"
                  :margin-left "0.1em"
-                 :border-left-style "solid"
+                 #_:border-left-style "solid"
+                 :margin-top "0.3em"
+                 :margin-bottom "0.7em"
                  :border-left-width "0.35em"
-                 :padding-left "0.25em"}]
+                 :font-size "0.905em"
+                 :line-height "1.275em"
+                 :font-style "italic"
+                 #_ #_ :padding-left "0.25em"}]
    [:figure {:margin-left "0em"}]
    [:aside :figcaption
     {:font-weight "300"
