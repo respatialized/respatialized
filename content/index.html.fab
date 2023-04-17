@@ -1,31 +1,45 @@
-✳ (def metadata {:title "Respatialized"}) 🔚
 ✳ (ns respatialized.writing.index
-(:require [respatialized.render :refer :all]
- [site.fabricate.prototype.page :refer :all])) 🔚
-
-✳=(header {:level :h1} (list "Re" [:br] "spatial" [:br] "ized")) 🔚
-✳=(header {:level :h4} "actual / potential spaces" ) 🔚
-
-✳=(header {:level :h2} "recent work")🔚
-✳=(ul
-   (list [:p [:a {:href "https://github.com/fabricate-site/fabricate"} "Fabricate"]]
-         [:p "A Clojure-based static website generator extracted from this website's history, implementing conceps similar to Matthew Butterick's " [:code "pollen."]])
-   (list [:p [:a {:href "/not-a-tree.html"} "This Website Is Not A Tree"]]
-         [:p "a metatextual introduction to this site as it is and as it could be."])
-   (list [:p [:a {:href "/against-metadata.html"} "Against Metadata"]]
-         [:p "rants against the apparent fact that metadata is treated as an afterthought in program design and configuration management."])
-   (list [:p [:a {:href "/information-cocoon.html"} "Reifying the Filter Bubble, part 1"]]
-         [:p "new digital infrastructure makes a metaphor less of one."])
-   (list [:p [:a {:href "/reifying-filter-bubble-2.html"} "Reifying the Filter Bubble, part 2"]]
-         [:p "notes against the 'decentralization' of an impoverished internet."])
-   (list [:p [:a {:href "/working-definition.html"} "A Working Definition"]]
-         [:p "a working definition of my own ideology."])
-   (list [:p [:a {:href "/framing-degrowth.html"} "Framing Degrowth"]]
-         [:p "Does quantity necessarily lead to quality?"])
-   (list [:p [:a {:href "/database-driven-applications.html"} "Database Driven Applications"]]
-         [:p "Connections between programs could be made simpler by speaking directly to those programs' databases - but this requires that more of those programs be put under users' control."])
-   (list [:p [:a {:href "/parking-garage-dread.html"} "Subsumed Automotive Dread in the Parking Garage"]]
-         [:p "The threat is coming from inside the car."]))🔚
-
+  (:require
+   [garden.core :refer [css style]]
+   [site.fabricate.prototype.page :refer :all])) 🔚
+   
+✳ (def metadata {:title "Respatialized"
+               :page-style (css [:div {:display "contents"}]
+                                [:li ])
+               }) 🔚
+               
+✳= [:div [:h1 {:class "logotype"
+             :style (style {:font-size "min(10vw, 4.5em)"
+                            :margin "0em"})} "Respatialized"]
+  [:h4 {:class "logotype" :style (style {:margin "0em"
+                                         :font-weight 300})} "potential / actual spaces"]
+  ] 🔚
+  
+✳= [:h2 {:class "logotype"} "Recent work"]  🔚
+✳=[:div {:style (style {:grid-column "1 / -1"})}
+ (list [:p [:a {:href "https://github.com/fabricate-site/fabricate"} "Fabricate"]]
+       [:p "A Clojure-based static website generator extracted from this website's history, implementing conceps similar to Matthew Butterick's " [:code "pollen."]])
+ (list [:p [:a {:href "/not-a-tree.html"} "This Website Is Not A Tree"]]
+       [:p "a metatextual introduction to this site as it is and as it could be."])
+ (list [:p [:a {:href "/against-metadata.html"} "Against Metadata"]]
+       [:p "rants against the apparent fact that metadata is treated as an afterthought in program design and configuration management."])
+ (list [:p [:a {:href "/information-cocoon.html"} "Reifying the Filter Bubble, part 1"]]
+       [:p "new digital infrastructure makes a metaphor less of one."])
+ (list [:p [:a {:href "/reifying-filter-bubble-2.html"} "Reifying the Filter Bubble, part 2"]]
+       [:p "notes against the 'decentralization' of an impoverished internet."])
+ (list [:p [:a {:href "/working-definition.html"} "A Working Definition"]]
+       [:p "a working definition of my own ideology."])
+ (list [:p [:a {:href "/framing-degrowth.html"} "Framing Degrowth"]]
+       [:p "Does quantity necessarily lead to quality?"])
+ (list [:p [:a {:href "/database-driven-applications.html"} "Database Driven Applications"]]
+       [:p "Connections between programs could be made simpler by speaking directly to those programs' databases - but this requires that more of those programs be put under users' control."])
+ (list [:p [:a {:href "/parking-garage-dread.html"} "Subsumed Automotive Dread in the Parking Garage"]]
+       [:p "The threat is coming from inside the car."])
+ (list [:p [:a {:href "/llms-impoverished-cognition.html"} "Large Language Models' Impoverished Theory of Cognition"]]
+       [:p "Language models fail to understand because they don't even try."])
+ (list [:p [:a {:href "/llms-impoverished-cognition.html"} "The Signs and Portents of the Computational Oracle"]]
+       [:p "Can we even seriously criticize large language models?" ])
+ ]🔚
+ 
 
 ✳= [:div {:class "f3"} (strong "Site source: " (link "https://github.com/respatialized/respatialized.github.io" (in-code "github")))] 🔚

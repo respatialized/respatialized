@@ -10,7 +10,7 @@
 ✳ (def metadata {:title "Large language models' impoverished theory of cognition"
                :summary "Language models fail to understand because they don't even try."}) 🔚
                
-✳= [:h1 #_{:class "logotype"} (:title  metadata)]🔚
+✳= [:h1 {:class "logotype"} (:title  metadata)]🔚
 
 
 ✳=[:em (:summary metadata)]🔚
@@ -25,7 +25,7 @@ He goes on to discuss why that process of self-conscious design, despite its aim
  [:p "Now what are these concepts, in terms of the system of variables? Each concept identifies a certain collection of the variables. 'Economics' identifies one part of the system, 'safety' another, 'acoustics' another', and so on."]
  [:p "My contention is this. These concepts will not help the designer in finding a well-adapted solution unless they happen to correspond to the system's subsystems. But since the concepts are on the whole the result of arbitrary historical accidents, there is no reason to expect that they will in face correspond to these subsystems."]
  ]🔚
- 
+
 Alexander contends that a designer's primary difficulty in mapping solutions to problems arises from the fact that conceptual terms and abstractions have an extremely tenuous relationship to the material form of the problems the designer attempts to solve.
 
 ✳=[:blockquote
