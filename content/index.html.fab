@@ -7,12 +7,21 @@
                :page-style (css [:div {:display "contents"}]
                                 [:li ])
                }) 🔚
-               
-✳= [:div [:h1 {:class "logotype"
-             :style (style {:font-size "min(10vw, 4.5em)"
-                            :margin "0em"})} "Respatialized"]
-  [:h4 {:class "logotype" :style (style {:margin "0em"
-                                         :font-weight 300})} "potential / actual spaces"]
+
+✳= [:figure {:style (style {:display :contents})}
+  [:img {:src "/media/respatialized-crop.svg"
+         :style (style {:grid-column "1 / 2"})}]
+  [:figcaption {:style (style {:display :contents})}
+   [:h1 {:class "logotype"
+         :style (style {:font-size "min(7.5vw, 4.5em)"
+                        :align-self :center
+                        :grid-column "2 / -1"
+                        :margin "0em"})} "Respatialized"]]
+  [:h4 {:class "logotype" :style 
+        (style {:margin "0em"
+                :grid-column "2 / -1"
+                :font-size "min(4.5vw, 1.5em)"
+                :font-weight 300})} "potential / actual spaces"]
   ] 🔚
   
 ✳= [:h2 {:class "logotype"} "Recent work"]  🔚
@@ -37,7 +46,7 @@
        [:p "The threat is coming from inside the car."])
  (list [:p [:a {:href "/llms-impoverished-cognition.html"} "Large Language Models' Impoverished Theory of Cognition"]]
        [:p "Language models fail to understand because they don't even try."])
- (list [:p [:a {:href "/llms-impoverished-cognition.html"} "The Signs and Portents of the Computational Oracle"]]
+ (list [:p [:a {:href "/computational-oracle.html"} "The Signs and Portents of the Computational Oracle"]]
        [:p "Can we even seriously criticize large language models?" ])
  ]🔚
  

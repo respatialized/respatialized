@@ -1,22 +1,22 @@
 
 ✳(ns respatialized.writing.boxed-int-libpython-clj)🔚
-✳(def metadata {:title "Working with large integers in libpython-clj"})🔚
+✳(def metadata {:title "Working with large integers in libpython-clj"}) 🔚
 
 
-✳=[:h1 (:title metadata)]🔚
-
+✳=[:h1 "Working with large integers in " [:code "libpython-clj"]]🔚
 ✳= [:h2 "Context"]🔚
 
 ✳=[:a {:href "https://github.com/clj-python/libpython-clj"}
  [:code "libpython-clj"]]🔚 is an enormously useful library for bridging the Python and Clojure (and Java) worlds. Its data-oriented interface to Python classes and objects makes discovering features of Python libraries simple and convenient from a Clojure REPL. This article documents a problem I encountered when using it recently and the solution I put together for it.
  
 
-As ✳=[:a {:href "https://github.com/cnuernber/"} "Chris Nuernberger"]🔚, the library's author described it to me, this is "one of the darker corners of libpython-clj," so I hope this offers some guidance to others who encounter similar issues.
+As ✳=[:a {:href "https://github.com/cnuernber/"} "Chris Nuernberger"]🔚, the library's author described it to me, this is "one of the darker corners of libpython-clj," so I hope this offers some guidance to others who encounter similar issues.  
 
 ✳+(require
   '[libpython-clj2.python :as py :refer [py. py.. py.-]]
-  '[libpython-clj2.require :refer [require-python]])🔚
-✳+(require-python '[builtins :as python])🔚
+  '[libpython-clj2.require :refer [require-python]]
+  '[libpython-clj2.python.protocols :as py-proto])🔚
+  ✳+(require-python '[builtins :as python])🔚
 
 ✳= [:h3 "The problem"]🔚
 I was unable to successfully convert very large integer values - those larger than can be represented by a signed 64-bit integer - between Python and Clojure. Here's an example: 

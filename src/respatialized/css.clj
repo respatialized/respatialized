@@ -207,7 +207,8 @@
      :grid-column "1 / -1"
      :line-height "1.25em"
      :text-align "left"
-     :hyphens "none"}]
+     :hyphens "none"}
+    [:code {:font-weight "800"}]]
    [:strong {:font-weight "900"}]
    [:s {:text-decoration-thickness "15%"}]
    [:pre :code
@@ -217,10 +218,32 @@
      ;;:line-height "27px"
      :font-size "0.925em"
      :color (oklch-hex-conversions "dark-steel")}]
-   [:pre {:margin-bottom "0.4em"}]
-   [:dt {:margin-bottom "0.2rem"}]
+   [:pre {:margin-bottom "0.4em"
+          :grid-column "1 / -1"}]
+   [:dl {:grid-column-start 1
+         :display "contents"}]
+   [:dt {:margin-bottom "0.2rem"
+         :hyphens "none"}]
    [:dd {:margin-bottom "0.4rem"}]
-   [:summary {:margin-bottom "0.4em"}]
+   [:.fabricate-error
+    {:display "contents"}
+    [:h6 {:margin-top "0.1em" :margin-bottom "0.1em"
+          :border-bottom-color (get oklch-hex-conversions "red")
+          :border-bottom-width "0.25em"
+          :border-bottom-style "solid"
+          }]
+    [:dl {:display "contents"}
+     [:dt {:grid-column "1 / 1"}]
+     [:dd {:grid-column "2 / -1"}]]
+    [:pre {:grid-column "1 / -1"}]
+    [:details {:display "contents"}
+     [:summary {:grid-column "1 / -1"}]]]
+
+   [:.fabricate-error-src
+    {:grid-column "1 / -1"}]
+
+   [:summary {:margin-bottom "0.4em"
+              :hyphens "none"}]
    [:article {:max-width "80ch"
               :color (oklch-hex-conversions "ink")
               :display "grid"

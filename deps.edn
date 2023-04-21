@@ -10,7 +10,7 @@
   site.fabricate/fabricate
   {:git/url "https://github.com/fabricate-site/fabricate/"
    #_ #_ :git/tag "2022.10.10"
-   :git/sha "35b3ddecc6044904ea14c10baaa0fa647ac65146"
+   :git/sha "0df5b2ed66cb8c044368abe404229b3f8b1d8bb7"
    :exclusions [org.apache.logging.log4j/log4j-slf4j-impl
                 org.slf4j/slf4j-api
                 org.apache.logging.log4j/log4j-api

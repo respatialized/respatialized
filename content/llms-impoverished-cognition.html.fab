@@ -12,7 +12,6 @@
                
 ✳= [:h1 {:class "logotype"} (:title  metadata)]🔚
 
-
 ✳=[:em (:summary metadata)]🔚
 
 ✳= [:h2 "Between a problem and its context"]🔚
