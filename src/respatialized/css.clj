@@ -181,6 +181,7 @@
            :color (oklch-hex-conversions "ink")}]
    [(selection) {:background-color (oklch-hex-conversions "aqua")}]
    [:header {:font-weight "600"
+             :grid-column "1 / -1"
              :font-family "Def Sans"}]
    [:article
     {:text-align "justify"
@@ -252,6 +253,7 @@
    (at-media
     {:screen true}
     [:article {:padding-left "1.5em"
+               :text-align "justify"
                :padding-right "2.5em"}]
     [:p :blockquote {:grid-column (get-in grid-ratios [:main :desktop])}]
     [:aside {:grid-column (get-in grid-ratios [:side :desktop])}]
@@ -265,7 +267,8 @@
    (at-media
     {:max-width "700px"}
     [:article
-     { :padding-left "0.15em"
+     {:padding-left "0.15em"
+      :text-align "left"
       :padding-right "0.15em"
       }]
     [:figure
