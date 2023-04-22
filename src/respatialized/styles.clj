@@ -94,6 +94,10 @@
   )
 
 
+(select/defclass annotated)
+(select/defclass annotation)
+
+
 (def geom-style
 
   (list
@@ -110,6 +114,18 @@
               :font-family "'Chivo Mono', monospace"}]
    [:body {:background-color "#1a1a1aff"
            :color "#e6e6e6ff"}]
+   [:.annotation {:display "none"}]
+   [(select/+ (annotated select/hover) annotation)
+    {:display "inherit"}]
+
    )
+
+  )
+
+
+(comment
+
+
+
 
   )

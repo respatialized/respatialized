@@ -56,6 +56,9 @@
 computational geometry with Clojure
 
 ✳= [:h4 {:class "wide"}  "thi.ng.geom.rect"] 🔚
+
+Rectangular shape generation
+
 ✳=
 (let [pct-range #_[0.25 0.3 0.35 0.45 0.67 0.75 0.95 0.99]
       (map (fn [i] (easings/cubic-in (/ i 25))) (range 15 24 0.8))
@@ -74,11 +77,15 @@ computational geometry with Clojure
                     r-row-height (/ (* (* max-y pct) 0.75) rect-count)]
                 (let [rect-geom (rect/rect x y r-width r-row-height)
                       r-code (with-out-str (print rect-geom))]
-                  (-> rect-geom
-                      adapt/all-as-svg
-                      (update 1 assoc :stroke "#e6e6e6" :fill "none"
-                              :stroke-dasharray "5,2"))))))))
+                  [:g
+                   
+                   (-> rect-geom
+                       adapt/all-as-svg
+                       (update 1 assoc :stroke "#e6e6e6" :fill "#1a1a1a"
+                               :class "annotated"
+                               :stroke-dasharray "6,2"))
+                   [:text {:x 15 :y 550 :class "annotation"
+                           :fill "#ff5549"} r-code]
+                   ]))))))
 
 🔚
-
-Rectangular shape generation
