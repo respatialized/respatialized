@@ -101,8 +101,11 @@
             :font-weight 900
             :font-stretch "150%"
             :text-transform "uppercase"}]
-   [:.big {:font-size "7rem"}]
+   [:.big {:font-size "5em"
+           :margin-top "0em"
+           :margin-bottom "0em"}]
    [:article {:background-color "#1a1a1aff"
+              :max-width "200ch"
               :color "#e6e6e6ff"
               :font-family "'Chivo Mono', monospace"}]
    [:body {:background-color "#1a1a1aff"
