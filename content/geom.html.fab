@@ -7,6 +7,7 @@
             [thi.ng.geom.svg.adapter :as adapt]
             [thi.ng.geom.vector :refer [vec2]]
             [thi.ng.color.core :as col]
+            [thi.ng.geom.rect :as rect]
             [thi.ng.color.gradients :as grad]
             [thi.ng.math.core :as m]
             [thi.ng.math.macros :as mm]
@@ -25,11 +26,11 @@
 computational geometry with Clojure
 
 ✳ (defn spiral
-   [center start end r1 r2 steps]
-   (map
-    (fn [r theta] (m/+ (g/as-cartesian (vec2 r theta)) center))
-    (range r1 r2 (mm/subdiv r2 r1 steps))
-    (range start end (mm/subdiv end start steps))))
+  [center start end r1 r2 steps]
+  (map
+   (fn [r theta] (m/+ (g/as-cartesian (vec2 r theta)) center))
+   (range r1 r2 (mm/subdiv r2 r1 steps))
+   (range start end (mm/subdiv end start steps))))
 🔚
 
 
@@ -42,24 +43,29 @@ computational geometry with Clojure
 
 
 ✳(def color-gradient-2
-  
-  (clj2d-col/gradient-cubehelix [
-                                 (clj2d-col/to-RGB (clj2d-col/from-HSL [173 95 82]))
-                                 (clj2d-col/to-RGB (clj2d-col/from-HSL [95 60 100]))
-                                 ])
-  )
+  (grad/cosine-gradient
+   2
+   (grad/cosine-coefficients (col/hex->int "#ff5549") (col/hex->int "#5abeb1"))))
 🔚
 
-✳=  (->> (svg/svg
-        {:width 300 :height 300}
-        (svg/defs
-          (apply svg/radial-gradient
-                 "gradient" {} (map
-                                (fn [ix]
-                                  [ix (apply col/->RGBA (clj2d-col/to-RGB (color-gradient-2 ix)))]) (m/norm-range 7)) ))
-        (svg/line-strip
-         (spiral [150 150] 0 (* 6 m/TWO_PI) 0 140 300)
-         (assoc svg/stroke-round
-                :stroke "url(#gradient)"
-                :stroke-width 10)))
-       (svg/serialize))🔚
+
+
+✳= (let [rect (rect/rect 50 50 300 700)]
+   (svg/serialize
+    (svg/svg
+     {:width 400 :height 800}
+     (svg/defs
+       (update
+        (apply svg/linear-gradient
+               "gradient" {}
+               (map-indexed
+                (fn [ix c]
+                  [ix c])
+                color-gradient-2))
+        1 assoc :x1 0 :x2 0 :y1 0 :y2 1) )
+     (-> rect
+         (adapt/all-as-svg )
+         (assoc-in [1 :fill] "url(#gradient)"))))
+   ) 🔚
+   
+
