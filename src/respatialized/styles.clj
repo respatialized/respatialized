@@ -3,7 +3,8 @@
             [garden.core :as garden]
             [garden.selectors :as select]
             [garden.stylesheet :as stylesheet]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [clojure.pprint :as pprint :refer [pprint]]))
 
 (def page "bg-moon-gray ml3 basier")
 (def copy "")
@@ -55,11 +56,11 @@
           :gridWidth 1 :labelColor stat-rethinking-fg
           :tickColor stat-rethinking-fg
           :labelFont "'Red Hat Mono', monospace" :labelFontSize "10"
-          :titleFont #_ "'Gelasio', serif" "'Red Hat Mono', monospace"
+          :titleFont #_"'Gelasio', serif" "'Red Hat Mono', monospace"
           :labelFontStyle "bold" :titleColor stat-rethinking-fg
           :titleFontSize 18}
    :background stat-rethinking-bg
-   :view { :strokeWidth 0}})
+   :view {:strokeWidth 0}})
 
 (def stat-rethinking-garden
   "Garden CSS style for statistical rethinking"
@@ -69,7 +70,7 @@
    [:body :article
     {:background-color stat-rethinking-bg
      :font-family "'Gelasio', serif"
-     :color stat-rethinking-fg }]
+     :color stat-rethinking-fg}]
    [:h1 :h2 :h3 :h4 :h5 :h6 {:font-family "'Syne', sans-serif" :text-transform "uppercase"}]
    [:h1 {:font-weight 800 :font-size "4em"
          :line-height "1.1"}]
@@ -89,18 +90,17 @@
 
 (def stat-rethinking-css (garden/css stat-rethinking-garden))
 (comment
-  stat-rethinking-css
-
-  )
-
+  stat-rethinking-css)
 
 (select/defclass annotated)
 (select/defclass annotation)
 
+(select/defpseudoelement selection)
 
 (def geom-style
 
   (list
+   (stylesheet/at-import "https://fonts.googleapis.com/css2?family=Overpass+Mono:wght@300..700&display=swap")
    [:.wide {:font-family "Anybody"
             :font-weight 900
             :font-stretch "150%"
@@ -109,23 +109,38 @@
            :margin-top "0em"
            :margin-bottom "0em"}]
    [:article {:background-color "#1a1a1aff"
+              :grid-auto-columns "minmax(20px, 25ch)"
               :max-width "200ch"
+              :text-align "left"
               :color "#e6e6e6ff"
-              :font-family "'Chivo Mono', monospace"}]
+              :font-family "'Overpass Mono', monospace"}]
    [:body {:background-color "#1a1a1aff"
            :color "#e6e6e6ff"}]
+   [:pre :code {:color "#e2e2e2"
+                :font-family "'Overpass Mono', monospace"
+                :text-align "left"
+                :hyphens "none"}]
+   [:.keyword {:color "#5abeb1"
+               :font-weight 550}]
+   [:.symbol {:color "#ff5549"
+              :font-weight 550}]
+   [:.number {:font-weight 550}]
+   [:a {:color "#ff5549"}]
+   [(select/a select/after)
+    {:position "relative"
+     :font-weight "900"
+     :vertical-align "super"
+     :margin-left "0.15em"
+     :font-size "0.95em"
+     :content "\"›\""}]
+   [:dd :dt {:margin-bottom "0.25em"
+             :text-justify "none"
+             :margin-left "0em"
+             :text-align "left"
+             :hyphens "none"}
+    [:pre {:margin-bottom "0em"
+           :margin-top "0em"}]]
+   [(selection) {:background-color "#5abeb1"}]
    [:.annotation {:display "none"}]
    [(select/+ (annotated select/hover) annotation)
-    {:display "inherit"}]
-
-   )
-
-  )
-
-
-(comment
-
-
-
-
-  )
+    {:display "inherit"}]))

@@ -24,11 +24,12 @@
   {:title "thi.ng/geom"
    :page-style (garden/css geom-style)}) 🔚
    
+✳ (def github-src-url "https://github.com/thi-ng/geom/tree/feature/no-org/src")  🔚
 
 ✳ (def colors {:red (col/hex->int "#ff5549")
-              :blue (col/hex->int "#5abeb1")
-              :white (col/hex->int "#e6e6e6")}) 🔚
-              
+             :blue (col/hex->int "#5abeb1")
+             :white (col/hex->int "#e6e6e6")}) 🔚
+             
 ✳= [:h1 {:class "big wide"} "thi.ng/geom"] 🔚
 ✳(def color-gradient-2
   (grad/cosine-gradient
@@ -75,7 +76,7 @@ Rectangular shape generation
       (map (fn [i] (easings/cubic-in (/ i 25))) (range 15 24 0.8))
       rect-count 13
       col-count (count pct-range)
-      w 600 h 700
+      w 900 h 700
       max-y (* h 0.95)
       r-width (/ (* w 0.9) col-count)
       r-height 10]
@@ -101,3 +102,25 @@ Rectangular shape generation
                      ]]]))))))
 
 🔚
+
+✳=
+(list
+ [:h5 [:span {:class "wide"} "Core type:"] [:br]
+  [:code [:a {:href (str github-src-url "/thi/ng/geom/types.cljc#L24")
+              :target "_blank"}
+          "thi.ng.geom.types.Rect2"]]]
+ "a 2d plane with a position, width, and height - specified either by coordinate points or vectors"
+ [:h4 [:code [:a {:href (str github-src-url "/thi/ng/geom/rect.cljc" )
+                  :target "_blank"}
+              "thi.ng.geom.rect"]] " namespace"]
+ [:dl 
+  (for [[sym v] (ns-publics 'thi.ng.geom.rect)]
+    (list [:dt {:style (style {:grid-column "1 / span 1"})} [:code sym]
+           [:dd {:style (style {:grid-column "span 3"})}
+            (geometry/var-meta->hiccup (meta v) github-src-url)
+            #_[:pre (page/expr->hiccup (meta v))]]]))
+  ])
+
+🔚
+
+
