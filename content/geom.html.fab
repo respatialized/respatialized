@@ -14,7 +14,9 @@
             [fastmath.easings :as easings]
             [respatialized.styles :refer [geom-style]]
             [respatialized.geometry :as geometry]
-            [garden.core :as garden :refer [style]]
+            [garden.core :as garden :refer [style css]]
+            [clojure.string :as str]
+            [clojure.pprint :as pprint :refer [pprint]]
             )) 🔚
             
 ✳(def metadata
@@ -75,17 +77,18 @@ Rectangular shape generation
                   y (geometry/evenly-space-up-to rect-count max-y pct)]
               (let [x (* (/ (* 1.0 w) col-count) ix)
                     r-row-height (/ (* (* max-y pct) 0.75) rect-count)]
-                (let [rect-geom (rect/rect x y r-width r-row-height)
-                      r-code (with-out-str (print rect-geom))]
+                (let [rect-geom (rect/rect x y r-width r-row-height)]
                   [:g
-                   
                    (-> rect-geom
                        adapt/all-as-svg
                        (update 1 assoc :stroke "#e6e6e6" :fill "#1a1a1a"
                                :class "annotated"
                                :stroke-dasharray "6,2"))
-                   [:text {:x 15 :y 550 :class "annotation"
-                           :fill "#ff5549"} r-code]
-                   ]))))))
+                   [:foreignObject {:class "annotation"
+                                    :x 15 :y 450
+                                    :width 450 :height 300}
+                    [:div {:xmlns "http://www.w3.org/1999/xhtml"}
+                     [:code {:style (style {:color "#ff5549"
+                                            :font-size "0.75em"})} (pr-str rect-geom)]]]]))))))
 
 🔚
