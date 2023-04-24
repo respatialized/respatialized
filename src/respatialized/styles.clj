@@ -100,7 +100,6 @@
 (def geom-style
 
   (list
-   (stylesheet/at-import "https://fonts.googleapis.com/css2?family=Overpass+Mono:wght@300..700&display=swap")
    [:.wide {:font-family "Anybody"
             :font-weight 900
             :font-stretch "150%"
@@ -113,11 +112,12 @@
               :max-width "200ch"
               :text-align "left"
               :color "#e6e6e6ff"
-              :font-family "'Overpass Mono', monospace"}]
+              :font-family "'Chivo Mono', monospace"
+              :font-variant-ligatures "none"}]
    [:body {:background-color "#1a1a1aff"
            :color "#e6e6e6ff"}]
    [:pre :code {:color "#e2e2e2"
-                :font-family "'Overpass Mono', monospace"
+                :font-family "'Chivo Mono', monospace"
                 :text-align "left"
                 :hyphens "none"}]
    [:.keyword {:color "#5abeb1"
@@ -140,6 +140,7 @@
              :hyphens "none"}
     [:pre {:margin-bottom "0em"
            :margin-top "0em"}]]
+   [:h1 :h2 :h3 :h4 :h5 :h6 {:margin-top "0.25em" :margin-bottom "0.25em"}]
    [(selection) {:background-color "#5abeb1"}]
    [:.annotation {:display "none"}]
    [(select/+ (annotated select/hover) annotation)

@@ -215,6 +215,7 @@
    [:pre :code
     {:white-space "pre-wrap"
      :font-family "'Chivo Mono', monospace"
+     :font-variant-ligatures "none"
      :font-weight 375
      ;;:line-height "27px"
      :font-size "0.925em"
@@ -314,6 +315,8 @@
             :letter-spacing "0.01rem"
             :line-height "1.45em"
             :max-width "90em"}]
+   [:article [:ol :ul {:display "contents"}
+              [:li {:grid-column "1 / -1"}]]]
    [:td :th {#_#_:border "0.5px solid"
              :padding "0.25rem"
              :text-align "left"}]
