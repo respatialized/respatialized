@@ -31,7 +31,7 @@
   ;; site content
   clojure2d/clojure2d {:mvn/version "1.4.4"
                        :exclusions [commons-logging/commons-logging]}
-  thi.ng/geom {:mvn/version "1.0.0-RC5"}
+  thi.ng/geom {:mvn/version "1.0.0"}
   generateme/fastmath {:mvn/version "2.1.8"}
   scicloj/tablecloth {:mvn/version "6.103"
                       :exclusions [org.apache.logging.log4j/log4j-api

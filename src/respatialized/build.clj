@@ -121,7 +121,22 @@
 
   )
 
+(defn up! []
+  (-> write/state
+      (send (constantly initial-state))
+      (#(do (set-error-handler!
+             %
+             (fn [ag ^Throwable ex]
+               (.printStackTrace ex)
+               ag)) %))
+      (send-off (fn [{:keys [site.fabricate.app/database] :as s}]
+                  (assoc-in s [:site.fabricate.app/database :db/conn]
+                            (d/connect (:db/uri database)))))
+      (send-off write/draft!)))
+
 (comment
+
+  (up!)
 
   (-> write/state
       (send (constantly initial-state))
