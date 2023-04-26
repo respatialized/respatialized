@@ -1,11 +1,12 @@
 
 ✳(ns respatialized.sketchbook.20230116
   (:require [clojure2d.core :as clj2d]
-            [garden.core :refer [style]]
+            [garden.core :refer [style css]]
             [svg-clj.jvm-utils :as svgutils])) 🔚
             
-✳(def metadata {:title "Experimentation with SVG filters"}) 🔚
-✳= [:h1 (:title metadata)]🔚
+✳(def metadata {:title "Experimentation with SVG filters"
+               :page-style (css [:svg {:grid-column "1 / -1"}])}) 🔚
+               ✳= [:h1 (:title metadata)]🔚
 
 In both clojure2d and in HTML/CSS. 
 
