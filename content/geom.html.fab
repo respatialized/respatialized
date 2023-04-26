@@ -17,9 +17,10 @@
             [respatialized.geometry :as geometry]
             [garden.core :as garden :refer [style css]]
             [clojure.string :as str]
-            [clojure.pprint :as pprint :refer [pprint]]
-            )) 🔚
-            
+            [clojure.set :as set])
+  (:import [thi.ng.geom.types Rect2 Triangle2])
+  ) 🔚
+  
 ✳(def metadata
   {:title "thi.ng/geom"
    :page-style (garden/css geom-style)}) 🔚
@@ -28,8 +29,12 @@
 
 ✳ (def colors {:red (col/hex->int "#ff5549")
              :blue (col/hex->int "#5abeb1")
-             :white (col/hex->int "#e6e6e6")}) 🔚
-             
+             :white (col/hex->int "#e6e6e6")
+             :pink (col/hex->int "#e788ea")
+             :yellow
+             {:hex "#f1d938"
+              :int (col/hex->int "#f1d938")}}) 🔚
+              
 ✳= [:h1 {:class "big wide"} "thi.ng/geom"] 🔚
 ✳(def color-gradient-2
   (grad/cosine-gradient
@@ -102,7 +107,10 @@ Rectangular shape generation
                      ]]]))))))
 
 🔚
-
+✳ (defmethod page/node->hiccup :var [node]
+  [:span {:class "language-clojure var"}
+   "#'" (str (get-in node [:children 0 :value]))]) 🔚
+   
 ✳=
 (list
  [:h5 [:span {:class "wide"} "Core type:"] [:br]
@@ -115,12 +123,88 @@ Rectangular shape generation
               "thi.ng.geom.rect"]] " namespace"]
  [:dl 
   (for [[sym v] (ns-publics 'thi.ng.geom.rect)]
-    (list [:dt {:style (style {:grid-column "1 / span 1"})} [:code sym]
-           [:dd {:style (style {:grid-column "span 3"})}
-            (geometry/var-meta->hiccup (meta v) github-src-url)
-            #_[:pre (page/expr->hiccup (meta v))]]]))
-  ])
-
+    (list [:dt {:style (style {:grid-column "1 / span 1"})} [:code sym]]
+          [:dd {:style (style {:grid-column "span 3"})}
+           (geometry/var-meta->hiccup (meta v) github-src-url)
+           #_[:pre (page/expr->hiccup (meta v))]]))
+  
+  ]
+ [:dl
+  (for [[sym var]
+        (filter (fn [[sym var]]
+                  (let [value (var-get var)]
+                    (and (map? value)
+                         (not (sorted? value))
+                         (some? (:on-interface value))
+                         (contains?  (:impls value) thi.ng.geom.types.Rect2)
+                         )))
+                (ns-publics 'thi.ng.geom.core)) ]
+    (list [:dt (page/expr->hiccup sym)]
+          (let [v (var-get var)]
+            [:dt (page/expr->hiccup v)]))
+    )])
 🔚
 
 
+
+
+✳=
+[:figure {:grid-column "1 / span 4"}
+ [:figcaption
+  #_{:style (style {:align-self "end"})}
+  [:h4 {:class "wide"}
+   "Grid elements deformed"]]
+ (let [ratio 1.618
+       rows 20
+       grid-w 85 grid-h 45
+       cols (int (* rows ratio))
+       h 1.2
+       w (* h ratio)
+       rect-grid
+       (for [x (range 0 grid-w (/ grid-w cols))
+             y (range 0 grid-h (/ grid-h rows))]
+         (rect/rect x y w h))
+       r-attrs {:fill "#e6e6e6"}
+       filter [:filter {:id "texture-filter-1"
+                        :filterUnits "userSpaceOnUse"
+                        :color-interpolation-filters "sRGB"}
+               [:feImage {:href "/media/7142992537_63cdc95211_o.jpg"
+                          :result "FEIMG"}]
+               [:feDisplacementMap
+                {:scale 1.5 :in "SourceGraphic"
+                 :xChannelSelector "B" :yChannelSelector "R"}]]
+       filter-2
+       [:filter {:id "texture-filter-2"
+                 :filterUnits "userSpaceOnUse"
+                 :color-interpolation-filters "sRGB"}
+        [:feImage {:href "/media/7142992537_63cdc95211_o.jpg"
+                   :result "FEIMG"}]
+        [:feDisplacementMap
+         {:scale 1.5 :in "SourceGraphic"
+          :xChannelSelector "R" :yChannelSelector "G"}]]
+       ]
+   (svg/serialize
+    (svg/svg
+     {:width "auto"  :height "auto"
+      :style (style { :grid-column "1 / span 3"})
+      :viewBox "0 0 100 100"}
+     [:defs filter filter-2]
+     (->> rect-grid
+          adapt/all-as-svg
+          (map #(update % 1 merge {:fill "#ff5549"}))
+          (reduce conj [:g {:style (style {:filter "url(#texture-filter-1)"})}]))
+     (->> rect-grid
+          adapt/all-as-svg
+          (map #(update % 1 merge {:fill "#5abeb1" }))
+          (reduce conj [:g {:style (style {:filter "url(#texture-filter-2)"})
+                            :transform "translate(2.5  2.5)"}]))
+     ))
+
+   )
+ 
+ ]
+🔚
+
+✳= [:h4 {:class "wide"}  "thi.ng.geom.triangle"] 🔚
+
+2-dimensional and 3-dimensional triangle generation
