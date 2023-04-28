@@ -111,6 +111,15 @@ Rectangular shape generation
   [:span {:class "language-clojure var"}
    "#'" (str (get-in node [:children 0 :value]))]) 🔚
    
+✳  (def geom-core-protocols
+    (filter (fn [[sym var]]
+              (let [value (var-get var)]
+                (and (map? value)
+                     (not (sorted? value))
+                     (some? (:on-interface value)))))
+            (ns-publics 'thi.ng.geom.core))
+    )  🔚
+    
 ✳=
 (list
  [:h5 [:span {:class "wide"} "Core type:"] [:br]
@@ -121,6 +130,8 @@ Rectangular shape generation
  [:h4 [:code [:a {:href (str github-src-url "/thi/ng/geom/rect.cljc" )
                   :target "_blank"}
               "thi.ng.geom.rect"]] " namespace"]
+
+ [:h5 {:class "wide"} "Functions"]
  [:dl 
   (for [[sym v] (ns-publics 'thi.ng.geom.rect)]
     (list [:dt {:style (style {:grid-column "1 / span 1"})} [:code sym]]
@@ -129,19 +140,21 @@ Rectangular shape generation
            #_[:pre (page/expr->hiccup (meta v))]]))
   
   ]
+ [:h5 [:code "thi.ng.geom.core"] [:span {:class "wide"} " implemented protocols"]]
  [:dl
   (for [[sym var]
         (filter (fn [[sym var]]
                   (let [value (var-get var)]
-                    (and (map? value)
-                         (not (sorted? value))
-                         (some? (:on-interface value))
-                         (contains?  (:impls value) thi.ng.geom.types.Rect2)
-                         )))
-                (ns-publics 'thi.ng.geom.core)) ]
-    (list [:dt (page/expr->hiccup sym)]
+                    (contains?  (:impls value) thi.ng.geom.types.Rect2)))
+                geom-core-protocols) ]
+    (list [:dt {:style (style {:grid-column "1 / span 1"})}
+           (page/expr->hiccup sym)]
           (let [v (var-get var)]
-            [:dt (page/expr->hiccup v)]))
+            [:dt
+             {:style (style {:grid-column "span 3"})}
+             (-> v
+                 (select-keys [:on :sigs :arglists])
+                 (page/expr->hiccup ))]))
     )])
 🔚
 
