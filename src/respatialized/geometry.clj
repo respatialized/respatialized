@@ -12,7 +12,9 @@
             [clojure.pprint :as pprint]
             [site.fabricate.prototype.page :as page])
   (:import [thi.ng.geom.types Path2 Bezier2 Circle2 Ellipse2
-            Line2 LineStrip2 Polygon2 Rect2 Triangle2]))
+            Line2 LineStrip2 Polygon2 Rect2 Triangle2])
+  (:import [thi.ng.geom.vector Vec2])
+  )
 
 
 
@@ -106,3 +108,22 @@
    [:span "source: " [:a {:href (str src-url "/" file "#L" line)
                           :target "_blank"}
                       (str file " L" line)]]))
+
+;; the centroid of a 2d vector is the vector
+(extend-protocol g/ICenter
+  Vec2
+  #_(center ([_] _))
+  (centroid ([_] _)))
+
+(defn translate-from [g-obj dist bearing]
+  (let [[x y] (g/centroid g-obj)
+        Δx (* dist (Math/sin bearing))
+        Δy (* dist (Math/cos bearing))]
+    (g/translate g-obj (v/vec2 Δx Δy))))
+
+(comment
+
+
+  (g/rotate (v/vec2 [1 1]) Math/PI)
+
+  )

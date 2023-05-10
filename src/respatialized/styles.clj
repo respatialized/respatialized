@@ -97,6 +97,15 @@
 
 (select/defpseudoelement selection)
 
+(def geom-colors
+  {:white "#e2e2e2"
+   :cool-grey "#597d8e"
+   :teal "#5abeb1"
+   :red "#ff5549"
+   :yellow "#ecd248"
+   :black "#1a1a1a"}
+  )
+
 (def geom-style
 
   (list
@@ -116,16 +125,16 @@
               :font-variant-ligatures "none"}]
    [:body {:background-color "#1a1a1aff"
            :color "#e6e6e6ff"}]
-   [:pre :code {:color "#e2e2e2"
+   [:pre :code {:color (:white geom-colors)
                 :font-family "'Chivo Mono', monospace"
                 :text-align "left"
                 :hyphens "none"}]
-   [:.keyword {:color "#5abeb1"
+   [:.keyword {:color (:teal geom-colors)
                :font-weight 550}]
-   [:.symbol {:color "#ff5549"
+   [:.symbol {:color (:red geom-colors)
               :font-weight 550}]
    [:.number {:font-weight 550}]
-   [:a {:color "#ff5549"}]
+   [:a {:color (:red geom-colors)}]
    [(select/a select/after)
     {:position "relative"
      :font-weight "900"
@@ -141,7 +150,7 @@
     [:pre {:margin-bottom "0em"
            :margin-top "0em"}]]
    [:h1 :h2 :h3 :h4 :h5 :h6 {:margin-top "0.25em" :margin-bottom "0.25em"}]
-   [(selection) {:background-color "#5abeb1"}]
+   [(selection) {:background-color (:cool-grey geom-colors)}]
    [:.annotation {:display "none"}]
    [(select/+ (annotated select/hover) annotation)
     {:display "inherit"}]))

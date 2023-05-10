@@ -182,10 +182,3 @@
 
   (get-in write/default-site-settings )
   )
-
-
-(comment
-
-  (get-in @write/state [:site.fabricate.app/database :db/conn])
-
-  )
