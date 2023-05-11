@@ -260,12 +260,19 @@ Rectangular shape generation
           (mapcat identity)
           (adapt/all-as-svg)
           (map
-           #(update % 1 merge {:fill (:red styles/geom-colors)
-                               :stroke (:black styles/geom-colors)
-                               :stroke-dasharray "12 2"
-                               :stroke-linecap "round"
-                               :stroke-linejoin "round"
-                               :stroke-width 0.9})))
+           (fn [t]
+             (update t 1 merge {:fill (:red styles/geom-colors)
+                                :stroke (:black styles/geom-colors)
+                                :stroke-dasharray "12 2"
+                                :stroke-linecap "round"
+                                :stroke-linejoin "round"
+                                :stroke-width 0.9})))
+          (reduce conj
+                  [:g [:animate {:attributeName "stroke-dashoffset"
+                                :values "0;2000"
+                                :additive "sum"
+                                :dur "360s"
+                                :repeatCount "indefinite"}] ]))
 
      ) )
    
