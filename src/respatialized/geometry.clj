@@ -115,6 +115,10 @@
   #_(center ([_] _))
   (centroid ([_] _)))
 
+(extend-protocol g/IRotate
+  clojure.lang.PersistentVector
+  (rotate ([v theta] (mapv (fn [g] (g/rotate g theta)) v))))
+
 (defn translate-from [g-obj dist bearing]
   (let [[x y] (g/centroid g-obj)
         Δx (* dist (Math/sin bearing))
@@ -124,6 +128,17 @@
 (comment
 
 
+  (meta (with-meta (v/vec2 [1 1]) {:angle 36}))
+
   (g/rotate (v/vec2 [1 1]) Math/PI)
+
+  (g/rotate [(v/vec2 [1 1]) (v/vec2 [1 1])] Math/PI)
+
+  (math/degrees
+   (*
+    (* (/ 1.0 2) 1)
+    (/ (* Math/PI 2) 2)))
+
+  (g/rotate (v/vec2 [0 1]) Math/PI)
 
   )

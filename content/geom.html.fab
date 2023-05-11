@@ -226,52 +226,46 @@ Rectangular shape generation
 
 ✳= (let [
        line
-       (->> {:pt (vec2 0 0) :dist 15 :bearing (m/radians -15)}
+       (->> {:pt (vec2 0 0) :dist 18 :bearing (m/radians 270)}
             (iterate (fn [{:keys [pt dist bearing]}]
                        {:pt (geometry/translate-from pt dist bearing)
                         :dist (+ dist 0)
-                        :bearing (+ bearing (m/radians 30))}))
+                        :bearing (- bearing (m/radians 120))}))
             (map :pt)
             (take 3)
             (types/->LineStrip2))
-       line-ct 32
+       line-ct 6
        triangles
        (map-indexed
         (fn [ix l]
-          (let [angle (* (/ (* 1.0 ix) line-ct)
-                         (/ (* Math/PI 64) line-ct))]
+          (let [angle (* (* (/ 1.0 line-ct) ix)
+                         (* Math/PI 2) )]
             (-> l
                 (g/center)
                 (g/rotate angle)
-                (geometry/translate-from 25 angle)
+                (geometry/translate-from 22 angle)
                 (g/translate (vec2 50 50))
-                (g/sample-uniform 3.5 false)
+                (g/sample-uniform 3 false)
                 (#(map (fn [pt] (tri/equilateral2
                                  pt
-                                 (geometry/translate-from pt 2.5 angle))) %)))))
+                                 (geometry/translate-from pt 18 angle))) %)))))
         (repeat line-ct line))]
-
-   
    (svg/serialize
     (svg/svg
      {:width "auto"  :height "auto"
       :style (style {:grid-column "1 / span 3"
                      :background-color (:red styles/geom-colors)})
       :viewBox "0 0 100 100"}
-     #_(->>
-        (g/sample-uniform line 5.5 false)
-        (map #(tri/equilateral2 % (g/translate % (vec2 2 2))))
-        adapt/all-as-svg
-        (map #(update % 1 merge {:stroke (:black styles/geom-colors)
-                                 :stroke-width 0.5
-                                 :fill-opacity 0})))
      (->> triangles
           (mapcat identity)
           (adapt/all-as-svg)
           (map
-           #(update % 1 merge {:fill(:black styles/geom-colors)
-                               #_ #_:fill-opacity 0
-                               :stroke-width 0})))
+           #(update % 1 merge {:fill (:red styles/geom-colors)
+                               :stroke (:black styles/geom-colors)
+                               :stroke-dasharray "12 2"
+                               :stroke-linecap "round"
+                               :stroke-linejoin "round"
+                               :stroke-width 0.9})))
 
      ) )
    
