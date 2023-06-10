@@ -8,6 +8,7 @@
             [thi.ng.geom.vector :refer [vec2]]
             [thi.ng.color.core :as col]
             [thi.ng.geom.rect :as rect]
+            [thi.ng.geom.line :as line]
             [thi.ng.geom.triangle :as tri]
             [thi.ng.geom.types :as types]
             [thi.ng.color.gradients :as grad]
@@ -269,12 +270,13 @@ Rectangular shape generation
                                 :stroke-width 0.9})))
           (reduce conj
                   [:g [:animate {:attributeName "stroke-dashoffset"
-                                :values "0;2000"
-                                :additive "sum"
-                                :dur "360s"
-                                :repeatCount "indefinite"}] ]))
+                                 :values "0;2000"
+                                 :additive "sum"
+                                 :dur "360s"
+                                 :repeatCount "indefinite"}] ]))
 
      ) )
    
-   
    ) 🔚
+   
+
