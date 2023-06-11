@@ -6,8 +6,9 @@
   ) 🔚
   
 
-✳(def metadata {:title "typesetting s-expressions with CSS"
+✳(def metadata {:title "Typesetting S-Expressions with CSS"
                :page-style (css
+                            [:article [:ul [:li {:grid-column "1 / span 4"}]]]
                             [:.keyword {:color (site-css/oklch-hex-conversions "ochre")}]
                             [:.grid-aligned-map
                              #_[:.whitespace :.comma 
@@ -31,8 +32,7 @@
                              [:.whitespace {:display "none"
                                             :width 0
                                             :column-gap 0}]
-                             [:.comma {:column-gap 0}]
-                             ]
+                             [:.comma {:column-gap 0}]]
                             )}) 🔚
                             
 
@@ -42,7 +42,7 @@
 
 
 ✳=[:strong "Assumptions"] 🔚
-✳=[:ul
+✳=[:ul {:style (style {:grid-column "1 / span 4"})}
  [:li "The structural and sequential nature of Lisp expressions means they more readily lend themselves to CSS selectors than the code of other programming languages"]
  [:li "Server side rendering with rewrite-clj means that all of the relevant syntax and semantics of Clojure code can be preserved via appropriate HTML classes"]
  ] 🔚
@@ -50,7 +50,21 @@
 ✳=[:strong "Goals"] 🔚
 I believe that Clojure source code deserves beautiful syntax highlighting that leverages the full power of modern CSS.
 
+
+✳=[:strong "Prior art"] 🔚
+
+Several bloggers in the Haskell community do a very good job of presenting source code as a coherent part of an overall document. ✳=[:a {:href "https://chrisdone.com/posts/fast-haskell-c-parsing-xml/"} "Chris Done"] 🔚 and  ✳=[:a {:href "https://wickstrom.tech/"} "Oskar Wickström"] 🔚 both have excellent blogs.
+
+Wickström's  ✳=[:a {:href "https://wickstrom.tech/programming/2021/05/03/specifying-state-machines-with-temporal-logic.html"} "blending of diagrams, code, and prose"] 🔚 to illustrate technical concepts is one of the points of inspiration for Fabricate, the static website generator I wrote and used to generate these examples.
+
+The multimethod-based generation of Hiccup elements from rewrite-clj nodes was adapted and extended from Michiel Borkent's ✳=[:a {:href "https://github.com/borkdude/quickblog"} "quickblog"] 🔚; he helpfully describes the approach in  ✳=[:a {:href "https://blog.michielborkent.nl/writing-clojure-highlighter.html"} "Writing a Clojure highlighter from scratch."] 🔚 I believe that only tools that can leverage the full structure of Clojure's source code are appropriate to the task of generating effective documentation of Clojure code.
+
+This page will have notes on several experiments in using CSS layout features for the display of Clojure expressions. Readers are strongly encouraged to use their web browser's inspector mode to see the hierarchy of elements and CSS rules used to generate these layouts.
+
 ✳= [:h2 "aligning map elements to CSS grid"] 🔚
+
+This page already uses CSS grid for its layout, so one starting point would be to just align the elements representing the map contents to the main grid.
+
 ✳=
 (update-in
  (page/expr->hiccup
@@ -93,58 +107,58 @@ It appears to be easier to fully hide insignificant elements with Flexbox than g
 This example uses nested flexboxes create an aligned container for the map contents and manually inserted ✳=[:a {:href "https://graffino.com/til/D0xjf7VIGi-how-to-force-a-flexbox-item-to-a-new-row"} "zero-height elements"] 🔚 before each new map key to force line breaks within the flexbox at the appropriate places.
 
 ✳=
-[:pre #_{:style  nil}
- [:span {:class "language-clojure map"
-         :style (style {:grid-column "1 / 3"
-                        :display "flex"
-                        :flex-wrap "wrap"
-                        :flex-direction "row"})}
-  [:span {:class "language-clojure open-brace"} "{"]
-  [:span {:class "language-clojure map-contents"
-          :style (style {:display "flex"
-                         :width "50ch"
-                         :flex-wrap "wrap"})}
-   [:span {:class "language-clojure keyword"} ":a/key"]
-   [:span {:class "language-clojure whitespace"} " "]
-   [:span {:class "language-clojure string"} "&quot;value&quot;"]
-   [:span {:class "language-clojure comma"} [:span {:class "language-clojure comma"} ","]]
-   [:span {:class "language-clojure whitespace"} " "]
-   [:span {:style (style {:flex-basis "100%" :height 0})}]
-   [:span {:class "language-clojure keyword"} ":attributeName"]
-   [:span {:class "language-clojure whitespace"} " "]
-   [:span {:class "language-clojure string"} "&quot;stroke-dashoffset&quot;"]
-   [:span {:class "language-clojure comma"} [:span {:class "language-clojure comma"} ","]]
-   [:span {:class "language-clojure whitespace"} " "]
-   [:span {:style (style {:flex-basis "100%" :height 0})}]
-   [:span {:class "language-clojure keyword"} ":values"]
-   [:span {:class "language-clojure whitespace"} " "]
-   [:span {:class "language-clojure string"} "&quot;0;2000&quot;"]
-   [:span {:class "language-clojure comma"} [:span {:class "language-clojure comma"} ","]]
-   [:span {:class "language-clojure whitespace"} " "]
-   [:span {:style (style {:flex-basis "100%" :height 0})}]
-   [:span {:class "language-clojure keyword"} ":some/key"]
-   [:span {:class "language-clojure whitespace"} " "]
-   [:span {:class "language-clojure string"} "&quot;some other value&quot;"]
-   [:span {:class "language-clojure comma"} [:span {:class "language-clojure comma"} ","]]
-   [:span {:class "language-clojure whitespace"} " "]
-   [:span {:style (style {:flex-basis "100%" :height 0})}]
-   [:span {:class "language-clojure keyword"} ":additive"]
-   [:span {:class "language-clojure whitespace"} " "]
-   [:span {:class "language-clojure string"} "&quot;sum&quot;"]
-   [:span {:class "language-clojure comma"} [:span {:class "language-clojure comma"} ","]]
-   [:span {:class "language-clojure whitespace"} " "]
-   [:span {:style (style {:flex-basis "100%" :height 0})}]
-   [:span {:class "language-clojure keyword"} ":dur"]
-   [:span {:class "language-clojure whitespace"} " "]
-   [:span {:class "language-clojure string"} "&quot;360s&quot;"]
-   [:span {:class "language-clojure comma"} [:span {:class "language-clojure comma"} ","]]
-   [:span {:class "language-clojure whitespace"} " "]
-   [:span {:style (style {:flex-basis "100%" :height 0})}]
-   [:span {:class "language-clojure keyword"} ":repeatCount"]
-   [:span {:class "language-clojure whitespace"} " "]
-   [:span {:class "language-clojure string"} "&quot;indefinite&quot;"]]
-  [:span {:class "language-clojure close-brace"
-          :style (style {:align-self "end"})} "}"]]]
+[:span {:class "language-clojure map"
+        :style (style {:grid-column "1 / span 4"
+                       :display "flex"
+                       :font-family "'Chivo Mono', monospace"
+                       :flex-wrap "wrap"
+                       :flex-direction "row"})}
+ [:span {:class "language-clojure open-brace"} "{"]
+ [:span {:class "language-clojure map-contents"
+         :style (style {:display "flex"
+                        :width "50ch"
+                        :flex-wrap "wrap"})}
+  [:span {:class "language-clojure keyword"} ":a/key"]
+  [:span {:class "language-clojure whitespace"} " "]
+  [:span {:class "language-clojure string"} "&quot;value&quot;"]
+  [:span {:class "language-clojure comma"} [:span {:class "language-clojure comma"} ","]]
+  [:span {:class "language-clojure whitespace"} " "]
+  [:span {:style (style {:flex-basis "100%" :height 0})}]
+  [:span {:class "language-clojure keyword"} ":attributeName"]
+  [:span {:class "language-clojure whitespace"} " "]
+  [:span {:class "language-clojure string"} "&quot;stroke-dashoffset&quot;"]
+  [:span {:class "language-clojure comma"} [:span {:class "language-clojure comma"} ","]]
+  [:span {:class "language-clojure whitespace"} " "]
+  [:span {:style (style {:flex-basis "100%" :height 0})}]
+  [:span {:class "language-clojure keyword"} ":values"]
+  [:span {:class "language-clojure whitespace"} " "]
+  [:span {:class "language-clojure string"} "&quot;0;2000&quot;"]
+  [:span {:class "language-clojure comma"} [:span {:class "language-clojure comma"} ","]]
+  [:span {:class "language-clojure whitespace"} " "]
+  [:span {:style (style {:flex-basis "100%" :height 0})}]
+  [:span {:class "language-clojure keyword"} ":some/key"]
+  [:span {:class "language-clojure whitespace"} " "]
+  [:span {:class "language-clojure string"} "&quot;some other value&quot;"]
+  [:span {:class "language-clojure comma"} [:span {:class "language-clojure comma"} ","]]
+  [:span {:class "language-clojure whitespace"} " "]
+  [:span {:style (style {:flex-basis "100%" :height 0})}]
+  [:span {:class "language-clojure keyword"} ":additive"]
+  [:span {:class "language-clojure whitespace"} " "]
+  [:span {:class "language-clojure string"} "&quot;sum&quot;"]
+  [:span {:class "language-clojure comma"} [:span {:class "language-clojure comma"} ","]]
+  [:span {:class "language-clojure whitespace"} " "]
+  [:span {:style (style {:flex-basis "100%" :height 0})}]
+  [:span {:class "language-clojure keyword"} ":dur"]
+  [:span {:class "language-clojure whitespace"} " "]
+  [:span {:class "language-clojure string"} "&quot;360s&quot;"]
+  [:span {:class "language-clojure comma"} [:span {:class "language-clojure comma"} ","]]
+  [:span {:class "language-clojure whitespace"} " "]
+  [:span {:style (style {:flex-basis "100%" :height 0})}]
+  [:span {:class "language-clojure keyword"} ":repeatCount"]
+  [:span {:class "language-clojure whitespace"} " "]
+  [:span {:class "language-clojure string"} "&quot;indefinite&quot;"]]
+ [:span {:class "language-clojure close-brace"
+         :style (style {:align-self "end"})} "}"]]
 🔚
 
 ✳=[:strong "Problems:"] 🔚 the flex-basis 100% elements prevents flex-shrink from sizing the map down to an appropriate size. It similarly will also cause problems with flex-wrap: wrap on the top-level flexbox unless the nested flexbox for the map elements has a manually constrained size (this example does).
@@ -152,3 +166,87 @@ This example uses nested flexboxes create an aligned container for the map conte
 But overall this has the right look. The keys are aligned, the text is still wholly copyable into a plaintext buffer, and it flows nicely with the typographic baseline established by the main text.
 
 The challenge is generating this type of layout programatically from rewrite-clj nodes, and doing so in a way that doesn't generate absurd layouts when displaying potentially nested maps.
+
+✳= [:h2 "Another example with manually &ltspan&gted key/value pairs"] 🔚
+
+Because the elements are being generated by rewrite-clj, one possible option would be to process them in a way that groups together key/value pairs. Here is a manual example that shows taking advantage of Flexbox layout to distribute these pairs in the space provided by the map contents element.
+
+✳=
+[:pre {:style (style {:grid-column "1 / span 4"
+                      :margin-top "0em"})}
+ [:span {:class "language-clojure map"
+         :style (style {
+                        :display "flex"
+                        ;;:flex-wrap "wrap"
+                        :flex-direction "row"})}
+  [:span {:class "language-clojure open-brace"} "{"]
+  [:span {:class "language-clojure map-contents"
+          :style (style {:display "flex"
+                         :max-width "60ch"
+                         :column-gap "max(4px, 0.5em)"
+                         :justify-content "flex-start"
+                         :flex-wrap "wrap"})}
+   [:span {:class "language-clojure keyval"}
+    [:span {:class "language-clojure keyword"} ":a/key"]
+    [:span {:class "language-clojure whitespace"} " "]
+    [:span {:class "language-clojure string"} "&quot;value&quot;"]
+    [:span {:class "language-clojure comma"} [:span {:class "language-clojure comma"} ","]]
+    [:span {:class "language-clojure whitespace"} " "]]
+   [:span {:clas "language-clojure keyval"}
+    [:span {:class "language-clojure keyword"} ":attributeName"]
+    [:span {:class "language-clojure whitespace"} " "]
+    [:span {:class "language-clojure string"} "&quot;stroke-dashoffset&quot;"]
+    [:span {:class "language-clojure comma"} [:span {:class "language-clojure comma"} ","]]
+    [:span {:class "language-clojure whitespace"} " "]]
+   [:span {:class "language-clojure keyval"}
+    [:span {:class "language-clojure keyword"} ":values"]
+    [:span {:class "language-clojure whitespace"} " "]
+    [:span {:class "language-clojure string"} "&quot;0;2000&quot;"]
+    [:span {:class "language-clojure comma"} [:span {:class "language-clojure comma"} ","]]
+    [:span {:class "language-clojure whitespace"} " "]]
+   [:span {:class "language-clojure keyval"}
+    [:span {:class "language-clojure keyword"} ":some/key"]
+    [:span {:class "language-clojure whitespace"} " "]
+    [:span {:class "language-clojure string"} "&quot;some other value&quot;"]
+    [:span {:class "language-clojure comma"} [:span {:class "language-clojure comma"} ","]]
+    [:span {:class "language-clojure whitespace"} " "]]
+   [:span {:class "language-clojure keyval"}
+    [:span {:class "language-clojure keyword"} ":additive"]
+    [:span {:class "language-clojure whitespace"} " "]
+    [:span {:class "language-clojure string"} "&quot;sum&quot;"]
+    [:span {:class "language-clojure comma"} [:span {:class "language-clojure comma"} ","]]
+    [:span {:class "language-clojure whitespace"} " "]]
+   [:span {:class "language-clojure keyval"}
+    [:span {:class "language-clojure keyword"} ":dur"]
+    [:span {:class "language-clojure whitespace"} " "]
+    [:span {:class "language-clojure string"} "&quot;360s&quot;"]
+    [:span {:class "language-clojure comma"} [:span {:class "language-clojure comma"} ","]]
+    [:span {:class "language-clojure whitespace"} " "]]
+   [:span {:class "language-clojure keyval"}
+    [:span {:class "language-clojure keyword"} ":repeatCount"]
+    [:span {:class "language-clojure whitespace"} " "]
+    [:span {:class "language-clojure string"} "&quot;indefinite&quot;"]]]
+  [:span {:class "language-clojure close-brace"
+          :style (style {:align-self "end"})} "}"]]]
+🔚
+
+This also looks appealing, ensuring a decent visual separation between the map elements while preventing keys and values from being split across a linebreak, which helps with visual comprehension of the map. Given that it does not require inserting elements or pseudo-elements that emulate a line break, it may be both much more robust and easier to implement than any solution that involves the insertion of invisible elements to manipulate flexbox rules.
+
+✳= [:h2 "A function definition"] 🔚
+A function definition presents more complex layout challenges than arranging key/value pairs in a map. It may require more preprocessing on the server side to separate into the basic semantic elments needed for effective display.
+
+✳=
+[:pre {:style (style {:grid-column "1 / span 4"})}
+ (page/expr->hiccup
+  
+  '(defn de-jong
+     "Returns A Peter de Jong attractor function.
+
+Use with clojure.core/iterate."
+     {:added "2023-06-11"}
+     [^Double a ^Double b ^Double c ^Double d]
+     (fn [[^Double x ^Double y]]
+       [(- (Math/sin (* a y)) (Math/cos (* b x)))
+        (- (Math/sin (* c x)) (Math/cos (* d y)))]))
+  
+  )] 🔚
