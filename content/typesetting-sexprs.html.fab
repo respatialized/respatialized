@@ -6,36 +6,59 @@
   ) 🔚
   
 
-✳(def metadata {:title "Typesetting S-Expressions with CSS"
-               :page-style (css
-                            [:article [:ul [:li {:grid-column "1 / span 4"}]]]
-                            [:.keyword {:color (site-css/oklch-hex-conversions "ochre")}]
-                            [:.grid-aligned-map
-                             #_[:.whitespace :.comma 
-                                :.open-brace :.close-brace {:display "none"}]
-                             [(select/nth-child 2) {:grid-column-start 1}]
-                             {:display "grid"
-                              :font-family "'Chivo Mono', monospace"
-                              :font-variant-ligatures "none"
-                              :grid-template-columns "repeat(2,minmax(3px, 1fr))"}
-                             ]
-                            [:.map-flex
-                             {:display "flex"
-                              :grid-column "1 / 6"
-                              :column-gap "max(4px, 0.25em)"
-                              :flex-direction "row"
-                              :flex-wrap "wrap"
-                              ;;:min-width 0
-                              :font-family "'Chivo Mono', monospace"
-                              :justify-content "start"
-                              :font-variant-ligatures "none"}
-                             [:.whitespace {:display "none"
-                                            :width 0
-                                            :column-gap 0}]
-                             [:.comma {:column-gap 0}]]
-                            )}) 🔚
-                            
-
+✳(def metadata
+  {:title "Typesetting S-Expressions with CSS"
+   :page-style
+   (css
+    [:article [:ul [:li {:grid-column "1 / span 4"}]]]
+    [:.keyword {:color (site-css/oklch-hex-conversions "ochre")}]
+    [:.language-clojure
+     {:font-family "'Chivo Mono', monospace"
+      :font-variant-ligatures "none"}]
+    [:.grid-aligned-map
+     #_[:.whitespace :.comma 
+        :.open-brace :.close-brace {:display "none"}]
+     [(select/nth-child 2) {:grid-column-start 1}]
+     {:display "grid"
+      :grid-template-columns "repeat(2,minmax(3px, 1fr))"}
+     ]
+    [:.map-flex
+     {:display "flex"
+      :grid-column "1 / 6"
+      :column-gap "max(4px, 0.25em)"
+      :flex-direction "row"
+      :flex-wrap "wrap"
+      ;;:min-width 0
+      :justify-content "start"
+      :font-variant-ligatures "none"}
+     [:.whitespace {:display "none"
+                    :width 0
+                    :column-gap 0}]
+     [:.comma {:column-gap 0}]]
+    [:.map-flex-basis
+     {:display "flex"
+      :grid-column "1 / 6"
+      :column-gap "max(4px, 0.25em)"
+      :flex-direction "row"
+      :flex-wrap "wrap"
+      ;;:min-width 0
+      :justify-content "start"}
+     [:.language-clojure {:flex "1 1 40%"}]
+     [:.map {:display "flex"
+             :column-gap "max(4px, 0.25em)"
+             ;;:flex-wrap "wrap"
+             :flex-grow "1"}
+      [:.language-clojure {:flex "1 1 40%"}]]
+     [:.whitespace {:display "none"
+                    :width 0
+                    :column-gap 0}]
+     [:.comma {:column-gap 0
+               :display "none"
+               :flex-basis 0}]
+     [:.open-brace :.close-brace {:flex "0 0.1 2em"}]
+     [:.close-brace {:align-self "flex-end"}]]
+    )}) 🔚
+    
 ✳= [:h1 (:title metadata)] 🔚
 
 ✳=[:strong "Problem statement"] 🔚 CSS is a very powerful library for styling and laying out page elements, but almost no extant HTML-based syntax highlighting tools for Clojure take full advantage of it. Instead, most people opt for code-based syntax highlighters (or no syntax highlighting at all).
@@ -43,8 +66,10 @@
 
 ✳=[:strong "Assumptions"] 🔚
 ✳=[:ul {:style (style {:grid-column "1 / span 4"})}
- [:li "The structural and sequential nature of Lisp expressions means they more readily lend themselves to CSS selectors than the code of other programming languages"]
- [:li "Server side rendering with rewrite-clj means that all of the relevant syntax and semantics of Clojure code can be preserved via appropriate HTML classes"]
+ [:li "The structural and sequential nature of Lisp expressions means they more readily lend themselves to CSS selectors than the code of other programming languages."]
+ [:li "Server side rendering with rewrite-clj means that all of the relevant syntax and semantics of Clojure code can be preserved via appropriate HTML classes."]
+ [:li "Whitespace conveys no information in Clojure, so good formatting can be achieved without requiring 1:1 preservation of whitespace in the original source code."]
+ [:li "Relaxing the requirement to exactly preserve whitespace will allow for more responsive and flexible display of Clojure source code based on viewport size."]
  ] 🔚
  
 ✳=[:strong "Goals"] 🔚
@@ -56,6 +81,52 @@ I believe that Clojure source code deserves beautiful syntax highlighting that l
 Several bloggers in the Haskell community do a very good job of presenting source code as a coherent part of an overall document. ✳=[:a {:href "https://chrisdone.com/posts/fast-haskell-c-parsing-xml/"} "Chris Done"] 🔚 and  ✳=[:a {:href "https://wickstrom.tech/"} "Oskar Wickström"] 🔚 both have excellent blogs.
 
 Wickström's  ✳=[:a {:href "https://wickstrom.tech/programming/2021/05/03/specifying-state-machines-with-temporal-logic.html"} "blending of diagrams, code, and prose"] 🔚 to illustrate technical concepts is one of the points of inspiration for Fabricate, the static website generator I wrote and used to generate these examples.
+
+Nikita Prokopov has proposed a simple, future-proof method of indenting Clojure source code that I believe can be adapted to CSS.
+
+✳=[:figure
+ [:blockquote "I propose two simple unconditioned formatting rules:"
+  [:ul [:li "Multi-line lists that start with a symbol are always indented with two spaces,"]
+   [:li "Other multi-line lists, vectors, maps and sets are aligned with the first element (1 or 2 spaces)."]]
+  [:em "Note: rules was updated to address an issue with Parinfer and multi-arity fns indentation, as many people has pointed out."]
+  [:p "Basically, these examples will “simply work”, with no form-specific rules or any exceptions:"]
+  [:pre [:code {:class "language-clojure"}]
+   "(when something
+  body)
+
+(defn f [x]
+  body)
+  
+(defn f
+  [x]
+  body)
+  
+(defn many-args [a b c
+                 d e f]
+  body)
+  
+(defn multi-arity
+  ([x]
+   body)
+  ([x y]
+   body))
+
+(let [x 1
+      y 2]
+  body)
+  
+[1 2 3
+ 4 5 6]
+
+{:key-1 v1
+ :key-2 v2}
+ 
+#{a b c
+  d e f}"]]
+ [:a {:href "https://tonsky.me/blog/clojurefmt/"}]] 🔚
+
+CSS can do better than "add two spaces here", a constraint that exists due to the limitations of plaintext. However, it is a useful starting point when thinking about how to lay out nested Clojure forms.
+ 
 
 The multimethod-based generation of Hiccup elements from rewrite-clj nodes was adapted and extended from Michiel Borkent's ✳=[:a {:href "https://github.com/borkdude/quickblog"} "quickblog"] 🔚; he helpfully describes the approach in  ✳=[:a {:href "https://blog.michielborkent.nl/writing-clojure-highlighter.html"} "Writing a Clojure highlighter from scratch."] 🔚 I believe that only tools that can leverage the full structure of Clojure's source code are appropriate to the task of generating effective documentation of Clojure code.
 
@@ -84,7 +155,7 @@ Problems with this approach:
   [:li "lack of support for CSS subgrid means that nested maps will be difficult to align"]]
 🔚
 
-✳= [:h2 "laying map elements out with flexbox"] 🔚
+✳= [:h2 "laying map elements out with flexbox: basic example"] 🔚
 
 ✳=
 
@@ -232,8 +303,41 @@ Because the elements are being generated by rewrite-clj, one possible option wou
 
 This also looks appealing, ensuring a decent visual separation between the map elements while preventing keys and values from being split across a linebreak, which helps with visual comprehension of the map. Given that it does not require inserting elements or pseudo-elements that emulate a line break, it may be both much more robust and easier to implement than any solution that involves the insertion of invisible elements to manipulate flexbox rules.
 
+
+✳= [:h2 "laying map elements out with flexbox: controlling layout with flex-basis"] 🔚
+
+✳=
+(update-in
+ (page/expr->hiccup
+  {:a/key "value"
+   :attributeName "stroke-dashoffset"
+   :values "0;2000"
+   :some/key "some other value"
+   :additive "sum"
+   :nested/map {:a 2 :b 3}
+   #_ :uneval/key #_ :uneval/value
+   :nested/map.2 {"a longer key" "with a correspondingly longer value"
+                  :longer.key/two "another longer value to take up more flexbox space" }
+   :dur "360s"
+   :repeatCount "indefinite"}
+  ) [1 :class]  #(str % " map-flex-basis"))
+🔚
+
+At first glance, this is pretty close to optimal. Setting flex-basis to 40% or so generates a layout with aligned columns. However, the layout gets trickier with nested maps. Flex-grow and flex-shrink might be the right way to do it; I just need to make sure the rules can apply at an arbitrary level of nesting.
+
+✳= [:h2 "Using " [:code "fabricate"] "'s multimethods to separate sequence contents from enclosing braces"]  🔚
+
+✳+ (defmethod page/node->hiccup :map [node]
+    (apply #'page/span "map"
+           (#'page/span "open-brace" "{")
+           [(reduce conj (#'page/span "contents")
+                    (mapv page/node->hiccup (:children node)))
+            (#'page/span "close-brace" "}")]))  🔚
+            
 ✳= [:h2 "A function definition"] 🔚
 A function definition presents more complex layout challenges than arranging key/value pairs in a map. It may require more preprocessing on the server side to separate into the basic semantic elments needed for effective display.
+
+✳= [:h3 "Basic example"]🔚
 
 ✳=
 [:pre {:style (style {:grid-column "1 / span 4"})}
@@ -250,3 +354,229 @@ Use with clojure.core/iterate."
         (- (Math/sin (* c x)) (Math/cos (* d y)))]))
   
   )] 🔚
+  
+✳=
+[:pre
+ (page/expr->hiccup
+  '(defn
+     ^{:doc "mymax [xs+] gets the maximum value in xs using > "
+       :test (fn []
+               (assert (= 42  (mymax 2 42 5 4))))
+       :user/comment "this is the best fn ever!"}
+     mymax
+     ([x] x)
+     ([x y] (if (> x y) x y))
+     ([x y & more]
+      (reduce mymax (mymax x y) more)))
+  )
+ ]
+🔚
+
+
+✳= [:h3 "Manual example"]🔚
+
+✳=
+[:pre
+ {:style "grid-column: 1 / span 4;"}
+ [:span
+  {:class "language-clojure list"}
+  [:span {:class "language-clojure open-paren"} "("]
+  [:span {:class "language-clojure symbol"} "defn"]
+  [:span {:class "language-clojure whitespace"} " "]
+  [:span {:class "language-clojure symbol"} "de-jong"]
+  [:span {:class "language-clojure whitespace"} " "]
+  [:span
+   {:class "language-clojure string"}
+   [:span {:class "language-clojure double-quote"} "\""]
+   "Returns A Peter de Jong attractor function."
+   [:br]
+   ""
+   [:br]
+   "Use with clojure.core/iterate."
+   [:span {:class "language-clojure double-quote"} "\""]]
+  [:span {:class "language-clojure whitespace"} " "]
+  [:span
+   {:class "language-clojure map"}
+   [:span {:class "language-clojure open-brace"} "{"]
+   [:span {:class "language-clojure keyword"} ":added"]
+   [:span {:class "language-clojure whitespace"} " "]
+   [:span {:class "language-clojure string"} "&quot;2023-06-11&quot;"]
+   [:span {:class "language-clojure close-brace"} "}"]]
+  [:span {:class "language-clojure whitespace"} " "]
+  [:span
+   {:class "language-clojure vector"}
+   [:span {:class "language-clojure open-brace"} "["]
+   [:span
+    {:class "language-clojure meta"}
+    [:span {:class "language-clojure caret"} "^"]
+    [:span
+     {:class "language-clojure map"}
+     [:span {:class "language-clojure open-brace"} "{"]
+     [:span {:class "language-clojure keyword"} ":tag"]
+     [:span {:class "language-clojure whitespace"} " "]
+     [:span {:class "language-clojure symbol"} "Double"]
+     [:span {:class "language-clojure close-brace"} "}"]]
+    [:span {:class "language-clojure whitespace"} " "]
+    [:span {:class "language-clojure symbol"} "a"]]
+   [:span {:class "language-clojure whitespace"} " "]
+   [:span
+    {:class "language-clojure meta"}
+    [:span {:class "language-clojure caret"} "^"]
+    [:span
+     {:class "language-clojure map"}
+     [:span {:class "language-clojure open-brace"} "{"]
+     [:span {:class "language-clojure keyword"} ":tag"]
+     [:span {:class "language-clojure whitespace"} " "]
+     [:span {:class "language-clojure symbol"} "Double"]
+     [:span {:class "language-clojure close-brace"} "}"]]
+    [:span {:class "language-clojure whitespace"} " "]
+    [:span {:class "language-clojure symbol"} "b"]]
+   [:span {:class "language-clojure whitespace"} " "]
+   [:span
+    {:class "language-clojure meta"}
+    [:span {:class "language-clojure caret"} "^"]
+    [:span
+     {:class "language-clojure map"}
+     [:span {:class "language-clojure open-brace"} "{"]
+     [:span {:class "language-clojure keyword"} ":tag"]
+     [:span {:class "language-clojure whitespace"} " "]
+     [:span {:class "language-clojure symbol"} "Double"]
+     [:span {:class "language-clojure close-brace"} "}"]]
+    [:span {:class "language-clojure whitespace"} " "]
+    [:span {:class "language-clojure symbol"} "c"]]
+   [:span {:class "language-clojure whitespace"} " "]
+   [:span
+    {:class "language-clojure meta"}
+    [:span {:class "language-clojure caret"} "^"]
+    [:span
+     {:class "language-clojure map"}
+     [:span {:class "language-clojure open-brace"} "{"]
+     [:span {:class "language-clojure keyword"} ":tag"]
+     [:span {:class "language-clojure whitespace"} " "]
+     [:span {:class "language-clojure symbol"} "Double"]
+     [:span {:class "language-clojure close-brace"} "}"]]
+    [:span {:class "language-clojure whitespace"} " "]
+    [:span {:class "language-clojure symbol"} "d"]]
+   [:span {:class "language-clojure close-brace"} "]"]]
+  [:span {:class "language-clojure whitespace"} " "]
+  [:span
+   {:class "language-clojure list"}
+   [:span {:class "language-clojure open-paren"} "("]
+   [:span {:class "language-clojure symbol"} "fn"]
+   [:span {:class "language-clojure whitespace"} " "]
+   [:span
+    {:class "language-clojure vector"}
+    [:span {:class "language-clojure open-brace"} "["]
+    [:span
+     {:class "language-clojure vector"}
+     [:span {:class "language-clojure open-brace"} "["]
+     [:span
+      {:class "language-clojure meta"}
+      [:span {:class "language-clojure caret"} "^"]
+      [:span
+       {:class "language-clojure map"}
+       [:span {:class "language-clojure open-brace"} "{"]
+       [:span {:class "language-clojure keyword"} ":tag"]
+       [:span {:class "language-clojure whitespace"} " "]
+       [:span {:class "language-clojure symbol"} "Double"]
+       [:span {:class "language-clojure close-brace"} "}"]]
+      [:span {:class "language-clojure whitespace"} " "]
+      [:span {:class "language-clojure symbol"} "x"]]
+     [:span {:class "language-clojure whitespace"} " "]
+     [:span
+      {:class "language-clojure meta"}
+      [:span {:class "language-clojure caret"} "^"]
+      [:span
+       {:class "language-clojure map"}
+       [:span {:class "language-clojure open-brace"} "{"]
+       [:span {:class "language-clojure keyword"} ":tag"]
+       [:span {:class "language-clojure whitespace"} " "]
+       [:span {:class "language-clojure symbol"} "Double"]
+       [:span {:class "language-clojure close-brace"} "}"]]
+      [:span {:class "language-clojure whitespace"} " "]
+      [:span {:class "language-clojure symbol"} "y"]]
+     [:span {:class "language-clojure close-brace"} "]"]]
+    [:span {:class "language-clojure close-brace"} "]"]]
+   [:span {:class "language-clojure whitespace"} " "]
+   [:span
+    {:class "language-clojure vector"}
+    [:span {:class "language-clojure open-brace"} "["]
+    [:span
+     {:class "language-clojure list"}
+     [:span {:class "language-clojure open-paren"} "("]
+     [:span {:class "language-clojure symbol"} "-"]
+     [:span {:class "language-clojure whitespace"} " "]
+     [:span
+      {:class "language-clojure list"}
+      [:span {:class "language-clojure open-paren"} "("]
+      [:span {:class "language-clojure symbol"} "Math/sin"]
+      [:span {:class "language-clojure whitespace"} " "]
+      [:span
+       {:class "language-clojure list"}
+       [:span {:class "language-clojure open-paren"} "("]
+       [:span {:class "language-clojure symbol"} "*"]
+       [:span {:class "language-clojure whitespace"} " "]
+       [:span {:class "language-clojure symbol"} "a"]
+       [:span {:class "language-clojure whitespace"} " "]
+       [:span {:class "language-clojure symbol"} "y"]
+       [:span {:class "language-clojure close-paren"} ")"]]
+      [:span {:class "language-clojure close-paren"} ")"]]
+     [:span {:class "language-clojure whitespace"} " "]
+     [:span
+      {:class "language-clojure list"}
+      [:span {:class "language-clojure open-paren"} "("]
+      [:span {:class "language-clojure symbol"} "Math/cos"]
+      [:span {:class "language-clojure whitespace"} " "]
+      [:span
+       {:class "language-clojure list"}
+       [:span {:class "language-clojure open-paren"} "("]
+       [:span {:class "language-clojure symbol"} "*"]
+       [:span {:class "language-clojure whitespace"} " "]
+       [:span {:class "language-clojure symbol"} "b"]
+       [:span {:class "language-clojure whitespace"} " "]
+       [:span {:class "language-clojure symbol"} "x"]
+       [:span {:class "language-clojure close-paren"} ")"]]
+      [:span {:class "language-clojure close-paren"} ")"]]
+     [:span {:class "language-clojure close-paren"} ")"]]
+    [:span {:class "language-clojure whitespace"} " "]
+    [:span
+     {:class "language-clojure list"}
+     [:span {:class "language-clojure open-paren"} "("]
+     [:span {:class "language-clojure symbol"} "-"]
+     [:span {:class "language-clojure whitespace"} " "]
+     [:span
+      {:class "language-clojure list"}
+      [:span {:class "language-clojure open-paren"} "("]
+      [:span {:class "language-clojure symbol"} "Math/sin"]
+      [:span {:class "language-clojure whitespace"} " "]
+      [:span
+       {:class "language-clojure list"}
+       [:span {:class "language-clojure open-paren"} "("]
+       [:span {:class "language-clojure symbol"} "*"]
+       [:span {:class "language-clojure whitespace"} " "]
+       [:span {:class "language-clojure symbol"} "c"]
+       [:span {:class "language-clojure whitespace"} " "]
+       [:span {:class "language-clojure symbol"} "x"]
+       [:span {:class "language-clojure close-paren"} ")"]]
+      [:span {:class "language-clojure close-paren"} ")"]]
+     [:span {:class "language-clojure whitespace"} " "]
+     [:span
+      {:class "language-clojure list"}
+      [:span {:class "language-clojure open-paren"} "("]
+      [:span {:class "language-clojure symbol"} "Math/cos"]
+      [:span {:class "language-clojure whitespace"} " "]
+      [:span
+       {:class "language-clojure list"}
+       [:span {:class "language-clojure open-paren"} "("]
+       [:span {:class "language-clojure symbol"} "*"]
+       [:span {:class "language-clojure whitespace"} " "]
+       [:span {:class "language-clojure symbol"} "d"]
+       [:span {:class "language-clojure whitespace"} " "]
+       [:span {:class "language-clojure symbol"} "y"]
+       [:span {:class "language-clojure close-paren"} ")"]]
+      [:span {:class "language-clojure close-paren"} ")"]]
+     [:span {:class "language-clojure close-paren"} ")"]]
+    [:span {:class "language-clojure close-brace"} "]"]]
+   [:span {:class "language-clojure close-paren"} ")"]]
+  [:span {:class "language-clojure close-paren"} ")"]]]
+🔚
