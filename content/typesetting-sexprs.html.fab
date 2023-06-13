@@ -25,7 +25,7 @@
     [:.map-flex
      {:display "flex"
       :grid-column "1 / 6"
-      :column-gap "max(4px, 0.25em)"
+      :column-gap "max(4px, 0.5em)"
       :flex-direction "row"
       :flex-wrap "wrap"
       ;;:min-width 0
@@ -58,6 +58,30 @@
      [:.open-brace :.close-brace {:flex "0 0.1 auto"}]
      [:.close-brace {:align-self "flex-end"
                      :flex "0 0.1 auto"}]]
+    [:.map-flex-contents
+     {:display "flex"
+      :grid-column "1 / 6"
+      :column-gap "max(4px, 0.25em)"
+      :flex-direction "row"
+      :flex-wrap "wrap"
+      ;;:min-width 0
+      :justify-content "start"}
+     [:.language-clojure {:flex "1 0 40%"}]
+     [:.contents
+      {:display "flex"
+       :column-gap "max(4px, 0.75em)"
+       :flex-wrap "wrap"}]
+     [:.map {:flex "1 0.1 auto"}]
+     [:.whitespace {:display "none"
+                    :width 0
+                    :column-gap 0}]
+     [:.comma {:column-gap 0
+               :display "none"
+               :flex-basis 0}]
+     [:.open-brace :.close-brace {:flex "0 0.1 auto"
+                                  :column-gap "max(4px, 0.25em)"
+                                  }]
+     [:.close-brace {:align-self "flex-end"}]]
     )}) 🔚
     
 ✳= [:h1 (:title metadata)] 🔚
@@ -74,9 +98,11 @@
  ] 🔚
  
 ✳=[:strong "Goals"] 🔚
+
 I believe that Clojure source code deserves beautiful syntax highlighting that leverages the full power of modern CSS.
-
-
+✳= [:ul [:li "Text should be directly copyable from a HTML page to a source file or buffer."]
+  [:li "CSS rules should be compatible with responsive layouts."]] 🔚
+  
 ✳=[:strong "Prior art"] 🔚
 
 Several bloggers in the Haskell community do a very good job of presenting source code as a coherent part of an overall document. ✳=[:a {:href "https://chrisdone.com/posts/fast-haskell-c-parsing-xml/"} "Chris Done"] 🔚 and  ✳=[:a {:href "https://wickstrom.tech/"} "Oskar Wickström"] 🔚 both have excellent blogs.
@@ -334,18 +360,39 @@ In order to dynamically rebind a multimethod, the body of it should be bound to 
            (conj (mapv #'page/node->hiccup (:children node))
                  (#'page/span "close-brace" "}")))) 🔚
 
-
            
 ✳+ (defmethod page/node->hiccup :map [node]
     (node->map node))  🔚
     
-✳= (defn node->map-contents [node]
-   (apply #'page/span "map"
-          (#'page/span "open-brace" "{")
-          [(reduce conj (#'page/span "contents")
-                   (mapv page/node->hiccup (:children node)))
-           (#'page/span "close-brace" "}")])) 🔚   
-    
+✳+ (defn node->map-contents [node]
+    (apply #'page/span "map map-flex-contents"
+           (#'page/span "open-brace" "{")
+           [(reduce conj (#'page/span "contents")
+                    (mapv page/node->hiccup (:children node)))
+            (#'page/span "close-brace" "}")])) 🔚   
+            
+✳= [:h2 "Using a new node->hiccup conversion to set map contents apart from opening and closing braces"] 🔚
+
+✳= (binding [node->map node->map-contents]
+   [:pre {:style (style {:grid-column "1 / span 4"})}
+    (page/expr->hiccup
+     {:a/key "value"
+      :attributeName "stroke-dashoffset"
+      :values "0;2000"
+      :some/key "some other value"
+      :additive "sum"
+      :nested/map {:a 2 :b 3}
+      #_ :uneval/key #_ :uneval/value
+      :nested/map.2 {"a longer key" "with a correspondingly longer value"
+                     :longer.key/two "another longer value to take up more flexbox space" }
+      :dur "360s"
+      :repeatCount "indefinite"}
+     )
+    ]
+   ) 🔚
+   
+This is starting to look more like a proper layout. However, it feels like the small nested map should be able to shrink down to a smaller size and fit on a single line, while the larger nested map should expand to take up the full line underneath its key. It's not yet clear how they can be made to do that.
+
 ✳= [:h2 "A function definition"] 🔚
 A function definition presents more complex layout challenges than arranging key/value pairs in a map. It may require more preprocessing on the server side to separate into the basic semantic elments needed for effective display.
 
@@ -592,3 +639,7 @@ Use with clojure.core/iterate."
    [:span {:class "language-clojure close-paren"} ")"]]
   [:span {:class "language-clojure close-paren"} ")"]]]
 🔚
+
+
+
+
