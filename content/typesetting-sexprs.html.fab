@@ -55,8 +55,9 @@
      [:.comma {:column-gap 0
                :display "none"
                :flex-basis 0}]
-     [:.open-brace :.close-brace {:flex "0 0.1 2em"}]
-     [:.close-brace {:align-self "flex-end"}]]
+     [:.open-brace :.close-brace {:flex "0 0.1 auto"}]
+     [:.close-brace {:align-self "flex-end"
+                     :flex "0 0.1 auto"}]]
     )}) 🔚
     
 ✳= [:h1 (:title metadata)] 🔚
@@ -124,9 +125,9 @@ Nikita Prokopov has proposed a simple, future-proof method of indenting Clojure 
 #{a b c
   d e f}"]]
  [:a {:href "https://tonsky.me/blog/clojurefmt/"}]] 🔚
-
-CSS can do better than "add two spaces here", a constraint that exists due to the limitations of plaintext. However, it is a useful starting point when thinking about how to lay out nested Clojure forms.
  
+CSS can do better than "add two spaces here", a constraint that exists due to the limitations of plaintext. However, it is a useful starting point when thinking about how to lay out nested Clojure forms.
+
 
 The multimethod-based generation of Hiccup elements from rewrite-clj nodes was adapted and extended from Michiel Borkent's ✳=[:a {:href "https://github.com/borkdude/quickblog"} "quickblog"] 🔚; he helpfully describes the approach in  ✳=[:a {:href "https://blog.michielborkent.nl/writing-clojure-highlighter.html"} "Writing a Clojure highlighter from scratch."] 🔚 I believe that only tools that can leverage the full structure of Clojure's source code are appropriate to the task of generating effective documentation of Clojure code.
 
@@ -326,14 +327,25 @@ This also looks appealing, ensuring a decent visual separation between the map e
 At first glance, this is pretty close to optimal. Setting flex-basis to 40% or so generates a layout with aligned columns. However, the layout gets trickier with nested maps. Flex-grow and flex-shrink might be the right way to do it; I just need to make sure the rules can apply at an arbitrary level of nesting.
 
 ✳= [:h2 "Using " [:code "fabricate"] "'s multimethods to separate sequence contents from enclosing braces"]  🔚
+In order to dynamically rebind a multimethod, the body of it should be bound to a function assigned to a dynamic var.
 
+✳+ (defn ^:dynamic node->map [node]
+    (apply #'page/span "map" (#'page/span "open-brace" "{")
+           (conj (mapv #'page/node->hiccup (:children node))
+                 (#'page/span "close-brace" "}")))) 🔚
+
+
+           
 ✳+ (defmethod page/node->hiccup :map [node]
-    (apply #'page/span "map"
-           (#'page/span "open-brace" "{")
-           [(reduce conj (#'page/span "contents")
-                    (mapv page/node->hiccup (:children node)))
-            (#'page/span "close-brace" "}")]))  🔚
-            
+    (node->map node))  🔚
+    
+✳= (defn node->map-contents [node]
+   (apply #'page/span "map"
+          (#'page/span "open-brace" "{")
+          [(reduce conj (#'page/span "contents")
+                   (mapv page/node->hiccup (:children node)))
+           (#'page/span "close-brace" "}")])) 🔚   
+    
 ✳= [:h2 "A function definition"] 🔚
 A function definition presents more complex layout challenges than arranging key/value pairs in a map. It may require more preprocessing on the server side to separate into the basic semantic elments needed for effective display.
 
