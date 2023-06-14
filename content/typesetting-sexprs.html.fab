@@ -71,16 +71,20 @@
       {:display "flex"
        :column-gap "max(4px, 0.75em)"
        :flex-wrap "wrap"}]
-     [:.map {:flex "1 0.1 auto"}]
-     [:.whitespace {:display "none"
+     [:.map {:flex "5 0.1 25%"}]
+     [:.whitespace {#_ #_ :display "none"
+                    :flex "0 0 0 !important"
+                    ;;:padding-left "min(-4px, -0.75em)"
+                    ;;:padding-right "min(-4px, -0.75em)"
+                    :margin-left "min(-4px, -0.75em)"
+                    ;;:margin-right "min(-4px, -0.75em)"
                     :width 0
                     :column-gap 0}]
      [:.comma {:column-gap 0
                :display "none"
                :flex-basis 0}]
      [:.open-brace :.close-brace {:flex "0 0.1 auto"
-                                  :column-gap "max(4px, 0.25em)"
-                                  }]
+                                  :column-gap "max(4px, 0.25em)"}]
      [:.close-brace {:align-self "flex-end"}]]
     )}) 🔚
     
@@ -373,6 +377,8 @@ In order to dynamically rebind a multimethod, the body of it should be bound to 
             
 ✳= [:h2 "Using a new node->hiccup conversion to set map contents apart from opening and closing braces"] 🔚
 
+Separating enclosing elements from the contents of a collection is probably a worthwhile idea regardless of the collection type. Here's how it might look in the context of a nested map.
+
 ✳= (binding [node->map node->map-contents]
    [:pre {:style (style {:grid-column "1 / span 4"})}
     (page/expr->hiccup
@@ -391,7 +397,9 @@ In order to dynamically rebind a multimethod, the body of it should be bound to 
     ]
    ) 🔚
    
-This is starting to look more like a proper layout. However, it feels like the small nested map should be able to shrink down to a smaller size and fit on a single line, while the larger nested map should expand to take up the full line underneath its key. It's not yet clear how they can be made to do that.
+This is starting to look more like a proper layout. The display of whitespace elements can be controlled within the context of the flexbox by setting their ✳= [:code "flex-basis"] 🔚 property to 0 and adding a negative left margin that's exactly equal in size to the column gap of the flex parent (times -1) - in this case ✳= [:code "max(4px, 0.75em)"] 🔚 would be offset by  ✳= [:code "min(4px, -0.75em)"] 🔚. Importantly, avoiding using  ✳= [:code "display: none"] 🔚 (as the previous examples did) on the whitespace means that whitespace will correctly copy out of a code element laid out in this manner.
+
+However, it feels like the small nested map should be able to shrink down to a smaller size and fit on a single line, while the larger nested map should expand to take up the full line underneath its key. It's not yet clear how they can be made to do that.
 
 ✳= [:h2 "A function definition"] 🔚
 A function definition presents more complex layout challenges than arranging key/value pairs in a map. It may require more preprocessing on the server side to separate into the basic semantic elments needed for effective display.
