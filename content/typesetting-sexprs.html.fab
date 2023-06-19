@@ -2,6 +2,8 @@
   (:require [garden.core :as garden :refer [style css]]
             [garden.selectors :as select]
             [site.fabricate.prototype.page :as page]
+            [rewrite-clj.parser :as p]
+            [rewrite-clj.node :as n]
             [respatialized.css :as site-css])
   ) 🔚
   
@@ -62,16 +64,19 @@
      {:display "flex"
       :grid-column "1 / 6"
       :column-gap "max(4px, 0.25em)"
+      :flex "0.3 4 content"
       :flex-direction "row"
       :flex-wrap "wrap"
       ;;:min-width 0
       :justify-content "start"}
-     [:.language-clojure {:flex "1 0 40%"}]
+     [:.language-clojure {:flex "1 2 40%"}]
      [:.contents
       {:display "flex"
        :column-gap "max(4px, 0.75em)"
-       :flex-wrap "wrap"}]
-     [:.map {:flex "5 0.1 25%"}]
+       :flex-wrap "wrap"}
+      #_  [:.language-clojure {:flex "0.1 2 40%"}]]
+     [:.map {:flex "5 0.1 fit-content"}
+      [:.string {:flex-basis "fit-content"}]]
      [:.whitespace {#_ #_ :display "none"
                     :flex "0 0 0 !important"
                     ;;:padding-left "min(-4px, -0.75em)"
@@ -448,203 +453,220 @@ Use with clojure.core/iterate."
  [:span
   {:class "language-clojure list"}
   [:span {:class "language-clojure open-paren"} "("]
-  [:span {:class "language-clojure symbol"} "defn"]
-  [:span {:class "language-clojure whitespace"} " "]
-  [:span {:class "language-clojure symbol"} "de-jong"]
-  [:span {:class "language-clojure whitespace"} " "]
-  [:span
-   {:class "language-clojure string"}
-   [:span {:class "language-clojure double-quote"} "\""]
-   "Returns A Peter de Jong attractor function."
-   [:br]
-   ""
-   [:br]
-   "Use with clojure.core/iterate."
-   [:span {:class "language-clojure double-quote"} "\""]]
-  [:span {:class "language-clojure whitespace"} " "]
-  [:span
-   {:class "language-clojure map"}
-   [:span {:class "language-clojure open-brace"} "{"]
-   [:span {:class "language-clojure keyword"} ":added"]
-   [:span {:class "language-clojure whitespace"} " "]
-   [:span {:class "language-clojure string"} "&quot;2023-06-11&quot;"]
-   [:span {:class "language-clojure close-brace"} "}"]]
-  [:span {:class "language-clojure whitespace"} " "]
-  [:span
-   {:class "language-clojure vector"}
-   [:span {:class "language-clojure open-brace"} "["]
-   [:span
-    {:class "language-clojure meta"}
-    [:span {:class "language-clojure caret"} "^"]
-    [:span
-     {:class "language-clojure map"}
-     [:span {:class "language-clojure open-brace"} "{"]
-     [:span {:class "language-clojure keyword"} ":tag"]
-     [:span {:class "language-clojure whitespace"} " "]
-     [:span {:class "language-clojure symbol"} "Double"]
-     [:span {:class "language-clojure close-brace"} "}"]]
+  [:span {:class "language-clojure list-contents"
+          :style (style {:display "flex"
+                         :flex-wrap "wrap"
+                         :flex-direction "row"})}
+   [:span {:class "language-clojure def-form"
+           :style (style {:flex "0 0 100%"})}
+    [:span {:class "language-clojure symbol"} "defn"]
     [:span {:class "language-clojure whitespace"} " "]
-    [:span {:class "language-clojure symbol"} "a"]]
+    [:span {:class "language-clojure symbol"} "de-jong"]
+    [:span {:class "language-clojure whitespace"} " "]]
+   [:span
+    {:class "language-clojure string docstring"
+     :style (style {:flex "0 0 100%"})}
+    [:span {:class "language-clojure double-quote"} "\""]
+    "Returns A Peter de Jong attractor function."
+    [:br]
+    ""
+    [:br]
+    "Use with clojure.core/iterate."
+    [:span {:class "language-clojure double-quote"} "\""]]
    [:span {:class "language-clojure whitespace"} " "]
    [:span
-    {:class "language-clojure meta"}
-    [:span {:class "language-clojure caret"} "^"]
-    [:span
-     {:class "language-clojure map"}
-     [:span {:class "language-clojure open-brace"} "{"]
-     [:span {:class "language-clojure keyword"} ":tag"]
+    {:class "language-clojure map map-flex-contents"}
+    [:span {:class "language-clojure open-brace"} "{"]
+    [:span {:class "language-clojure contents"}
+     [:span {:class "language-clojure keyword"} ":added"]
      [:span {:class "language-clojure whitespace"} " "]
-     [:span {:class "language-clojure symbol"} "Double"]
-     [:span {:class "language-clojure close-brace"} "}"]]
-    [:span {:class "language-clojure whitespace"} " "]
-    [:span {:class "language-clojure symbol"} "b"]]
-   [:span {:class "language-clojure whitespace"} " "]
-   [:span
-    {:class "language-clojure meta"}
-    [:span {:class "language-clojure caret"} "^"]
-    [:span
-     {:class "language-clojure map"}
-     [:span {:class "language-clojure open-brace"} "{"]
-     [:span {:class "language-clojure keyword"} ":tag"]
+     [:span {:class "language-clojure string"} "&quot;2023-06-11&quot;"]
      [:span {:class "language-clojure whitespace"} " "]
-     [:span {:class "language-clojure symbol"} "Double"]
-     [:span {:class "language-clojure close-brace"} "}"]]
-    [:span {:class "language-clojure whitespace"} " "]
-    [:span {:class "language-clojure symbol"} "c"]]
-   [:span {:class "language-clojure whitespace"} " "]
-   [:span
-    {:class "language-clojure meta"}
-    [:span {:class "language-clojure caret"} "^"]
-    [:span
-     {:class "language-clojure map"}
-     [:span {:class "language-clojure open-brace"} "{"]
-     [:span {:class "language-clojure keyword"} ":tag"]
+     [:span {:class "language-clojure keyword"} ":description"]
      [:span {:class "language-clojure whitespace"} " "]
-     [:span {:class "language-clojure symbol"} "Double"]
-     [:span {:class "language-clojure close-brace"} "}"]]
-    [:span {:class "language-clojure whitespace"} " "]
-    [:span {:class "language-clojure symbol"} "d"]]
-   [:span {:class "language-clojure close-brace"} "]"]]
-  [:span {:class "language-clojure whitespace"} " "]
-  [:span
-   {:class "language-clojure list"}
-   [:span {:class "language-clojure open-paren"} "("]
-   [:span {:class "language-clojure symbol"} "fn"]
+     [:span {:class "language-clojure string"} "A reader in Holland, Peter de Jong of Leiden, has already suggested some other iteration formulas that produce bizarre shapes and images."]
+     [:span {:class "language-clojure whitespace"} " "]]
+    [:span {:class "language-clojure close-brace"} "}"]]
    [:span {:class "language-clojure whitespace"} " "]
    [:span
-    {:class "language-clojure vector"}
+    {:class "language-clojure vector"
+     :style (style {:flex-basis "100%"})}
     [:span {:class "language-clojure open-brace"} "["]
+    [:span {:class "language-clojure vector-contents"
+            :style (style {:display "flex"
+                           :flex-wrap "wrap"})}
+     [:span
+      {:class "language-clojure meta"}
+      [:span {:class "language-clojure caret"} "^"]
+      [:span
+       {:class "language-clojure map"}
+       [:span {:class "language-clojure open-brace"} "{"]
+       [:span {:class "language-clojure keyword"} ":tag"]
+       [:span {:class "language-clojure whitespace"} " "]
+       [:span {:class "language-clojure symbol"} "Double"]
+       [:span {:class "language-clojure close-brace"} "}"]]
+      [:span {:class "language-clojure whitespace"} " "]
+      [:span {:class "language-clojure symbol"} "a"]]
+     [:span {:class "language-clojure whitespace"} " "]
+     [:span
+      {:class "language-clojure meta"}
+      [:span {:class "language-clojure caret"} "^"]
+      [:span
+       {:class "language-clojure map"}
+       [:span {:class "language-clojure open-brace"} "{"]
+       [:span {:class "language-clojure keyword"} ":tag"]
+       [:span {:class "language-clojure whitespace"} " "]
+       [:span {:class "language-clojure symbol"} "Double"]
+       [:span {:class "language-clojure close-brace"} "}"]]
+      [:span {:class "language-clojure whitespace"} " "]
+      [:span {:class "language-clojure symbol"} "b"]]
+     [:span {:class "language-clojure whitespace"} " "]
+     [:span
+      {:class "language-clojure meta"}
+      [:span {:class "language-clojure caret"} "^"]
+      [:span
+       {:class "language-clojure map"}
+       [:span {:class "language-clojure open-brace"} "{"]
+       [:span {:class "language-clojure keyword"} ":tag"]
+       [:span {:class "language-clojure whitespace"} " "]
+       [:span {:class "language-clojure symbol"} "Double"]
+       [:span {:class "language-clojure close-brace"} "}"]]
+      [:span {:class "language-clojure whitespace"} " "]
+      [:span {:class "language-clojure symbol"} "c"]]
+     [:span {:class "language-clojure whitespace"} " "]
+     [:span
+      {:class "language-clojure meta"}
+      [:span {:class "language-clojure caret"} "^"]
+      [:span
+       {:class "language-clojure map"}
+       [:span {:class "language-clojure open-brace"} "{"]
+       [:span {:class "language-clojure keyword"} ":tag"]
+       [:span {:class "language-clojure whitespace"} " "]
+       [:span {:class "language-clojure symbol"} "Double"]
+       [:span {:class "language-clojure close-brace"} "}"]]
+      [:span {:class "language-clojure whitespace"} " "]
+      [:span {:class "language-clojure symbol"} "d"]]]
+    [:span {:class "language-clojure close-brace"} "]"]]
+   [:span {:class "language-clojure whitespace"} " "]
+   [:span
+    {:class "language-clojure list"}
+    [:span {:class "language-clojure open-paren"} "("]
+    [:span {:class "language-clojure symbol"} "fn"]
+    [:span {:class "language-clojure whitespace"} " "]
     [:span
      {:class "language-clojure vector"}
      [:span {:class "language-clojure open-brace"} "["]
      [:span
-      {:class "language-clojure meta"}
-      [:span {:class "language-clojure caret"} "^"]
+      {:class "language-clojure vector"}
+      [:span {:class "language-clojure open-brace"} "["]
       [:span
-       {:class "language-clojure map"}
-       [:span {:class "language-clojure open-brace"} "{"]
-       [:span {:class "language-clojure keyword"} ":tag"]
+       {:class "language-clojure meta"}
+       [:span {:class "language-clojure caret"} "^"]
+       [:span
+        {:class "language-clojure map"}
+        [:span {:class "language-clojure open-brace"} "{"]
+        [:span {:class "language-clojure keyword"} ":tag"]
+        [:span {:class "language-clojure whitespace"} " "]
+        [:span {:class "language-clojure symbol"} "Double"]
+        [:span {:class "language-clojure close-brace"} "}"]]
        [:span {:class "language-clojure whitespace"} " "]
-       [:span {:class "language-clojure symbol"} "Double"]
-       [:span {:class "language-clojure close-brace"} "}"]]
+       [:span {:class "language-clojure symbol"} "x"]]
       [:span {:class "language-clojure whitespace"} " "]
-      [:span {:class "language-clojure symbol"} "x"]]
-     [:span {:class "language-clojure whitespace"} " "]
-     [:span
-      {:class "language-clojure meta"}
-      [:span {:class "language-clojure caret"} "^"]
       [:span
-       {:class "language-clojure map"}
-       [:span {:class "language-clojure open-brace"} "{"]
-       [:span {:class "language-clojure keyword"} ":tag"]
+       {:class "language-clojure meta"}
+       [:span {:class "language-clojure caret"} "^"]
+       [:span
+        {:class "language-clojure map"}
+        [:span {:class "language-clojure open-brace"} "{"]
+        [:span {:class "language-clojure keyword"} ":tag"]
+        [:span {:class "language-clojure whitespace"} " "]
+        [:span {:class "language-clojure symbol"} "Double"]
+        [:span {:class "language-clojure close-brace"} "}"]]
        [:span {:class "language-clojure whitespace"} " "]
-       [:span {:class "language-clojure symbol"} "Double"]
-       [:span {:class "language-clojure close-brace"} "}"]]
-      [:span {:class "language-clojure whitespace"} " "]
-      [:span {:class "language-clojure symbol"} "y"]]
+       [:span {:class "language-clojure symbol"} "y"]]
+      [:span {:class "language-clojure close-brace"} "]"]]
      [:span {:class "language-clojure close-brace"} "]"]]
-    [:span {:class "language-clojure close-brace"} "]"]]
-   [:span {:class "language-clojure whitespace"} " "]
-   [:span
-    {:class "language-clojure vector"}
-    [:span {:class "language-clojure open-brace"} "["]
-    [:span
-     {:class "language-clojure list"}
-     [:span {:class "language-clojure open-paren"} "("]
-     [:span {:class "language-clojure symbol"} "-"]
-     [:span {:class "language-clojure whitespace"} " "]
-     [:span
-      {:class "language-clojure list"}
-      [:span {:class "language-clojure open-paren"} "("]
-      [:span {:class "language-clojure symbol"} "Math/sin"]
-      [:span {:class "language-clojure whitespace"} " "]
-      [:span
-       {:class "language-clojure list"}
-       [:span {:class "language-clojure open-paren"} "("]
-       [:span {:class "language-clojure symbol"} "*"]
-       [:span {:class "language-clojure whitespace"} " "]
-       [:span {:class "language-clojure symbol"} "a"]
-       [:span {:class "language-clojure whitespace"} " "]
-       [:span {:class "language-clojure symbol"} "y"]
-       [:span {:class "language-clojure close-paren"} ")"]]
-      [:span {:class "language-clojure close-paren"} ")"]]
-     [:span {:class "language-clojure whitespace"} " "]
-     [:span
-      {:class "language-clojure list"}
-      [:span {:class "language-clojure open-paren"} "("]
-      [:span {:class "language-clojure symbol"} "Math/cos"]
-      [:span {:class "language-clojure whitespace"} " "]
-      [:span
-       {:class "language-clojure list"}
-       [:span {:class "language-clojure open-paren"} "("]
-       [:span {:class "language-clojure symbol"} "*"]
-       [:span {:class "language-clojure whitespace"} " "]
-       [:span {:class "language-clojure symbol"} "b"]
-       [:span {:class "language-clojure whitespace"} " "]
-       [:span {:class "language-clojure symbol"} "x"]
-       [:span {:class "language-clojure close-paren"} ")"]]
-      [:span {:class "language-clojure close-paren"} ")"]]
-     [:span {:class "language-clojure close-paren"} ")"]]
     [:span {:class "language-clojure whitespace"} " "]
     [:span
-     {:class "language-clojure list"}
-     [:span {:class "language-clojure open-paren"} "("]
-     [:span {:class "language-clojure symbol"} "-"]
-     [:span {:class "language-clojure whitespace"} " "]
+     {:class "language-clojure vector"}
+     [:span {:class "language-clojure open-brace"} "["]
      [:span
       {:class "language-clojure list"}
       [:span {:class "language-clojure open-paren"} "("]
-      [:span {:class "language-clojure symbol"} "Math/sin"]
+      [:span {:class "language-clojure symbol"} "-"]
       [:span {:class "language-clojure whitespace"} " "]
       [:span
        {:class "language-clojure list"}
        [:span {:class "language-clojure open-paren"} "("]
-       [:span {:class "language-clojure symbol"} "*"]
+       [:span {:class "language-clojure symbol"} "Math/sin"]
        [:span {:class "language-clojure whitespace"} " "]
-       [:span {:class "language-clojure symbol"} "c"]
+       [:span
+        {:class "language-clojure list"}
+        [:span {:class "language-clojure open-paren"} "("]
+        [:span {:class "language-clojure symbol"} "*"]
+        [:span {:class "language-clojure whitespace"} " "]
+        [:span {:class "language-clojure symbol"} "a"]
+        [:span {:class "language-clojure whitespace"} " "]
+        [:span {:class "language-clojure symbol"} "y"]
+        [:span {:class "language-clojure close-paren"} ")"]]
+       [:span {:class "language-clojure close-paren"} ")"]]
+      [:span {:class "language-clojure whitespace"} " "]
+      [:span
+       {:class "language-clojure list"}
+       [:span {:class "language-clojure open-paren"} "("]
+       [:span {:class "language-clojure symbol"} "Math/cos"]
        [:span {:class "language-clojure whitespace"} " "]
-       [:span {:class "language-clojure symbol"} "x"]
+       [:span
+        {:class "language-clojure list"}
+        [:span {:class "language-clojure open-paren"} "("]
+        [:span {:class "language-clojure symbol"} "*"]
+        [:span {:class "language-clojure whitespace"} " "]
+        [:span {:class "language-clojure symbol"} "b"]
+        [:span {:class "language-clojure whitespace"} " "]
+        [:span {:class "language-clojure symbol"} "x"]
+        [:span {:class "language-clojure close-paren"} ")"]]
        [:span {:class "language-clojure close-paren"} ")"]]
       [:span {:class "language-clojure close-paren"} ")"]]
      [:span {:class "language-clojure whitespace"} " "]
      [:span
       {:class "language-clojure list"}
       [:span {:class "language-clojure open-paren"} "("]
-      [:span {:class "language-clojure symbol"} "Math/cos"]
+      [:span {:class "language-clojure symbol"} "-"]
       [:span {:class "language-clojure whitespace"} " "]
       [:span
        {:class "language-clojure list"}
        [:span {:class "language-clojure open-paren"} "("]
-       [:span {:class "language-clojure symbol"} "*"]
+       [:span {:class "language-clojure symbol"} "Math/sin"]
        [:span {:class "language-clojure whitespace"} " "]
-       [:span {:class "language-clojure symbol"} "d"]
+       [:span
+        {:class "language-clojure list"}
+        [:span {:class "language-clojure open-paren"} "("]
+        [:span {:class "language-clojure symbol"} "*"]
+        [:span {:class "language-clojure whitespace"} " "]
+        [:span {:class "language-clojure symbol"} "c"]
+        [:span {:class "language-clojure whitespace"} " "]
+        [:span {:class "language-clojure symbol"} "x"]
+        [:span {:class "language-clojure close-paren"} ")"]]
+       [:span {:class "language-clojure close-paren"} ")"]]
+      [:span {:class "language-clojure whitespace"} " "]
+      [:span
+       {:class "language-clojure list"}
+       [:span {:class "language-clojure open-paren"} "("]
+       [:span {:class "language-clojure symbol"} "Math/cos"]
        [:span {:class "language-clojure whitespace"} " "]
-       [:span {:class "language-clojure symbol"} "y"]
+       [:span
+        {:class "language-clojure list"}
+        [:span {:class "language-clojure open-paren"} "("]
+        [:span {:class "language-clojure symbol"} "*"]
+        [:span {:class "language-clojure whitespace"} " "]
+        [:span {:class "language-clojure symbol"} "d"]
+        [:span {:class "language-clojure whitespace"} " "]
+        [:span {:class "language-clojure symbol"} "y"]
+        [:span {:class "language-clojure close-paren"} ")"]]
        [:span {:class "language-clojure close-paren"} ")"]]
       [:span {:class "language-clojure close-paren"} ")"]]
-     [:span {:class "language-clojure close-paren"} ")"]]
-    [:span {:class "language-clojure close-brace"} "]"]]
-   [:span {:class "language-clojure close-paren"} ")"]]
+     [:span {:class "language-clojure close-brace"} "]"]]
+    [:span {:class "language-clojure close-paren"} ")"]]]
   [:span {:class "language-clojure close-paren"} ")"]]]
 🔚
 
