@@ -98,7 +98,11 @@
     [(select/> ".language-clojure.map-contents"
                select/span
                #_(select/not ".open-paren, .close-paren"))
-     {:flex "1 0 40%"}]
+     {:flex "0 0 40%"}]
+    [(select/> ".language-clojure.map-contents"
+               ".map")
+     {:flex "0 1 40%"}]
+
     [(select/> ".language-clojure.map-flex-contents"
                ".map-contents")
      {:display "flex"
@@ -115,10 +119,10 @@
      [:.map {:flex "5 0.1 fit-content"}
       [:.string {:flex-basis "fit-content"}]]
      [:.whitespace {#_ #_ :display "none"
-                    :flex "0 0 0 !important"
+                    :flex "0 0 0.1% !important"
                     ;;:padding-left "min(-4px, -0.75em)"
                     ;;:padding-right "min(-4px, -0.75em)"
-                    :margin-left "min(-4px, -0.75em)"
+                    ;;:margin-left "min(-4px, -0.75em)"
                     ;;:margin-right "min(-4px, -0.75em)"
                     :width 0
                     :column-gap 0}]
@@ -260,7 +264,7 @@ This example uses nested flexboxes create an aligned container for the map conte
  [:span {:class "language-clojure open-brace"} "{"]
  [:span {:class "language-clojure contents"
          :style (style {:display "flex"
-                        :width "50ch"
+                        :column-gap "max(4px, 0.25em)"
                         :flex-wrap "wrap"})}
   [:span {:class "language-clojure keyword"} ":a/key"]
   [:span {:class "language-clojure whitespace"} " "]
