@@ -35,8 +35,8 @@
            :class "background-image"
            :style (garden/style {:object-fit "cover"
                                  :object-position "100% 0%"
-                                 :width "90vw"
-                                 :height "20em"}) }]
+                                 :width "40vw"
+                                 :height "65vh"}) }]
     [:h1 {:class "overlay"
           :style (garden/style
                   {:position "absolute"
@@ -50,7 +50,7 @@
      "Subsumed Automotive Dread" [:br] "in the Parking Garage"]
     [:figcaption [:a {:href "https://www.flickr.com/photos/46925878@N03/5794788696"} "\"Parking garage at Nuremberg airport\" by Markusnl"]  ", licensed under CC BY-NC-SA 2.0"]] 🔚
 
-The parking garage is a predictable site for scenes in horror films. They offer filmmakers a large space for a film crew, and are ubiquitous in the suburban and urban American landscape. Full of dirty shadows, their cast concrete textures compliment film grain and provide a subterranean affect regardless of the actual elevation.
+The parking garage is a predictable site for scenes in horror films. They offer filmmakers a large space for a film crew, and are ubiquitous in the suburban and urban American landscape. Full of dirty shadows, their cast concrete textures complement film grain and provide a subterranean affect regardless of the actual elevation.
 
 ✳= [:figure
   {:style (garden/style {:position "relative"})}
