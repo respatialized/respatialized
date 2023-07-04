@@ -23,14 +23,16 @@ My knowledge and ability grows, unmediated by a company's need to surveil my own
 ✳= [:h3 "(YA)MLops"] 🔚
 There's also the mundane aspects. Working with opaque ML systems is not enjoyable. The initial thrill of feeling like you've cracked the problem or gotten an acceptable level of predictable accuracy quickly gives way to bureaucratic tedium. You have a very brittle process that requires constant monitoring, tinkering, and instrumentation to make sure you're not facing performance regressions. Most of this monitoring isn't well-supported within the actual programming context, so you have to reach outside your programming language of choice for a half-baked wrapper atop a database that lets you remember what your parameters are. You end up declare all the components of your workflow in a plaintext environment where composition is impossible, consistency is not enforced, and you have no query capabilities.
 
-You don't have to take my word for it. Several researchers at Google were uniquely well-suited to identify the difficulties in building and maintaining ML systems that perform useful work in the real world, and they described them quite well nearly a decade ago in the paper "Machine Learning: The High-Interest Credit Card of Technical Debt."  The paper identifies several sources of debt: data debt, pipeline debt, and configuration debt that are likely to impose very high maintenance burdens on anyone working with ML systems, and if the proposed design of LLM-based systems is any indication, the interest rate on the LLM credit card is substantially higher than the ML card.
+You don't have to take my word for it. Several researchers at Google were uniquely well-suited to identify the difficulties in building and maintaining ML systems that perform useful work in the real world, and they described them quite well nearly a decade ago in the paper "Machine Learning: The High-Interest Credit Card of Technical Debt."  The paper identifies several sources of debt: data debt, pipeline debt, and configuration debt that are likely to impose very high maintenance burdens on anyone working with ML systems. If the proposed design of LLM-based systems is any indication, the interest rate on the LLM credit card is substantially higher than the ML card.
 
 Anyone thinking of ascending the mountain of madness specified in Andressen Horowitz's work of speculative fiction ✳= [:a {:href "https://a16z.com/2023/06/20/emerging-architectures-for-llm-applications/"} "\"Emerging Architectures for LLMs\""] 🔚 should read through this paper several times and ask themselves if they are prepared for the journey, and what they expect to find at its conclusion.
 
 ✳= [:figure [:img {:src "/media/a16z-llm-madness.webp"}]
   [:figcaption "(not pictured: how the system interfaces with any part of your business that adds value. good luck!)" ]] 🔚
   
-One of the reasons I enjoy programming is because, when I do it well, I can directly map my conceptual representations of a problem to components in the code, thus achieving an organizational structure that suits both myself as the maintainer of the system and the machine the system runs on. I like to half-jokingly refer to this as "applied metaphysics." With prompt-based language models as an important component of software, such a conceptual and practical separation of concerns is impossible. 
+
+
+One of the reasons I enjoy programming is because, when I do it well, I can directly map my conceptual representations of a problem to components in the code, thus achieving an organizational structure that suits both myself as the maintainer of the system and the machine the system runs on. I like to half-jokingly refer to this as "applied metaphysics." With prompt-based language models as an important component of software, such a conceptual and practical separation of concerns is impossible. Everything is just text.
 
 ✳= [:figure
   [:blockquote
@@ -54,6 +56,43 @@ The net result of such changes is that prediction behavior may alter, either sub
 
 I may have a strong preference for dynamically-typed languages, but I still appreciate that I get an exception when I try to increment a string. 
 
+The gigantic apparatus described by the a16z chart is an implicit admission that language models, as statistical text generators, intrinsically ✳=[:em "cannot be programmed."]🔚 The type of control, monitoring, and separation of concerns that programmers like myself are accustomed to must be bolted on to them after the fact.  I have no interest in a tool that requires a devops and cloud software budget of a million dollars a year to operate safely. 
+
+✳= [:figure [:blockquote "If a system is to serve the creative spirit, it must be entirely comprehensible to a single individual. The point here is that the human potential manifests itself in individuals. To realize this potential, we must provide a medium that can be mastered by a single individual. Any barrier that exists between the user and some part of the system will eventually be a barrier to creative expression."]
+  [:figcaption "Dan Ingalls"]]  🔚
+
+
+✳= [:h3 "Intellectual strip mining"] 🔚 
+
+In understanding the current boom, I think it is worth examining a common cliche with a bit more of an eye to its historical context. If that chart from a16z is any indication, in the AI gold rush, a lot more people are going to get rich selling the shovels of "LLMops" than by panning for gold in the streams of grammatical nonsense generated by language models.
+
+
+Usually the historical analogy stops there, but it is worth remembering that when the naturally occurring rivers in the northern California landscape proved insufficient to the task of dissolving enough soil to find the gold sought by prospectors, they turned to more destructive means.
+
+✳= [:figure
+  [:img {:src "/media/1093px-Henry_Sandham_-_The_Monitor.jpeg"}]] 🔚
+  
+Whole hillsides were ripped away by ✳= [:a {:href "https://www.kcet.org/shows/earth-focus/mercury-in-our-waters-the-10-000-year-legacy-of-californias-gold-rush"} "hydraulic mining"] 🔚 in the search for gold, leading to toxic runoff that persists to this day, the destruction an incredibly rich ecosystem, and mass death for the tribal communities that lived there before the gold rush.
+
+An electronic equivalent to ecosystem collapse may occur as the output of language and image generation models begins to pollute the environment being drawn from for the purposes of training data. 
+
+✳= [:figure
+  [:img {:src "/media/curse-of-recursion.jpg"}]] 🔚
+
+Web-based intellectual ecosystems have been undergoing collapse for some time prior to the widespread use of large language models like ChatGPT.
+
+Trivially-deployable bots overwhelm the human users of Q&A sites (https://github.com/RanjithJames/Reddit---Quora-question-BOT)
+Estimates suggest about 1 in 3 website visitors is an attack bot (https://www.theatlantic.com/technology/archive/2017/01/bots-bots-bots/515043/)
+Content mills drown out useful information in search results (https://www.technologyreview.com/2010/07/26/26327/the-search-engine-backlash-against-content-mills/)
+
+All of those articles were written well before ChatGPT came on to the scene; language models did not create this trend, but they will certainly accelerate it. Efforts to thwart wholesale data harvesting on Twitter have been met with equally heavy-handed responses like blocking rate-limiting and requiring logins merely to view tweets - both of which attack the very foundations of the open internet. Those who thought that their Twitter feed would be a simple and public way of sharing their updates with the world have now found their reach limited to other Twitter users, and those like myself who have resisted the shrill siren song of the bird website are frozen out. OpenAI, as the first mover, very likely already has their hands on a large historical archive of Twitter data; it is everyone else who must pay the price.
+
+
+✳= [:blockquote "LLMs are an innovation that reprivatizes public space. It creatively destroys the organization of information that the internet had once facilitated, back before it had come to depend on the environment of manipulation and deceit that characterizes advertising. “AI” indexes information without requiring social interaction, without any people organizing it with the needs of other people in mind. AI gets around having to have a “useful internet” that structures ways for people to develop trust in one another and the information they provide on an ongoing basis, beyond the kinds of branding and inculcation developed to support consumerism. It presents information with apparent directness, without the social mediation that contextualizes it; it organizes information as though it is all equally valid, no matter what purpose it originally served. It makes it seem as though all information has never been any better and any worse than advertising."] 🔚
+
+The enclosure and strip-mining of the intellectual commons will lay waste to whatever is left of the complex intellectual ecosystem on the web that contains genuine knowledge to try and mine it for answers to queries that seem barely plausible enough to get past users' bullshit detectors. The  ✳= [:a {:href "https://www.newyorker.com/tech/annals-of-technology/chatgpt-is-a-blurry-jpeg-of-the-web"} "jpeg blurs"] 🔚 into meaningless noise as the the accumulated errors of the model overwhelm the signal of the real world. 
+
+Plastic may be safe to eat from, but it will still cause harm to your body and the ecosystem that supports it in the long term. I am inclined to think that the near-term utility of LLMs will be greatly outweighed by toxic effects further down the line.
 
 ✳= [:h3 "The irreducible labor of thinking"] 🔚
 
