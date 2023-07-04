@@ -48,6 +48,8 @@
        [:p "Language models fail to understand because they don't even try."])
  (list [:p [:a {:href "/computational-oracle.html"} "The Signs and Portents of the Computational Oracle"]]
        [:p "Can we even seriously criticize large language models?" ])
+ (list [:p [:a {:href "/the-will-to-understand.html"} "The Will To Understand"]]
+       [:p "Why I am personally not interested in unpredictable and opaque AI systems like deep learning and generative AI, as a programmer and artist." ])
  ]🔚
  
 
