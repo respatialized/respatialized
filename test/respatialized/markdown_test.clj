@@ -9,4 +9,11 @@
                      slurp
                      markdown->hiccup
                      hiccup/html
-                     str))))
+                     str)))
+
+  (t/is (=
+         "example"
+         (:title (md/parse (slurp "test-resources/respatialized/example.md") )) )
+        "EDN front matter should parse properly"
+        )
+  )

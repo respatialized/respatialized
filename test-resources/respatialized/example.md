@@ -1,3 +1,7 @@
+```edn
+{:title "example"}
+```
+
 # Example markdown file
 
 ## Rationale
