@@ -16,8 +16,8 @@
   (m/schema
    [:map {:registry {::img-url (m/schema :string)}} [:image/hash :string]
     [:image/source-url [:schema [:ref ::img-url]]]
-    [:image/local-file {:optional true} :string] [:image/library-file :string]
-    [:image/remote-url {:optional true} :string]
+    [:image/relative-url {:optional true} :string]
+    [:image/library-file :string] [:image/remote-url {:optional true} :string]
     [:image/download-time {:optional true} inst?]]))
 
 (def lookup-schema
@@ -86,14 +86,35 @@
             (dissoc :image/bytes)))
       image-data)))
 
+(defn relativize
+  [file-path]
+  (str (fs/relativize (fs/parent media-dir) file-path)))
+
+(defn absolutize
+  [abs-file-path]
+  (if (fs/absolute? abs-file-path)
+    abs-file-path
+    (str (fs/path (System/getProperty "user.dir")
+                  (subs (str abs-file-path) 1)))))
+
+(comment
+  (fs/absolute? (absolutize "/media/img/something.jpg")))
+
+
 (defn copy!
   [image-data]
   (let [{:keys [image/library-file], :as image-data} (download! image-data)
-        local-file (str (fs/path media-dir (fs/file-name library-file)))]
-    (when-not (fs/exists? local-file) (fs/copy library-file local-file))
-    (dissoc image-data :image/bytes)))
+        canonical-local-file (str (fs/path media-dir
+                                           (fs/file-name library-file)))
+        local-file-rel (str "/" (relativize canonical-local-file))]
+    (when-not (fs/exists? canonical-local-file)
+      (fs/copy library-file canonical-local-file))
+    (-> image-data
+        (assoc :image/relative-url local-file-rel)
+        (dissoc :image/bytes))))
 
 (comment
+  (fs/relativize "public" "public/media")
   (fs/extension "https://mdl.artvee.com/sftb/101051ab.jpg")
   (img-url->data "https://mdl.artvee.com/sftb/101051ab.jpg"))
 
@@ -128,4 +149,5 @@
   (let [updated (swap! lookup-state update! url)] (get updated url)))
 
 (comment
+  (fs/relativize)
   (get! "https://mdl.artvee.com/sftb/101051ab.jpg"))
