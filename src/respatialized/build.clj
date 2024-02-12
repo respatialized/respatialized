@@ -3,6 +3,7 @@
             [malli.core :as m]
             [hiccup2.core :as hiccup]
             [hiccup.page :as hp]
+            [hiccup.util]
             [site.fabricate.prototype.read :as read]
             [site.fabricate.prototype.page :as page]
             [site.fabricate.prototype.html :as html]
@@ -15,6 +16,25 @@
             [juxt.dirwatch :refer [watch-dir]]
             [respatialized.archive :as archive]
             [clojure.string :as str]))
+
+
+(def options {:site.fabricate.page/publish-dir "public"})
+(defonce site (atom {:site.fabricate.api/options options}))
+
+(defn get-css!
+  [{:keys [site.fabricate.api/options], :as site}]
+  (let
+    [{:keys [site.fabricate.page/publish-dir]} options
+     remedy
+       {:file (fs/file (fs/path publish-dir "css" "remedy.css")),
+        :url
+          "https://raw.githubusercontent.com/jensimmons/cssremedy/6590d9630bdd324469620636d85b7ea3753e9a7b/css/remedy.css"}
+     normalize
+       {:file (fs/file (fs/path publish-dir "css" "normalize.css")),
+        :url "https://unpkg.com/@csstools/normalize.css@12.1.1/normalize.css"}]
+    (doseq [{:keys [file url]} [normalize remedy]]
+      (when-not (fs/exists? file) (io/copy url file))))
+  site)
 
 (defmethod api/collect "content/**.fab"
   [src options]
@@ -39,7 +59,8 @@
   (api/collect "content/**.fab" {}))
 
 (def setup-tasks
-  [(fn [site]
+  [get-css!
+   (fn [site]
      (files/create-dir? "public/css/")
      (files/create-dir? "public/fonts/")
      (when-not (fs/exists? "public/fonts/DefSansVF.woff2")
@@ -57,22 +78,40 @@
    :site-name "respatialized.net",
    :site-title "Respatialized"})
 
+(defn doc-header
+  "Returns a default header from a map with a post's metadata."
+  [{:keys [title page-style scripts], :as metadata}]
+  (let [page-meta (-> metadata
+                      (dissoc :title :page-style :scripts)
+                      (#(merge default-metadata %)))]
+    (apply page/conj-non-nil
+      [:head [:title (str (:site-title page-meta) " | " title)]
+       [:link {:rel "stylesheet", :href "/css/normalize.css"}]
+       [:link {:rel "stylesheet", :href "/css/main.css"}]]
+      (concat (page/opengraph-enhance page/ogp-properties
+                                      (map page/->meta page-meta))
+              (list [:meta {:charset "utf-8"}]
+                    [:meta {:http-equiv "X-UA-Compatible", :content "IE=edge"}])
+              (if scripts scripts)
+              (if page-style [[:style page-style]])))))
+
 (defn fabricate-v0->hiccup
   "Generate a Hiccup representation of the page by evaluating the parsed Fabricate template of the page contents."
   [entry]
   (let [start-time (System/currentTimeMillis)
         parsed-page (read/parse (slurp (:site.fabricate.source/location entry)))
         evaluated-page (read/eval-all parsed-page)
-        page-metadata (page/lift-metadata evaluated-page
-                                          (let [m (:metadata (meta
-                                                              evaluated-page))]
-                                            ;; TODO: better handling of
-                                            ;; unbound metadata vars
-                                            (if (map? m) m {})))
-        hiccup-page [:html
-                     (conj (page/doc-header (merge default-metadata
-                                                   page-metadata))
-                           [:link {:href "/css/main.css", :rel "stylesheet"}])
+        page-metadata (page/lift-metadata
+                       evaluated-page
+                       (let [m (:metadata (meta evaluated-page))]
+                         ;; TODO: better handling of
+                         ;; unbound metadata vars
+                         (if (map? m)
+                           (if (contains? m :page-style)
+                             (update m :page-style hiccup.util/raw-string)
+                             m)
+                           {})))
+        hiccup-page [:html (doc-header page-metadata)
                      [:body
                       [:main
                        (apply conj
@@ -140,9 +179,7 @@
 
 (defmethod api/produce! [:hiccup :html] [entry opts] (hiccup->html entry opts))
 
-(def options {:site.fabricate.page/publish-dir "public"})
 
-(defonce site (atom {:site.fabricate.api/options options}))
 
 (defn build!
   [site]
@@ -152,8 +189,9 @@
        (api/construct! [])))
 
 (comment
+  (keys @site)
   (def task (future (do (swap! site build!) nil)))
-  (swap! site build!)
+  (do (swap! site build!) nil)
   (reset! site {:site.fabricate.api/options options})
   (->> {:site.fabricate.api/options options}
        (api/plan!)
