@@ -1,76 +1,75 @@
-{:aliases
- {:dev {:extra-deps
-        {com.clojure-goes-fast/clj-async-profiler {:mvn/version "1.1.1"},
-         com.clojure-goes-fast/clj-memory-meter {:mvn/version "0.3.0"},
-         com.taoensso/tufte {:mvn/version "2.6.3"},
-         criterium/criterium {:mvn/version "0.4.6"}},
-        :extra-paths ["test"],
-        :jvm-opts
-        ["-Djdk.attach.allowAttachSelf" "-XX:+UnlockDiagnosticVMOptions"
-         "-XX:+DebugNonSafepoints" "--illegal-access=warn"
-         "-Dio.netty.tryReflectionSetAccessible=false" "-Xms4G" "-Xmx12G"]},
-  :kaocha/test {:exec-args {:reporter [kaocha.report/documentation]},
-                :exec-fn kaocha.runner/exec-fn,
-                :extra-deps {lambdaisland/kaocha {:mvn/version "1.87.1366"}}},
-  :kaocha/watch
-  {:exec-args {:fail-fast? true, :skip-meta :slow, :watch? true},
-   :exec-fn kaocha.runner/exec-fn,
-   :extra-deps {lambdaisland/kaocha {:mvn/version "1.87.1366"}}},
-  :libpython-clj {:extra-deps {clj-python/libpython-clj {:mvn/version
-                                                         "2.025"}},
-                  :jvm-opts ["--add-modules" "jdk.incubator.foreign"
-                             "--enable-native-access=ALL-UNNAMED"]},
-  :runner {:exec-fn cognitect.test-runner.api/test,
-           :extra-deps {io.github.cognitect-labs/test-runner
-                        {:git/sha "dfb30dd", :git/tag "v0.5.1"}},
-           :main-opts ["-m" "cognitect.test-runner"]},
-  :test {:extra-deps {org.clojure/test.check {:mvn/version "1.1.1"}},
-         :extra-paths ["test"]}},
- :deps {;; core
-        org.clojure/clojure {:mvn/version "1.11.1"},
-        ;; bizarrely, commenting this dep out causes tests to fail
-        org.clojure/test.check {:mvn/version "1.1.1"},
-        ;; site generation
-        site.fabricate/fabricate
-        {:git/url "https://github.com/fabricate-site/fabricate/",
-         #_#_:git/tag "2022.10.10",
-         :git/sha "7a719f9a11c1c9f54aaf3956a29ebfbf6a831f12",
-         :exclusions [org.apache.logging.log4j/log4j-slf4j-impl
-                      org.slf4j/slf4j-api org.apache.logging.log4j/log4j-api
-                      org.apache.logging.log4j/log4j-core log4j/log4j]},
-        hiccup/hiccup {:exclusions [org.clojure/clojure],
-                       :mvn/version "2.0.0-RC2"},
-        hickory/hickory {:mvn/version "0.7.1"},
-        garden/garden {:mvn/version "1.3.10"},
-        ;; markdown (ugh)
-        commonmark-hiccup/commonmark-hiccup {:mvn/version "0.3.0"},
-        ;; data munging
-        org.clojure/data.xml {:mvn/version "0.2.0-alpha8"},
-        metosin/malli {:mvn/version "0.14.0"},
-        org.flatland/ordered {:mvn/version "1.15.11"},
-        babashka/fs {:mvn/version "0.5.20"},
-        babashka/babashka.curl {:mvn/version "0.1.2"},
-        ;; site content
-        clojure2d/clojure2d {:exclusions [commons-logging/commons-logging],
-                             :mvn/version "1.4.5"},
-        thi.ng/geom {:mvn/version "1.0.1"},
-        generateme/fastmath {:mvn/version "2.3.0"},
-        scicloj/tablecloth {:exclusions [org.apache.logging.log4j/log4j-api
-                                         ch.qos.logback/logback-classic],
-                            :mvn/version "7.021"},
-        io.github.adam-james-v/svg-clj
-        {#_#_:mvn/version "0.0.11",
-         :git/url "https://github.com/adam-james-v/svg-clj",
-         :sha "8c8d90535c3d6d421993833f6af4936e36301eb5"},
-        applied-science/darkstar
-        {:git/url "https://github.com/applied-science/darkstar/",
-         :sha "abd480cc382b7ae143f7902ee9d300cdc1a705cc"},
-        ;; site indexing and dbs
-        org.clojars.quoll/asami {:mvn/version "2.3.4"},
-        ;; unified logging
-        com.stuartsierra/log.dev {:mvn/version "0.2.0"},
-        ch.qos.logback/logback-core {:mvn/version "1.4.14"},
-        ch.qos.logback/logback-classic {:mvn/version "1.4.14"}
-        ;; site building functions
-        },
- :paths ["src" "resources" "content"]}
+{:aliases {:dev           {:extra-deps {com.clojure-goes-fast/clj-async-profiler
+                                        {:mvn/version "1.1.1"}
+                                        :repl/cider {:}
+                                        com.clojure-goes-fast/clj-memory-meter
+                                        {:mvn/version "0.3.0"}
+                                        com.taoensso/tufte {:mvn/version
+                                                            "2.6.3"}
+                                        criterium/criterium {:mvn/version
+                                                             "0.4.6"}}
+                           :extra-paths ["test"]
+                           :jvm-opts
+                           ["-Djdk.attach.allowAttachSelf"
+                            "-XX:+UnlockDiagnosticVMOptions"
+                            "-XX:+DebugNonSafepoints" "--illegal-access=warn"
+                            "-Dio.netty.tryReflectionSetAccessible=false"
+                            "-Xms4G" "-Xmx12G"]}
+           :libpython-clj {:extra-deps {clj-python/libpython-clj {:mvn/version
+                                                                  "2.025"}}
+                           :jvm-opts   ["--add-modules" "jdk.incubator.foreign"
+                                        "--enable-native-access=ALL-UNNAMED"]}
+           :runner        {:exec-fn    cognitect.test-runner.api/test
+                           :extra-deps {io.github.cognitect-labs/test-runner
+                                        {:git/sha "dfb30dd" :git/tag "v0.5.1"}}
+                           :main-opts  ["-m" "cognitect.test-runner"]}
+           :test          {:extra-deps  {org.clojure/test.check {:mvn/version
+                                                                 "1.1.1"}}
+                           :extra-paths ["test"]}}
+ :deps    {;; core
+           org.clojure/clojure {:mvn/version "1.11.1"}
+           ;; bizarrely, commenting this dep out causes tests to fail
+           org.clojure/test.check {:mvn/version "1.1.1"}
+           ;; site generation
+           site.fabricate/fabricate
+           {:git/url    "https://github.com/fabricate-site/fabricate/"
+            #_#_:git/tag "2022.10.10"
+            :git/sha    "a612edef698f93525590b9d611dc53d187df032a"
+            :exclusions [org.apache.logging.log4j/log4j-slf4j-impl
+                         org.slf4j/slf4j-api org.apache.logging.log4j/log4j-api
+                         org.apache.logging.log4j/log4j-core log4j/log4j]}
+           hiccup/hiccup {:exclusions  [org.clojure/clojure]
+                          :mvn/version "2.0.0-RC2"}
+           hickory/hickory {:mvn/version "0.7.1"}
+           garden/garden {:mvn/version "1.3.10"}
+           ;; markdown (ugh)
+           commonmark-hiccup/commonmark-hiccup {:mvn/version "0.3.0"}
+           ;; data munging
+           org.clojure/data.xml {:mvn/version "0.2.0-alpha8"}
+           metosin/malli {:mvn/version "0.14.0"}
+           org.flatland/ordered {:mvn/version "1.15.11"}
+           babashka/fs {:mvn/version "0.5.20"}
+           babashka/babashka.curl {:mvn/version "0.1.2"}
+           ;; site content
+           clojure2d/clojure2d {:exclusions  [commons-logging/commons-logging]
+                                :mvn/version "1.4.5"}
+           thi.ng/geom {:mvn/version "1.0.1"}
+           generateme/fastmath {:mvn/version "2.3.0"}
+           scicloj/tablecloth {:exclusions  [org.apache.logging.log4j/log4j-api
+                                             ch.qos.logback/logback-classic]
+                               :mvn/version "7.021"}
+           io.github.adam-james-v/svg-clj
+           {#_#_:mvn/version "0.0.11"
+            :git/url "https://github.com/adam-james-v/svg-clj"
+            :sha     "8c8d90535c3d6d421993833f6af4936e36301eb5"}
+           applied-science/darkstar
+           {:git/url "https://github.com/applied-science/darkstar/"
+            :sha     "abd480cc382b7ae143f7902ee9d300cdc1a705cc"}
+           ;; site indexing and dbs
+           org.clojars.quoll/asami {:mvn/version "2.3.4"}
+           ;; unified logging
+           com.stuartsierra/log.dev {:mvn/version "0.2.0"}
+           ch.qos.logback/logback-core {:mvn/version "1.4.14"}
+           ch.qos.logback/logback-classic {:mvn/version "1.4.14"}
+           ;; site building functions
+           }
+ :paths   ["src" "resources" "content"]}
