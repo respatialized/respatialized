@@ -1,0 +1,123 @@
+
+✳ (ns respatialized.writing.gg-clj.syntax
+  (:require [garden.core :refer [style css]])
+  ) 🔚
+
+
+✳ (def metadata
+  {:title "A Grammar of Graphics in Clojure: Specification and Syntax"
+   :description "Sketching out what a grammar of graphics would look like based on part 1 of Wilkinson's book"
+   :date "2024-03-15"}) 🔚
+  
+✳= [:div {:class "header-block logotype"
+        :style (style {:grid-column "1 / 6"
+                       :display "grid"
+                       :grid-template-columns "subgrid"})}
+  [:h1 {:style (style {:grid-column "1 / 4"
+                       :font-size "1.75rem"})} "Notes Towards A Grammar of Graphics in Clojure" ]
+  [:h2 {:style (style {:grid-column "5 / 6"
+                       :align-self "end"
+                       :font-size "1.25rem"})} "Part 1: Specification and Syntax"]
+  [:h6 (:date metadata)]] 🔚
+                       
+Leland Wilkinson's magnum opus The Grammar of Graphics has set the standard by which any statistical graphics program must be judged, though few libraries make the attempt. By the second page, I knew I was reading the right book, because Wilkinson spells out the exact problems with the statistical plotting programs written both before and after the book's publication. It is well worth quoting at length:
+
+✳= [:figure
+  [:blockquote [:h4 "1.1 Graphics Versus Charts"]
+   [:p "We often call graphics " [:strong "charts"] " (from χάρτης or Latin " [:em "charta"] ", a leaf of paper or papyrus). There are pie charts, bar charts, line charts, and so on. This book shuns chart typologies. For one thing, chars are usually instances of much more general objects. Once we understand that a pie is a divided bar in polar coordinates, we can construct other polar graphics that are less well known. We will also come to realize why a histogram is not a bar chart and why many other graphics that look similar nevertheless have different grammmars."]
+   [:p "There is also a practical reason for shunning chart typology. If we endeavor to develop a charting instead of a graphing program, we will accomplish two things. First, we inevitably will offer fewer charts than people want. Second, our package will have no deep structure. Our computer program will be unnecessarily complex, because we will fail to reuse objects or routines that function similarly in different charts. And we will have no way to add new charts to our system wthout generating complex new code. Elegant design requires us to think about a theory of graphics, not charts."]
+   ]] 🔚
+
+As I read this, it gave voice to the frustrations I've experienced using "basic" plotting libraries from matplotlib to Apache eCharts and even to Microsoft Excel. If you're reading this, you almost certainly have had the experience of trying to use a plotting library that had a nice-looking landing page or GitHub repository, only to find that there's a still-open GitHub issue over a two years old for a relatively minor aesthetic tweak to the display of a chart it offers. This passage explained to me why every single one of these tools falls short: they are not built on a sufficiently compositional foundation. The book offers that foundation in depth.
+
+The reason why R programmers use ggplot2 and basically nothing else is because they don't need to. It remains the most faithful and complete implementation of the ideas outlined in the book, and my experience using plotting libraries in other programming languages pales in comparison - Clojure included, unfortunately. I hope what I write here can assist in remedying this deficiency: I think Clojure has the all the components necessary to build a first-rate implementation of Wilkinson's ideas, and even some characteristics that may, with sufficient effort, allow Clojure to surpass other implementations. 
+
+In this article I will offer a brief tour based on part 1 of the book, which introduces the idea of a grammar of graphics and outlines the syntax and components of a plot in terms general enough to encompass almost any kind of graphic derived from data. The ideas I sketch out here are highly preliminary; my intention is to use this article as a springboard for further discussions and prototype code as part of the broader scicloj efforts to build a more flexible and capable graphics system for data science and scientific computing in Clojure.
+
+Part 2 of the book is on semantics: I will discuss more ideas about implementation there.
+
+
+✳=[:h2 "Chapter 1: Introduction"]🔚
+
+Wilkinson defines his project for graphics in this chapter after contrasting it with charts in the above quotation.  
+
+He argues that the only system flexible enough to produce the graphics is an object-oriented one. I will have more to say on this claim - particularly in the context of Clojure programs - later on. But for now, at risk of using a vague and frequently overloaded term, it is sufficient to note that the specification system outlined in this book is ✳=[:em "declarative"]🔚: it focuses on first producing a ✳=[:strong "specification"]🔚 of what is to be displayed, then ✳=[:strong "assembling"]🔚 a graphical scene from that specification, and then finally produces a series of instructions for  ✳=[:strong "displaying"]🔚 the graphical scene by rendering it, will necessarily depend on the details of the output medium. This separation of specification, assembly, and display is critical, and I will have more to say about it later on.
+
+A specification has six components:
+
+✳=[:ol {:start 1}
+ [:li "Data" [:br] [:q "A set of data operations that create variables from datasets."] " (pg. 7)"]
+ [:li "Transformations" [:br]
+  "Transformations are mathematical functions that update variables or create new ones for the purposes of a graphic."]
+ [:li "Scale" [:br]
+  "Scales map from the domain of one or more variables to the units in a graphical scene."]
+ [:li "Coordinate System" [:br] [:q "... coordinates can be thought of more generally as schemes for mapping elements of sets to geometric objects."] " (pg. 179)"]
+ [:li "Element" [:br]
+  [:q "graphs (e.g. points), and their aesthetic attributes (e.g. color)"] " (pg. 7)"]
+ [:li "Guide" [:br]
+  "Guides label components of a graph to aid in understanding what it represents."]
+ ]🔚
+
+
+✳=[:h2 "Chapter 2: How to Make a Pie"]🔚
+
+The recipe is for a pie chart displaying responses to questions about perceived gender bias in academic publishing in ACLS survey data. It consists of the following steps:
+
+✳=[:ol 
+ [:li "Create variables"]
+ [:li "Apply algebra"]
+ [:li "Apply scales"]
+ [:li "Compute statistics"]
+ [:li "Construct geometry"]
+ [:li "Apply coordinates"]
+ [:li "Compute aesthetics"]
+ ]🔚
+
+I have skipped over the definitions used to establish the underlying algebra of graphics (pg. 25-30). While these definitions are essential for ensuring the integrity of the formalism elucidated in detail in Chapter 5 — and by extension, any implementation —  they are not necessary to see how the components of a graph fit together. 
+
+✳=[:h2 "Chapter 3: Data"]🔚
+
+Wilkinson outlines several types of data that serve as the material from which graphics are constructed. Functions produce variables from datasets.
+
+✳= [:dl [:dt "Empirical"]
+  [:dd [:q "arise from observations of the world"] " (pg. 44)."
+   [:br] [:span {:style (style {:font-weight "500"})} "Functions"] [:br]
+   [:dl
+    [:dt [:code "col"]] [:dd "mapping source data, a variable name, units of measurement, and weights to a column of empirical data."]
+    [:dt [:code "map"]] [:dd [:q "a function from one set to another."] " (pg. 366) - more general than a Clojure hash map, which would be a finite " [:em "injective"] " map. It's most analogous to the " [:code {:class "language-clojure function"} "map"]  " function."]
+    [:dt [:code "stream"]] [:dd [:q "for streaming data sources"] " (pg. 42) - because of Clojure's sequence abstractions, this capability could likewise be handled by the  " [:code {:class "language-clojure function"} "map"]  " function."]
+    [:dt [:code "image"]] [:dd "Produces an image. Could potentially just be a function over raster data, or a multidimensional version of " [:code {:class "language-clojure function"} "map"] "."]
+    [:dt [:code "sample"]] [:dd "Produce a variable by statistically sampling the given data or variable."]
+    [:dt [:code "reshape"]] [:dd "Transform a matrix or table of columns into a different shape."]
+    ]]
+  [:dt "Abstract Data"]
+  [:dd [:q "arise from formal models"] " (pg 48)."
+   [:br] [:span {:style (style {:font-weight "500"})} "Functions"] [:br]
+   [:dl
+    [:dt [:code "iter"]] [:dd "Generate a series - includes " [:code "count, proportion, percent"] " as special cases." ]
+    [:dt [:code "mesh"]] [:dd [:q "compute a 1D, 2D, or 3D mesh."] " (pg. 43)"]
+    [:dt [:code "constant"]] [:dd "Yield multiple instances of a constant - equivalent to" [:code {:class "language-clojure"} "(repeat x item)"]]
+    [:dt [:code "rand"] [:dd "Generate numbers according to a probability distribution." ]]
+    ]]
+  [:dt "Metadata"]
+  [:dd [:q "Metadata are data about data."] " (pg. 51)"
+   [:br] [:span {:style (style {:font-weight "500"})} "Functions"] [:br]
+   [:dl [:dt [:code "meta"]] [:dd [:q "The meta() function associates metadata with rows of datasets. ...[e]ach index in the source() of the meta() function might point to a video image, a Web address in the form of a [URL], or some other item of metadata."]
+                              " (pg. 43)." ]]
+   ]
+  
+  ] 🔚
+
+
+
+✳=[:h2 "Ideas from Part 1"]🔚
+✳=[:h3 "Polymorphism and Extensibility"]🔚
+
+In Chapter 3, Wilkinson introduces subclassing for functions, giving examples like sample.boot (bootstrap sampling), reshape.diag (create a diagonal matrix), and rand.normal (sample from a given normal distribution). I prefer to think that Table 3.1, which introduces these functions, is generally illustrative rather than exhausive; any system designed to produce graphics should be flexible enough to introduce new functions that conform to the signature expected of each type of function. Clojure multimethods seem like a useful alternative to subclassing in this regard: one could imagine a sample multimethod that can be extended to dispatch to new functions for sampling data. This would allow users to use novel methods of sampling not enumerated in the original package in order to produce variables for their graphics. 
+
+I think this is one of the first areas where we can simplify the design laid out in Wilkinson's book using the capabilities of Clojure.
+
+
+✳=[:h3 "Improving on metadata"]🔚
+
+The second is in the realm of metadata. Wilkinson's specification for metadata is quite succinct: a simple mapping from named sources to values. It makes sense for the book not to dwell on this topic, as it is a book on graphics, not on information systems or ontology. While this is certainly enough for many types of metadata, Clojure has been influenced by languages and concepts with a much richer model for metadata. Expanding the idea of metadata to an EAVT model would allow for more expressive specification of provenance and other metadata, and for deeper integration with the Datalog and RDF-style systems favored by many in the Clojure community.
