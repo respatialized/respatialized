@@ -42,8 +42,8 @@
         {:exclusions [org.apache.logging.log4j/log4j-slf4j-impl
                       org.slf4j/slf4j-api org.apache.logging.log4j/log4j-api
                       org.apache.logging.log4j/log4j-core log4j/log4j]
-         :git/sha    "067b956"
-         :git/tag    "2026.04.13"
+         :git/sha    "1c93f40"
+         :git/tag    "2026.08.21"
          :git/url    "https://github.com/fabricate-site/fabricate/"}
         hiccup/hiccup {:exclusions  [org.clojure/clojure]
                        :mvn/version "2.0.0-RC2"}
