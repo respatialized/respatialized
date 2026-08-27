@@ -1,9 +1,15 @@
 (ns respatialized.build2
+  "Build namespace using Fabricate's API"
   (:require [site.fabricate.api :as fabricate]
             [site.fabricate.prototype.document.fabricate :as fab]
             [site.fabricate.prototype.document.clojure :as clj]
-            [hiccup2.core :as hiccup]
-            [babashka.fs :as fs]))
+            [site.fabricate.prototype.page.hiccup :as hiccup]
+            [site.fabricate.prototype.eval :as eval]
+            [malli.core :as m]
+            [dev.onionpancakes.chassis.core :as chassis]
+            [respatialized.render :as render]
+            [babashka.fs :as fs]
+            [clojure.walk :as walk]))
 
 
 ;; this seems like a function that Fabricate ought to provide
@@ -23,13 +29,16 @@
   ([source-path source-dir target-dir]
    (output-to source-path source-dir target-dir nil)))
 
-(defmethod fabricate/collect "content/**/*.fab"
+
+(defmethod fabricate/collect "content/*.fab"
   [ptrn {:keys [site.fabricate.page/publish-dir] :as opts}]
   (mapv
    (fn [path]
      (let [src-loc (fs/canonicalize (fs/absolutize path))]
        {:site.fabricate.source/location  (fs/file src-loc)
-        :site.fabricate.page/location    (output-to src-loc ptrn publish-dir)
+        :site.fabricate.page/location    (output-to src-loc
+                                                    (first (fs/components ptrn))
+                                                    publish-dir)
         :site.fabricate.page/format      :html
         :site.fabricate.document/format  :hiccup
         :site.fabricate.source/format    :fabricate/v0
@@ -48,11 +57,35 @@
            :site.fabricate.document/data  article
            :site.fabricate.document/title title)))
 
+(def kindly-map? (m/validator eval/Evaluated-Form))
+
+(defn process-kindly?
+  [v]
+  (if (kindly-map? v)
+    (try (fabricate/render-form v)
+         (catch Exception e
+           (throw (ex-info "Error processing kindly map"
+                           (merge (Throwable->map e) {:kindly/map v})))))
+    v))
+
+(defmethod fabricate/display-form [:fabricate/error :hiccup/html]
+  [form]
+  [:figure {:class "fabricate-error"}
+   [:pre [:code {:class "language-clojure"} (:code form)]] [:hr]
+   [:pre [:code {:class "language-clojure"} (:error form)]]])
+
 (defmethod fabricate/produce! [:hiccup :html]
-  [{:keys [site.fabricate.document/data] :as entry} opts]
-  (assoc entry
-         :site.fabricate.page/data
-         (hiccup/html [:html [:head] [:body data]])))
+  [{:keys [site.fabricate.document/data site.fabricate.document/title
+           site.fabricate.page/location]
+    :as   entry} opts]
+  (let [processed-page-data (walk/postwalk process-kindly? data)
+        output-html         (chassis/html
+                             [chassis/doctype-html5
+                              (render/site-page-header {:title title}) #_[:head]
+                              [:body processed-page-data]])]
+    (println "writing to" (str location))
+    (spit (fs/file location) output-html)
+    (assoc entry :site.fabricate.page/data output-html)))
 
 (def init-site
   {::fabricate/entries []

@@ -10,6 +10,7 @@
             [respatialized.styles :as styles]
             [respatialized.css :as css]))
 
+;; TODO: rewrite this to take an entry as an argument
 (defn site-page-header
   "Returns a default header from a map with a post's metadata."
   [{:keys [title page-style scripts]}]
