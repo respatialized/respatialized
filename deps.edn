@@ -19,8 +19,7 @@
                   :exec-fn    kaocha.runner/exec-fn
                   :extra-deps {lambdaisland/kaocha {:mvn/version "1.87.1366"}}}
   :libpython-clj {:extra-deps {clj-python/libpython-clj {:mvn/version "2.025"}}
-                  :jvm-opts   ["--add-modules" "jdk.incubator.foreign"
-                               "--enable-native-access=ALL-UNNAMED"]}
+                  :jvm-opts   ["--enable-native-access=ALL-UNNAMED"]}
   :serve         {:deps      {org.babashka/http-server {:mvn/version "0.1.14"}}
                   :exec-args {:dir     "public"
                               :headers {"Cross-Origin-Opener-Policy"
