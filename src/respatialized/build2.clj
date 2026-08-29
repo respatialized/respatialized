@@ -1,16 +1,18 @@
 (ns respatialized.build2
   "Build namespace using Fabricate's API"
   (:require [site.fabricate.api :as fabricate]
+            [site.fabricate.prototype.read]
             [site.fabricate.prototype.document.fabricate :as fab]
             [site.fabricate.prototype.document.clojure :as clj]
-            [site.fabricate.prototype.page.hiccup :as hiccup]
+            #_[site.fabricate.prototype.page.hiccup :as hiccup]
+            [site.fabricate.prototype.hiccup :as hiccup]
             [site.fabricate.prototype.eval :as eval]
+            [site.fabricate.prototype.read :as read]
             [malli.core :as m]
             [dev.onionpancakes.chassis.core :as chassis]
             [respatialized.render :as render]
             [babashka.fs :as fs]
             [clojure.walk :as walk]))
-
 
 ;; this seems like a function that Fabricate ought to provide
 (defn output-to
@@ -48,14 +50,38 @@
    (fs/glob (fs/cwd) ptrn)))
 
 
+(defn evaluated-page->hiccup-article
+  "Return a Hiccup article for the document by parsing and evaluating the document's Fabricate template."
+  [evaluated-page metadata]
+  (let [page-metadata (hiccup/lift-metadata evaluated-page metadata)
+        page-title    (or (:site.fabricate.page/title page-metadata)
+                          (:site.fabricate.document/title page-metadata)
+                          (:title page-metadata))]
+    (with-meta
+      (into [:article {:lang "en-us" :title page-title}]
+            (hiccup/parse-paragraphs evaluated-page))
+      (assoc page-metadata :site.fabricate.document/title page-title))))
 
 (defmethod fabricate/build [:fabricate/v0 :hiccup]
   [{:keys [site.fabricate.source/location ::fabricate/source] :as entry} opts]
-  (let [article (fab/entry->hiccup-article entry opts)
-        title   (or (get-in article [1 :title]) "Respatialized")]
+  (let [parsed-page    (read/parse (slurp (fs/file location)))
+        evaluated-page (read/eval-all parsed-page)
+        metadata       (hiccup/lift-metadata
+                        evaluated-page
+                        (let [m (or (:metadata (meta evaluated-page))
+                                    #_(var-get (ns-resolve (:namespace
+                                                            (meta
+                                                             evaluated-page))
+                                                           'metadata)))]
+                          ;; TODO: better handling of
+                          ;; unbound metadata vars
+                          (if (map? m) m {})))
+        article        (evaluated-page->hiccup-article evaluated-page metadata)
+        title          (or (get-in article [1 :title]) "Respatialized")]
     (assoc entry
-           :site.fabricate.document/data  article
-           :site.fabricate.document/title title)))
+           :site.fabricate.document/data     article
+           :site.fabricate.document/metadata metadata
+           :site.fabricate.document/title    title)))
 
 (def kindly-map? (m/validator eval/Evaluated-Form))
 
