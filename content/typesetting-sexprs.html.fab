@@ -1,7 +1,8 @@
 ✳ (ns respatialized.writing.typesetting-sexprs
   (:require [garden.core :as garden :refer [style css]]
             [garden.selectors :as select]
-            [site.fabricate.prototype.page :as page]
+            [site.fabricate.adorn :as adorn]
+            [site.fabricate.adorn.forms :as forms]
             [rewrite-clj.parser :as p]
             [rewrite-clj.node :as n]
             [respatialized.css :as site-css])
@@ -134,6 +135,12 @@
      [:.close-brace {:align-self "flex-end"}]]
     )}) 🔚
     
+
+✳ (defn- span [class & contents]
+  (apply conj
+         [:span {:class (str "language-clojure " class)}]
+         contents))  🔚
+
 ✳= [:h1 (:title metadata)] 🔚
 
 ✳=[:strong "Problem statement"] 🔚 CSS is a very powerful library for styling and laying out page elements, but almost no extant HTML-based syntax highlighting tools for Clojure take full advantage of it. Instead, most people opt for code-based syntax highlighters (or no syntax highlighting at all).
@@ -215,7 +222,7 @@ This page already uses CSS grid for its layout, so one starting point would be t
 
 ✳=
 (update-in
- (page/expr->hiccup
+ (adorn/clj->hiccup
   {:a/key "value"
    :attributeName "stroke-dashoffset"
    :values "0;2000"
@@ -237,7 +244,7 @@ Problems with this approach:
 ✳=
 
 (update-in
- (page/expr->hiccup
+ (adorn/clj->hiccup
   {:a/key "value"
    :attributeName "stroke-dashoffset"
    :values "0;2000"
@@ -385,7 +392,7 @@ This also looks appealing, ensuring a decent visual separation between the map e
 
 ✳=
 (update-in
- (page/expr->hiccup
+ (adorn/clj->hiccup
   {:a/key "value"
    :attributeName "stroke-dashoffset"
    :values "0;2000"
@@ -402,32 +409,32 @@ This also looks appealing, ensuring a decent visual separation between the map e
 
 At first glance, this is pretty close to optimal. Setting flex-basis to 40% or so generates a layout with aligned columns. However, the layout gets trickier with nested maps. Flex-grow and flex-shrink might be the right way to do it; I just need to make sure the rules can apply at an arbitrary level of nesting.
 
-✳= [:h2 "Using " [:code "fabricate"] "'s multimethods to separate sequence contents from enclosing braces"]  🔚
+✳= [:h2 "Using " [:code "adorn"] "'s multimethods to separate sequence contents from enclosing braces"]  🔚
 In order to dynamically rebind a multimethod, the body of it should be bound to a function assigned to a dynamic var.
 
 ✳+ (defn ^:dynamic node->map [node]
-    (apply #'page/span "map" (#'page/span "open-brace" "{")
-           (conj (mapv #'page/node->hiccup (:children node))
-                 (#'page/span "close-brace" "}")))) 🔚
+    (apply span "map" (span "open-brace" "{")
+           (conj (mapv #'adorn/clj->hiccup (:children node))
+                 (span "close-brace" "}")))) 🔚
 
            
-✳+ (defmethod page/node->hiccup :map [node]
-    (node->map node))  🔚
+✳+ (defmethod adorn/form->hiccup :map [node _opts]
+      (node->map node))  🔚
     
 ✳+ (defn node->map-contents [node]
-    (apply #'page/span "map map-flex-contents"
-           (#'page/span "open-brace" "{")
-           [(reduce conj (#'page/span "map-contents")
-                    (mapv page/node->hiccup (:children node)))
-            (#'page/span "close-brace" "}")])) 🔚   
+    (apply span "map map-flex-contents"
+           (span "open-brace" "{")
+           [(reduce conj (span "map-contents")
+                    (mapv adorn/clj->hiccup (:children node)))
+            (span "close-brace" "}")])) 🔚   
             
-✳= [:h2 "Using a new node->hiccup conversion to set map contents apart from opening and closing braces"] 🔚
+✳= [:h2 "Using a new clj->hiccup conversion to set map contents apart from opening and closing braces"] 🔚
 
 Separating enclosing elements from the contents of a collection is probably a worthwhile idea regardless of the collection type. Here's how it might look in the context of a nested map.
 
 ✳= (binding [node->map node->map-contents]
    [:pre {:style (style {:grid-column "1 / span 4"})}
-    (page/expr->hiccup
+    (adorn/clj->hiccup
      {:a/key "value"
       :attributeName "stroke-dashoffset"
       :values "0;2000"
@@ -454,7 +461,7 @@ A function definition presents more complex layout challenges than arranging key
 
 ✳=
 [:pre {:style (style {:grid-column "1 / span 4"})}
- (page/expr->hiccup
+ (adorn/clj->hiccup
   
   '(defn de-jong
      "Returns A Peter de Jong attractor function.
@@ -470,7 +477,7 @@ Use with clojure.core/iterate."
   
 ✳=
 [:pre
- (page/expr->hiccup
+ (adorn/clj->hiccup
   '(defn
      ^{:doc "mymax [xs+] gets the maximum value in xs using > "
        :test (fn []

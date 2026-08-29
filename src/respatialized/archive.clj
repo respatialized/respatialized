@@ -31,7 +31,7 @@
 ;; 4. Open-world assumption about relations
 ;; 5. On-disk storage
 
-(def db-uri (str "asami:local://.cache/respatialized"))
+(def db-uri (str #_"asami:local://.cache/respatialized" "asami:mem://test-db"))
 
 (comment
   (d/create-database db-uri)

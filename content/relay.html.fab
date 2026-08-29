@@ -1,9 +1,8 @@
-✳ (def metadata {:title "//RELAY"}) 🔚
 
 ✳ (ns respatialized.writing.relay
-(:require [respatialized.render :refer :all]
- [site.fabricate.prototype.page :refer :all]))🔚
+(:require [respatialized.render :refer :all])) 🔚
 
+✳ (def metadata {:title "//RELAY"}) 🔚
 ✳= [:div {:class "f1"} (header "//RELAY")]🔚
 
 ✳= [:div {:class "f3"}

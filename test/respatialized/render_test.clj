@@ -9,6 +9,7 @@
   (t/testing "html helper fns"
     (t/is (= "<em>help</em>" (html [:em "help"])) "emphasis should be added")
     (t/is (= "<em>help</em>" (html [:em "help"])) "emphasis should be added")
+    (t/is (vector? (header {:level :h1} "title")) "header should be created")
     (t/is
      (=
       (html (sorted-map-vec->table [(sorted-map :a 1 :b 2)

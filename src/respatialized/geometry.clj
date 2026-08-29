@@ -10,135 +10,104 @@
             [thi.ng.math.macros :as mm]
             [clojure.string :as str]
             [clojure.pprint :as pprint]
+            [site.fabricate.adorn :as adorn]
             [site.fabricate.prototype.page :as page])
-  (:import [thi.ng.geom.types Path2 Bezier2 Circle2 Ellipse2
-            Line2 LineStrip2 Polygon2 Rect2 Triangle2])
-  (:import [thi.ng.geom.vector Vec2])
-  )
+  (:import [thi.ng.geom.types Path2 Bezier2 Circle2 Ellipse2 Line2 LineStrip2
+            Polygon2 Rect2 Triangle2])
+  (:import [thi.ng.geom.vector Vec2]))
+
+
+
 
 
 
 (comment
   (map #(assoc-in % [1 :color] "#fff")
-       (adapt/all-as-svg
-        (list (tri/equilateral2 {:p [10 10] :q [20 20]})
-              (tri/equilateral2 {:p [10 10] :q [20 20]}))))
+       (adapt/all-as-svg (list (tri/equilateral2 {:p [10 10] :q [20 20]})
+                               (tri/equilateral2 {:p [10 10] :q [20 20]}))))
+  (adapt/all-as-svg (tri/equilateral2 {:p [10 10] :q [20 20]}))
+  (for [n (map #(/ % 5.0) (range 1 5))] (mm/mix 0 1 n)))
 
 
-  (adapt/all-as-svg
-   (tri/equilateral2 {:p [10 10] :q [20 20]}))
-
-
-  (for [n (map #(/ % 5.0)(range 1 5))]
-    (mm/mix 0 1 n))
-  )
-
-
-(defn evenly-space-up-to [n max pct]
-  (let [ext (* max pct)
+(defn evenly-space-up-to
+  [n max pct]
+  (let [ext       (* max pct)
         range-ext (map #(/ % n) (range 0 (inc n)))]
     (map (fn [r] (mm/mix 0 ext r)) range-ext)))
 
 (comment
   (evenly-space-up-to 2 200 0.5))
 
-(defn get-literal [r]
+(defn get-literal
+  [r]
   (let [r-type (symbol (.getName (type r)))]
     (tagged-literal r-type (into {} r))))
 
-(defmethod pprint/simple-dispatch thi.ng.geom.types.Rect2 [g]
+(defmethod pprint/simple-dispatch thi.ng.geom.types.Rect2
+  [g]
   (pprint/pprint (get-literal g)))
 
 
 
 (comment
-
   (:tag (get-literal (thi.ng.geom.rect/rect 240.298 298.29 30 30)))
   (type (:form (get-literal (thi.ng.geom.rect/rect 240.298 298.29 30 30))))
-
-  (pprint/simple-dispatch )
-
+  (pprint/simple-dispatch)
   (. pprint/simple-dispatch addMethod thi.ng.geom.types.Rect2 ????)
-
-  (print-dup )
+  (print-dup)
   (pprint/pprint #"[a-z]")
-
   (:tag (get-geom-literal (thi.ng.geom.rect/rect 240.298 298.29 30 30)))
-
-  (site.fabricate.prototype.page/expr->hiccup
-   (get-geom-literal (thi.ng.geom.rect/rect 240.298 298.29 30 30))
-   )
-
-  (:string-value  (rewrite-clj.node/coerce (get-geom-literal (thi.ng.geom.rect/rect 240.298 298.29 30 30))))
-
-
-
+  (adorn/clj->hiccup (get-geom-literal (thi.ng.geom.rect/rect 240.298 298.29
+                                                              30      30)))
+  (:string-value (rewrite-clj.node/coerce (get-geom-literal
+                                           (thi.ng.geom.rect/rect 240.298 298.29
+                                                                  30      30))))
   (binding [*])
-  (pprint/pprint
-   (thi.ng.geom.rect/rect 240.298 298.29 30 30)
-   )
-
+  (pprint/pprint (thi.ng.geom.rect/rect 240.298 298.29 30 30))
   (type (get-literal (thi.ng.geom.rect/rect 240.298 298.29 30 30)))
-
   (pr)
   (print-dup (thi.ng.geom.rect/rect 240.298 298.29 30 30))
-
   (print (thi.ng.geom.rect/rect 240.298 298.29 30 30))
   (binding [pprint/*print-right-margin* 35]
-    (pprint/pprint  (thi.ng.geom.rect/rect 240.298 298.29 30 30)))
-
+    (pprint/pprint (thi.ng.geom.rect/rect 240.298 298.29 30 30)))
   (clojure.pprint/pprint (thi.ng.geom.rect/rect 240.298 298.29 30 30))
   (clojure.pprint/pr-with-base (thi.ng.geom.rect/rect 240.298 298.29 30 30))
-
-  (page/expr->hiccup  {:a 2 :b 3})
-
-  (page/expr->hiccup (vec (:arglists (meta #'thi.ng.geom.rect/rect))))
-
+  (adorn/clj->hiccup {:a 2 :b 3})
+  (adorn/clj->hiccup (vec (:arglists (meta #'thi.ng.geom.rect/rect))))
   (binding [pprint/*print-right-margin* 35]
-    (with-out-str (pprint/pprint (thi.ng.geom.rect/rect 240.298 298.29 30 30))))
+    (with-out-str (pprint/pprint (thi.ng.geom.rect/rect 240.298 298.29
+                                                        30      30)))))
 
-  )
-
-(defn var-meta->hiccup [{:keys [arglists name ns line column file] :as var-meta}
-                        src-url]
-  (list
-   "arguments:" [:br]
-   (page/expr->hiccup (vec arglists))
-   [:br]
-   [:span "source: " [:a {:href (str src-url "/" file "#L" line)
-                          :target "_blank"}
-                      (str file " L" line)]]))
+(defn var-meta->hiccup
+  [{:keys [arglists name ns line column file] :as var-meta} src-url]
+  (list "arguments:"
+        [:br]
+        (adorn/clj->hiccup (vec arglists))
+        [:br]
+        [:span "source: "
+         [:a {:href (str src-url "/" file "#L" line) :target "_blank"}
+          (str file " L" line)]]))
 
 ;; the centroid of a 2d vector is the vector
 (extend-protocol g/ICenter
-  Vec2
-  #_(center ([_] _))
-  (centroid ([_] _)))
+ Vec2
+   #_(center ([_] _))
+   (centroid ([_] _)))
 
 (extend-protocol g/IRotate
-  clojure.lang.PersistentVector
-  (rotate ([v theta] (mapv (fn [g] (g/rotate g theta)) v))))
+ clojure.lang.PersistentVector
+   (rotate ([v theta] (mapv (fn [g] (g/rotate g theta)) v))))
 
-(defn translate-from [g-obj dist bearing]
+(defn translate-from
+  [g-obj dist bearing]
   (let [[x y] (g/centroid g-obj)
-        Δx (* dist (Math/sin bearing))
-        Δy (* dist (Math/cos bearing))]
+        Δx    (* dist (Math/sin bearing))
+        Δy    (* dist (Math/cos bearing))]
     (g/translate g-obj (v/vec2 Δx Δy))))
 
 (comment
-
-
   (meta (with-meta (v/vec2 [1 1]) {:angle 36}))
-
   (g/rotate (v/vec2 [1 1]) Math/PI)
-
   (g/rotate [(v/vec2 [1 1]) (v/vec2 [1 1])] Math/PI)
-
-  (math/degrees
-   (*
-    (* (/ 1.0 2) 1)
-    (/ (* Math/PI 2) 2)))
-
-  (g/rotate (v/vec2 [0 1]) Math/PI)
-
-  )
+  (math/degrees (* (* (/ 1.0 2) 1) (/ (* Math/PI 2) 2)))
+  (g/rotate (v/vec2 [0 1]) Math/PI))

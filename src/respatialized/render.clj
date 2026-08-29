@@ -34,9 +34,10 @@
   (let [c (if (not (map? opts)) (conj contents opts) contents)
         h (apply conj [level] c)
         d (if date [:time {:datetime date} date])]
-    (into (if class [:header {:class class}] [:header]) h d)))
+    (into (if class [:header {:class class}] [:header]) (remove nil? [h d]))))
 
 (comment
+  (header {:level :h1} "title")
   (into [1] (remove nil? [2 3 nil 4])))
 
 (defn image
@@ -130,3 +131,76 @@
      [:table header (map->tbody m all-keys)])))
 
 (def default-grid 8)
+
+
+(defn em
+  {:malli/schema [:=> [:cat [:* :any]] [:cat [:= :em] [:* :any]]]}
+  [& contents]
+  (apply conj [:em] contents))
+
+(defn strong
+  {:malli/schema [:=> [:cat [:* :any]] [:cat [:= :em] [:* :any]]]}
+  [& contents]
+  (apply conj [:strong] contents))
+
+(defn link
+  {:malli/schema [:=> [:cat :string [:? :map] [:* :any]]
+                  [:cat [:= :a] [:map [:href :string]] [:* :any]]]}
+  ([url {:keys [frag] :or {frag nil} :as opts} & contents]
+   (let [c (if (not (map? opts)) (conj contents opts) contents)]
+     (apply conj [:a {:href url}] c))))
+
+(defn code
+  {:malli/schema [:=> [:cat [:* :any]]
+                  [:cat [:= :pre] [:schema [:cat [:= :code] [:* :any]]]]]}
+  [& contents]
+  [:pre (apply conj [:code] contents)])
+
+(defn in-code
+  {:malli/schema [:=> [:cat [:* :any]] [:cat [:= :code] [:* :any]]]}
+  [& contents]
+  (apply conj [:code] contents))
+
+(defn aside
+  {:malli/schema [:=> [:cat [:* :any]] [:cat [:= :aside] [:* :any]]]}
+  [& contents]
+  (apply conj [:aside] contents))
+
+(defn blockquote
+  {:malli/schema [:=> [:cat [:? :map] [:* :any]]
+                  [:cat [:= :figure]
+                   [:schema
+                    [:cat [:= :blockquote] :map [:* :any]
+                     [:? [:schema [:cat [:= :figcaption] [:* :any]]]]]]]]}
+  [{:keys [caption url author source]
+    :or   {caption nil author "" url ""}
+    :as   opts} & contents]
+  (let [c (if (not (map? opts)) (conj contents opts) contents)
+        s (if source
+            [:figcaption author ", " [:cite source]]
+            [:figcaption author])]
+    [:figure (apply conj [:blockquote {:cite url}] c) s]))
+
+(defn quote
+  {:malli/schema [:=> [:cat [:? :map] [:* :any]] [:cat [:= :q] :map [:* :any]]]}
+  [{:keys [cite] :or {cite ""} :as opts} & contents]
+  (let [c (if (not (map? opts)) (conj contents opts) contents)]
+    (apply conj [:q {:cite cite}] c)))
+
+(defn ul
+  {:malli/schema [:=> [:cat [:* :any]]
+                  [:cat [:= :ul] [:* [:schema [:cat [:= :li] :any]]]]]}
+  [& contents]
+  (apply conj [:ul] (map (fn [i] [:li i]) contents)))
+
+(defn ol
+  {:malli/schema [:=> [:cat [:* :any]]
+                  [:cat [:= :ol] [:* [:schema [:cat [:= :li] :any]]]]]}
+  [& contents]
+  (apply conj [:ol] (map (fn [i] [:li i]) contents)))
+
+(defn script
+  {:malli/schema [:=> [:cat :map [:* :any]]
+                  [:cat [:= :script] [:? :map] [:* :any]]]}
+  [attr-map & contents]
+  (apply conj [:script attr-map] contents))

@@ -461,7 +461,7 @@ A cluster of 24 colors can be compared pairwise in a table to see all the contra
   (let [hex-colors
         (->>
          (:representatives cluster)
-         (map #(map (fn [i] (Math/round i)) %))
+         (mapv #(mapv (fn [i] (Math/round i)) %))
          sort
          (map (fn [c]
                 (-> c
@@ -481,9 +481,9 @@ A cluster of 24 colors can be compared pairwise in a table to see all the contra
                     [:td
                      (Math/round
                              (clj2d-color/delta-c (clj2d-color/color c1)
-                                                  (clj2d-color/color c2)))]))))))🔚
+                                                  (clj2d-color/color c2)))])))))) 🔚
 
-✳= (pairwise-cluster-table (:x-means hsv-clusters-24))🔚
+✳= (pairwise-cluster-table (:x-means hsv-clusters-24)) 🔚
 
 Trying again with density clustering:
 

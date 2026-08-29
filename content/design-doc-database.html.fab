@@ -75,7 +75,7 @@ Here's an example of that power to find quotations:
              [?e :html/tag :q])
          [?e ?a2* ?q]
          [(string? ?q)]]
-    (d/db archive/test-db)
+    (d/db archive/db)
     {:col-renames {'?title "Title" '?fp "input file path"}})🔚
 
 
@@ -144,4 +144,4 @@ What about cycles? Pages' contents may be added to the database as data, then qu
 
 ✳=[:h4 "possible solutions"]🔚
 
-✳=[:dl [:dt "UUIDs"] [:dd "Assigning every element a unique identifier could prevent the same element from being returned multiple times if it happens to occur in multiple places."]]]🔚
+✳=[:dl [:dt "UUIDs"] [:dd "Assigning every element a unique identifier could prevent the same element from being returned multiple times if it happens to occur in multiple places."]]🔚

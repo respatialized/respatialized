@@ -133,7 +133,7 @@ I can use this capability to build out a quotes page (it's not as good as Bret V
           [?e :html/tag :q])
       [?e ?a2* ?q]
       [(string? ?q)]]
-    (d/db archive/test-db)
+    (d/db archive/db)
     {:col-renames {'?title "Title" '?fp "input file path" '?q "Quote contents"}})🔚
 
 
@@ -169,7 +169,7 @@ I'm going to modify the query to include ✳=[:em "all"]🔚  quotes, not just t
        [?e :html/tag :q])
    [?e ?a2* ?q]
    [(string? ?q)]]
-    (d/db archive/test-db)
+    (d/db archive/db)
  {:col-renames {'?title "Title" '?fp "input file path" '?q "Quote contents"}})]🔚
 
 ]//🔚
