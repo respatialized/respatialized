@@ -12,7 +12,8 @@
             [dev.onionpancakes.chassis.core :as chassis]
             [respatialized.render :as render]
             [babashka.fs :as fs]
-            [clojure.walk :as walk]))
+            [clojure.walk :as walk]
+            [site.fabricate.prototype.page :as page]))
 
 ;; this seems like a function that Fabricate ought to provide
 (defn output-to
@@ -58,8 +59,7 @@
                           (:site.fabricate.document/title page-metadata)
                           (:title page-metadata))]
     (with-meta
-      (into [:article {:lang "en-us" :title page-title}]
-            (hiccup/parse-paragraphs evaluated-page))
+      (into [:article {:lang "en-us" :title page-title}] evaluated-page)
       (assoc page-metadata :site.fabricate.document/title page-title))))
 
 (defmethod fabricate/build [:fabricate/v0 :hiccup]
@@ -104,7 +104,8 @@
   [{:keys [site.fabricate.document/data site.fabricate.document/title
            site.fabricate.page/location]
     :as   entry} opts]
-  (let [processed-page-data (walk/postwalk process-kindly? data)
+  (let [processed-page-data (hiccup/parse-paragraphs
+                             (walk/postwalk process-kindly? data))
         output-html         (chassis/html
                              [chassis/doctype-html5
                               (render/site-page-header {:title title}) #_[:head]
