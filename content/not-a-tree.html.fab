@@ -118,7 +118,7 @@ Mostly because I know that I'm going to have to write my own solution to this pr
 I've gone through myriad to-do apps, organizers, journaling systems. Here's a table depicting my overall thoughts.
 
 ✳=
- [:div (sorted-map-vec->table [
+ [:figure (sorted-map-vec->table [
  {"Type" "Binder notebook"
   "Examples" "Filofax"
   "Advantages" "associative,organic,frictional,multi-modal,simple"
@@ -354,12 +354,11 @@ And yes, there's no small irony in the fact that the ✳=(link "https://github.c
 
 ✳=(header {:level :h3 :date "2019-12-29"} "Extensible textual notation, part 4")🔚
 
-✳= [:section {:columns 5}
-      [:div {:span 2} (image "media/thinking-about-things.jpg" "laptop sticker reading 'thinking about things'" "mw20")]
-  [:div {:span 3} (blockquote "I read relentlessly. I don’t do any programming not directed at making the computer do something useful, so I don’t do any exercises. I try to spend more time thinking about the problem than I do typing it in." [:br] (link "http://web.archive.org/web/20160918041754/http://codequarterly.com/2011/rich-hickey/" "Rich Hickey"))]] 🔚
-
-✳= [:aside "inspiration for what the medium should make possible, and for my prose-first approach to thinking about it: Bret Victor's laptop sticker and Rich Hickey's mindset; the antithesis of the \"shut up and show me the code\" brogrammer ethos"] 🔚
-
+✳= (list [:figure {:style {:grid-column "1 / 5"}}
+        [:div {:style {:grid-column "span 2"}} (image "media/bret-victor-thinking-about-things-sticker.jpg" "laptop sticker reading 'thinking about things'" "mw20")]
+        [:div {:style {:grid-column "span 2"}} (blockquote "I read relentlessly. I don’t do any programming not directed at making the computer do something useful, so I don’t do any exercises. I try to spend more time thinking about the problem than I do typing it in." [:br] (link "http://web.archive.org/web/20160918041754/http://codequarterly.com/2011/rich-hickey/" "Rich Hickey"))]]  
+[:aside "inspiration for what the medium should make possible, and for my prose-first approach to thinking about it: Bret Victor's laptop sticker and Rich Hickey's mindset; the antithesis of the \"shut up and show me the code\" brogrammer ethos"]
+) 🔚 
 ✳=(header {:level :h5} "Beyond plain text: storing prose within " (in-code "datahike"))🔚
 
 Here's a ✳=(link "https://blog.datopia.io/2018/11/03/hitchhiker-tree/" "background post on the Datahike internals")🔚 for context about how the hitchhiker B-tree structure allows for self-balancing and efficient updates that "hitchhike" on queries.
