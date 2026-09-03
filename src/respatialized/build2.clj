@@ -102,14 +102,17 @@
 
 (defmethod fabricate/produce! [:hiccup :html]
   [{:keys [site.fabricate.document/data site.fabricate.document/title
-           site.fabricate.page/location]
+           site.fabricate.document/metadata site.fabricate.page/location]
     :as   entry} opts]
   (let [processed-page-data (hiccup/parse-paragraphs
                              (walk/postwalk process-kindly? data))
-        output-html         (chassis/html
-                             [chassis/doctype-html5
-                              (render/site-page-header {:title title}) #_[:head]
-                              [:body processed-page-data]])]
+        output-html         (chassis/html [chassis/doctype-html5
+                                           (render/site-page-header
+                                            {:title      title
+                                             :scripts    (:scripts metadata)
+                                             :page-style (:page-style
+                                                          metadata)})
+                                           [:body processed-page-data]])]
     (println "writing to" (str location))
     (spit (fs/file location) output-html)
     (assoc entry :site.fabricate.page/data output-html)))
