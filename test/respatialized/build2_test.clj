@@ -8,7 +8,8 @@
             [malli.core :as m]
             [malli.error :as me]
             [clojure.test :as t]
-            [babashka.fs :as fs]))
+            [babashka.fs :as fs]
+            [site.fabricate.prototype.read :as read]))
 
 (defn- check-schema
   ([schema value msg]
@@ -77,8 +78,11 @@
                   e
                   "Post-build entry should have required components")
     (t/testing "checking for evaluation errors"
-      (error-free? (:site.fabricate.document/data e)
-                   (:site.fabricate.document/title e))))
+      ;; skip over posts with intentional errors until additional metadata
+      ;; about them can be specified at the form level
+      (when-not (= "HOLOTYPE: blueprint" (:site.fabricate.document/title e))
+        (error-free? (:site.fabricate.document/data e)
+                     (:site.fabricate.document/title e)))))
   (t/is (not-empty (filter #(string? (get-in %
                                              [:site.fabricate.document/metadata
                                               :page-style]))
