@@ -13,7 +13,12 @@ jobs:
           key: ${{ runner.os }}-deps-${{ hashFiles('**/deps.edn') }}
           restore-keys: |
             ${{ runner.os }}-deps-
-      - name: Set up clojure
+      - name: Set up Java
+        uses: actions/setup-java@v6.0.0
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Set up Clojure
         uses: DeLaGuardo/setup-clojure@13.6.1
         with:
           cli: 1.12.5.1664
