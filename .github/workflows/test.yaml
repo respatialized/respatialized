@@ -19,4 +19,4 @@ jobs:
           cli: 1.12.5.1664
       - name: Run site tests
         run: |
-          clojure -X:dev:test:kaocha/test
+          clojure -X:dev:libpython-clj:test:kaocha/test
