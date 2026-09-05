@@ -1,0 +1,141 @@
+(ns respatialized.build2-test
+  (:require [respatialized.build2 :as build2]
+            #_[site.fabricate.build-test :as build-test]
+            #_[site.fabricate.dev.html :as html-check]
+            [site.fabricate.api :as fabricate]
+            [site.fabricate.prototype.schema :as schema]
+            [site.fabricate.prototype.properties :as props]
+            [malli.core :as m]
+            [malli.error :as me]
+            [clojure.test :as t]
+            [babashka.fs :as fs]
+            [site.fabricate.prototype.read :as read]))
+
+(defn- check-schema
+  ([schema value msg]
+   (t/is (m/validate schema value)
+         (or (not-empty (str (when msg (str msg "\n"))
+                             (me/humanize (m/explain schema value))))
+             "value conforms to schema")))
+  ([schema value] (check-schema schema value nil)))
+
+(defn check-init-site
+  [site]
+  (check-schema fabricate/site-schema
+                site
+                "Init site should have required components")
+  site)
+
+(defn check-clj-src
+  [{:keys [::fabricate/options] :as site}]
+  (let [src-dir (fs/file #_(fs/parent (:site.fabricate.page/publish-dir
+                                       options))
+                         (fs/cwd)
+                         "src")]
+    (t/testing "Clojure source files:"
+      (doseq [clj-file (fs/glob src-dir "**.clj")]
+        (t/testing (str clj-file)
+          (t/is (= :loaded
+                   (try (do (load-file (str clj-file)) :loaded)
+                        (catch Exception e
+                          (assoc (select-keys [:cause :phase]
+                                              (Throwable->map e))
+                                 :file
+                                 (str clj-file)))))))))))
+
+(defn check-collected-entries
+  [{:keys [::fabricate/entries ::fabricate/options] :as site}]
+  (t/is (not-empty entries) "Entries should be collected")
+  (t/testing "\ncollected entries:"
+    (doseq [e entries]
+      (t/testing (str (:site.fabricate.source/location e))
+        (t/is (re-find (re-pattern (str (:site.fabricate.page/publish-dir
+                                         options)))
+                       (str (:site.fabricate.page/location e)))
+              "Pages should be output to the approproate publish directory")
+        (check-schema props/CollectedEntry
+                      e
+                      "Post-collect entry should have required components"))))
+  site)
+
+(defn condense-errors
+  [kindly-map]
+  (-> kindly-map
+      (select-keys [:kind :error :code])
+      (update :error select-keys [:cause :phase])))
+
+(defn error-free?
+  [article title]
+  (t/testing title
+    (let [kindly-maps (filterv build2/kindly-map?
+                               (tree-seq sequential? identity article))]
+      (t/is (empty? (mapv condense-errors (filter :error kindly-maps)))))))
+
+(def skip-posts
+  ;; skip over posts with intentional errors until additional metadata
+  ;; about them can be specified at the form level
+  (into #{"HOLOTYPE: blueprint"}
+        (when (or (= "true" (System/getenv "CI"))
+                  (= "true" (System/getenv "GITHUB_ACTIONS")))
+          ;; posts that are currently flaky on CI but work locally
+          ["HOLOTYPE//4" "Color Extraction Through Curve Fitting"])))
+
+(defn check-built-entries
+  [{:keys [::fabricate/entries] :as site}]
+  (doseq [e entries]
+    (check-schema props/BuiltEntry
+                  e
+                  "Post-build entry should have required components")
+    (t/testing "checking for evaluation errors"
+      (when-not (skip-posts (:site.fabricate.document/title e))
+        (error-free? (:site.fabricate.document/data e)
+                     (:site.fabricate.document/title e)))))
+  (t/is (not-empty (filter #(string? (get-in %
+                                             [:site.fabricate.document/metadata
+                                              :page-style]))
+                           entries))
+        "Page styles should be handled")
+  (t/is (not-empty (filter #(list? (get-in %
+                                           [:site.fabricate.document/metadata
+                                            :scripts]))
+                           entries))
+        "Page scripts should be handled")
+  site)
+
+(defn check-produced-entries
+  [{:keys [::fabricate/entries] :as site}]
+  (t/testing "\nproduced entries:"
+    (doseq [{:keys [site.fabricate.page/location site.fabricate.document/title]
+             :as   e}
+            entries]
+      (t/testing title
+        (check-schema props/ProducedEntry
+                      e
+                      "Post-produce entry should have required components")
+        (check-schema props/FileExists location "output file should exist"))))
+  site)
+
+(t/deftest build
+  (t/testing "site building conforms to default Fabricate properties\n"
+    (->> build2/init-site
+         (fabricate/plan! [check-init-site check-clj-src])
+         check-collected-entries
+         (fabricate/assemble [check-built-entries])
+         (fabricate/construct! [check-produced-entries]))))
+
+
+(comment
+  (let [built-entry (fabricate/build {:site.fabricate.source/location
+                                      (fs/file "content/clojure-ti-83.html.fab")
+                                      :site.fabricate.source/format
+                                      :fabricate/v0
+                                      :site.fabricate.document/format :hiccup}
+                                     {})]
+    (tree-seq sequential? identity (:site.fabricate.document/data built-entry)))
+  (sequential? [])
+  (site.fabricate.prototype.document.fabricate/entry->hiccup-article
+   {:site.fabricate.source/location "content/index.html.fab"}
+   {})
+  (fs/glob "content" "*.html.fab")
+  (fs/glob (fs/cwd) "content/*.html.fab")
+  (m/form props/CollectedEntry))

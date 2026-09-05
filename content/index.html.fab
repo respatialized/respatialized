@@ -1,7 +1,7 @@
 ✳ (ns respatialized.writing.index
   (:require
    [garden.core :refer [css style]]
-   [site.fabricate.prototype.page :refer :all])) 🔚
+   [respatialized.render :refer :all])) 🔚
    
 ✳ (def metadata {:title "Respatialized"
                :page-style (css [:div {:display "contents"}]

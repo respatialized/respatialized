@@ -6,17 +6,22 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
-      - uses: actions/cache@v3
+        uses: actions/checkout@v7.0.1
+      - uses: actions/cache@v6.1.0
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-deps-${{ hashFiles('**/deps.edn') }}
           restore-keys: |
             ${{ runner.os }}-deps-
-      - name: Set up clojure
-        uses: DeLaGuardo/setup-clojure@10.1
+      - name: Set up Java
+        uses: actions/setup-java@v6.0.0
         with:
-          cli: 1.11.1.1208
+          distribution: temurin
+          java-version: '17'
+      - name: Set up Clojure
+        uses: DeLaGuardo/setup-clojure@13.6.1
+        with:
+          cli: 1.12.5.1664
       - name: Run site tests
         run: |
-          clojure -X:dev:kaocha/test
+          clojure -X:dev:libpython-clj:test:kaocha/test

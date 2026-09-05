@@ -15,7 +15,8 @@
             [thi.ng.math.core :as m]
             [thi.ng.math.macros :as mm]
             [fastmath.easings :as easings]
-            [site.fabricate.prototype.page :as page]
+            [site.fabricate.adorn :as adorn]
+            [site.fabricate.adorn.forms :as forms]
             [respatialized.styles :as styles :refer [geom-style]]
             [respatialized.geometry :as geometry]
             [garden.core :as garden :refer [style css]]
@@ -77,7 +78,7 @@ Rectangular shape generation
      [:code {:style (style {:color "#ff5549" :font-weight 700
                             :font-size "1.05em"})}
       "#" (:tag lit)] [:br]
-     (page/expr->hiccup (:form lit))])) 🔚
+     (adorn/clj->hiccup (:form lit))])) 🔚
      
 ✳=
 (let [pct-range #_[0.25 0.3 0.35 0.45 0.67 0.75 0.95 0.99]
@@ -110,10 +111,15 @@ Rectangular shape generation
                      ]]]))))))
 
 🔚
-✳ (defmethod page/node->hiccup :var [node]
+✳ (defmethod adorn/form->hiccup :var [node]
   [:span {:class "language-clojure var"}
    "#'" (str (get-in node [:children 0 :value]))]) 🔚
    
+
+✳ (defmethod adorn/form->hiccup :map [node {:keys [attrs] :or {attrs {}}}]
+(forms/coll->span (forms/->node node) attrs adorn/form->hiccup)
+  ) 🔚
+
 ✳  (def geom-core-protocols
     (filter (fn [[sym var]]
               (let [value (var-get var)]
@@ -140,7 +146,7 @@ Rectangular shape generation
     (list [:dt {:style (style {:grid-column "1 / span 1"})} [:code sym]]
           [:dd {:style (style {:grid-column "span 3"})}
            (geometry/var-meta->hiccup (meta v) github-src-url)
-           #_[:pre (page/expr->hiccup (meta v))]]))
+           #_[:pre (adorn/clj->hiccup (meta v))]]))
   
   ]
  [:h5 [:code "thi.ng.geom.core"] [:span {:class "wide"} " implemented protocols"]]
@@ -151,13 +157,13 @@ Rectangular shape generation
                     (contains?  (:impls value) thi.ng.geom.types.Rect2)))
                 geom-core-protocols) ]
     (list [:dt {:style (style {:grid-column "1 / span 1"})}
-           (page/expr->hiccup sym)]
+           (adorn/clj->hiccup sym)]
           (let [v (var-get var)]
             [:dt
              {:style (style {:grid-column "span 3"})}
              (-> v
                  (select-keys [:on :sigs :arglists])
-                 (page/expr->hiccup ))]))
+                 (adorn/clj->hiccup ))]))
     )])
 🔚
 

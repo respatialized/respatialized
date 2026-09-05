@@ -14,7 +14,7 @@
               [tech.v3.datatype.functional :as dtype-fn]
               [tech.v3.libs.buffered-image :as buf-img]
               [criterium.core :as criterium])
-    (:import [tech.v3.tensor DirectTensor]))
+    (:import [tech.v3 Tensor]))
 
 🔚
 
@@ -70,7 +70,7 @@ general strategy: sort the resulting values into layers based on density and dra
 ✳ (defn tensor-de-jong [^Double a ^Double b ^Double c ^Double d]
   ;; this probably isn't the best implementation
   ;; but it's a starting point
-  (fn tensor-de-jong-iter [[^DirectTensor xs ^DirectTensor ys]]
+  (fn tensor-de-jong-iter [[^Tensor xs ^Tensor ys]]
     [(dtype/clone (dtype-fn/- (dtype-fn/sin (dtype-fn/* a ys))
                         (dtype-fn/cos (dtype-fn/* b xs))))
      (dtype/clone (dtype-fn/- (dtype-fn/sin (dtype-fn/* c xs))
@@ -124,7 +124,7 @@ general strategy: sort the resulting values into layers based on density and dra
 
 ✳
 (defn coords+tensor!
-  ([^DirectTensor xs ^DirectTensor ys ^DirectTensor t magnitude]
+  ([^Tensor xs ^Tensor ys ^Tensor t magnitude]
    (let [xarray (dtype/->double-array xs)
          yarray (dtype/->double-array ys)
          [width height] (dtype/shape t)]
@@ -141,7 +141,7 @@ general strategy: sort the resulting values into layers based on density and dra
 
 🔚
 
-✳ (defn paint-canvas [^DirectTensor xs ^DirectTensor ys canvas]
+✳ (defn paint-canvas [^Tensor xs ^Tensor ys canvas]
   (println "timing type conv:")
   (let [xarray (time (dtype/->double-array xs))
         yarray (time (dtype/->double-array ys))]
@@ -155,13 +155,13 @@ general strategy: sort the resulting values into layers based on density and dra
 
 
 
-✳(defn normalize [^DirectTensor t ^Double old-extent  ^Long new-extent ^Long offset]
+✳(defn normalize [^Tensor t ^Double old-extent  ^Long new-extent ^Long offset]
   (dtype-fn/round (dtype-fn/+ (dtype-fn/* (dtype-fn// t old-extent) new-extent) offset))) 🔚
 
 ✳
 
 (defn rasterize-xys
-  ([[^DirectTensor xs ^DirectTensor ys] ^DirectTensor tens ^Long magnitude]
+  ([[^Tensor xs ^Tensor ys] ^Tensor tens ^Long magnitude]
    (let [two-pi (* Math/PI 2)
          [height width] (dtype/shape tens)
          x-center (/ width 2)
@@ -171,7 +171,7 @@ general strategy: sort the resulting values into layers based on density and dra
 
      (coords+tensor! ys-normed xs-normed tens magnitude)))
 
-  ([^Long magnitude] (fn [[^DirectTensor xs ^DirectTensor ys] ^DirectTensor tens] (rasterize-xys [xs ys] tens magnitude))))
+  ([^Long magnitude] (fn [[^Tensor xs ^Tensor ys] ^Tensor tens] (rasterize-xys [xs ys] tens magnitude))))
 
 🔚
 
@@ -225,7 +225,7 @@ general strategy: sort the resulting values into layers based on density and dra
 Instead of writing to the image tensor on each iteration of the attractor, a more efficient approach would take an arbitrary number of iterations and reduce over all of them to produce a raster image. This resulting density map is also a necessary input for clustering / topography.
 
 ✳ (defn inc-tensor!
-  ([[^DirectTensor xs ^DirectTensor ys] ^DirectTensor t [xnorm ynorm]]
+  ([[^Tensor xs ^Tensor ys] ^Tensor t [xnorm ynorm]]
       (let [xarray (dtype/->double-array (xnorm xs))
             yarray (dtype/->double-array (ynorm ys))
             [width height] (dtype/shape t)]
@@ -237,7 +237,7 @@ Instead of writing to the image tensor on each iteration of the attractor, a mor
             #_(println "invalid coord" x "," y))))
       t)
   ([normalizer]
-   (fn [[^DirectTensor xs ^DirectTensor ys] ^DirectTensor t]
+   (fn [[^Tensor xs ^Tensor ys] ^Tensor t]
      (inc-tensor! [xs ys] t normalizer))))  🔚
 
 ✳ (def unbounded-tensor (tensor/new-tensor [1100 650] :datatype :int64)) 🔚
